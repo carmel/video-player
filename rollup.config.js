@@ -10,7 +10,7 @@ import pkg from './package.json'
 export default [
   // browser-friendly UMD build
   {
-    input: 'src/main.js',
+    input: 'src/player.js',
     output: {
       name: 'howLongUntilLunch',
       file: pkg.browser,
