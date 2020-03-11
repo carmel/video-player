@@ -1,17 +1,17 @@
 import polyfill from './all'
 
-/**
+/* *
  * @summary A polyfill to stub out
  * {@link https://bit.ly/EmeMar15 EME draft 12 March 2015} on browsers without
  * EME.
  * All methods will fail.
  */
 export default class PatchedMediaKeysNop {
-  /**
+  /* *
    * Installs the polyfill if needed.
    */
   static install() {
-    if (!window.HTMLVideoElement ||
+    if (!HTMLVideoElement ||
         (navigator.requestMediaKeySystemAccess &&
          // eslint-disable-next-line no-restricted-syntax
          MediaKeySystemAccess.prototype.getConfiguration)) {
@@ -38,7 +38,7 @@ export default class PatchedMediaKeysNop {
     window.MediaKeySystemAccess = PatchedMediaKeysNop.MediaKeySystemAccess
   }
 
-  /**
+  /* *
    * An implementation of navigator.requestMediaKeySystemAccess.
    * Retrieves a MediaKeySystemAccess object.
    *
@@ -50,13 +50,13 @@ export default class PatchedMediaKeysNop {
   static requestMediaKeySystemAccess(keySystem, supportedConfigurations) {
     console.debug('PatchedMediaKeysNop.requestMediaKeySystemAccess')
     console.assert(this === navigator,
-      'bad "this" for requestMediaKeySystemAccess')
+      'bad `this` for requestMediaKeySystemAccess')
 
     return Promise.reject(new Error(
       'The key system specified is not supported.'))
   }
 
-  /**
+  /* *
    * An implementation of HTMLMediaElement.prototype.setMediaKeys.
    * Attaches a MediaKeys object to the media element.
    *
@@ -67,7 +67,7 @@ export default class PatchedMediaKeysNop {
   static setMediaKeys(mediaKeys) {
     console.debug('PatchedMediaKeysNop.setMediaKeys')
     console.assert(this instanceof HTMLMediaElement,
-      'bad "this" for setMediaKeys')
+      'bad `this` for setMediaKeys')
 
     if (mediaKeys == null) {
       return Promise.resolve()
@@ -76,7 +76,7 @@ export default class PatchedMediaKeysNop {
     return Promise.reject(new Error('MediaKeys not supported.'))
   }
 }
-/**
+/* *
  * An unusable constructor for MediaKeys.
  * @implements {MediaKeys}
  */
@@ -85,28 +85,28 @@ PatchedMediaKeysNop.MediaKeys = class {
     throw new TypeError('Illegal constructor.')
   }
 
-  /** @override */
+  /* * @override */
   createSession() {}
 
-  /** @override */
+  /* * @override */
   setServerCertificate() {}
 }
-/**
+/* *
  * An unusable constructor for MediaKeySystemAccess.
  * @implements {MediaKeySystemAccess}
  */
 PatchedMediaKeysNop.MediaKeySystemAccess = class {
   constructor() {
-    /** @override */
+    /* * @override */
     this.keySystem = '' // For the compiler.
 
     throw new TypeError('Illegal constructor.')
   }
 
-  /** @override */
+  /* * @override */
   getConfiguration() {}
 
-  /** @override */
+  /* * @override */
   createMediaKeys() {}
 }
 

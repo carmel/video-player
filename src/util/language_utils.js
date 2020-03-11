@@ -1,10 +1,10 @@
 import ManifestParserUtils from './manifest_parser_utils'
-/**
+/* *
  * @summary A set of language utility functions.
  * @final
  */
 export default class LanguageUtils {
-  /**
+  /* *
    * Check if |locale1| and |locale2| are locale-compatible.
    *
    * Locale-compatible is defined as all components in each locale match. Since
@@ -31,7 +31,7 @@ export default class LanguageUtils {
     return locale1 === locale2
   }
 
-  /**
+  /* *
    * Check if |locale1| and |locale2| are language-compatible.
    *
    * Language compatible is when the language component of each locale matches.
@@ -60,16 +60,16 @@ export default class LanguageUtils {
 
     // Get all components. This should only be language and region
     // since we do not support dialect.
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     const locale1Components = LanguageUtils.disassembleLocale_(locale1)
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     const locale2Components = LanguageUtils.disassembleLocale_(locale2)
 
     // We are language compatible if we have the same language.
     return locale1Components[0] === locale2Components[0]
   }
 
-  /**
+  /* *
    * Check if |possibleParent| is the parent locale of |possibleChild|. Because
    * we do not support dialects, the parent-child relationship is a lot simpler.
    * In a parent child relationship:
@@ -100,10 +100,10 @@ export default class LanguageUtils {
 
     // Get all components. This should only be language and region
     // since we do not support dialect.
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     const possibleParentComponents =
         LanguageUtils.disassembleLocale_(possibleParent)
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     const possibleChildComponents =
         LanguageUtils.disassembleLocale_(possibleChild)
 
@@ -112,7 +112,7 @@ export default class LanguageUtils {
            possibleChildComponents.length === 2
   }
 
-  /**
+  /* *
    * Check if |localeA| shares the same parent with |localeB|. Since we don't
    * support dialect, we will only look at language and region. For two locales
    * to be siblings:
@@ -144,9 +144,9 @@ export default class LanguageUtils {
 
     // Get all components. This should only be language and region
     // since we do not support dialect.
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     const localeAComponents = LanguageUtils.disassembleLocale_(localeA)
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     const localeBComponents = LanguageUtils.disassembleLocale_(localeB)
 
     return localeAComponents.length === 2 &&
@@ -154,7 +154,7 @@ export default class LanguageUtils {
            localeAComponents[0] === localeBComponents[0]
   }
 
-  /**
+  /* *
    * Normalize a locale. This will take a locale and canonicalize it to a state
    * that we are prepared to work with.
    *
@@ -194,7 +194,7 @@ export default class LanguageUtils {
       : language
   }
 
-  /**
+  /* *
    * Check if two language codes are siblings. Language codes are siblings if
    * they share the same base language while neither one is the base language.
    *
@@ -214,7 +214,7 @@ export default class LanguageUtils {
     return a !== baseA && b !== baseB && baseA === baseB
   }
 
-  /**
+  /* *
    * Get the normalized base language for a language code.
    *
    * @param {string} lang
@@ -240,7 +240,7 @@ export default class LanguageUtils {
     return major
   }
 
-  /**
+  /* *
    * Get the normalized language of the given text stream. Will return 'und' if
    * a language is not found on the text stream.
    *
@@ -261,7 +261,7 @@ export default class LanguageUtils {
     return LanguageUtils.normalize(language)
   }
 
-  /**
+  /* *
    * Get the normalized locale for the given variant. This will look through
    * the variant to find the locale that represents the content in the variant.
    * This will return 'und' if no language can be found.
@@ -297,7 +297,7 @@ export default class LanguageUtils {
     return 'und'
   }
 
-  /**
+  /* *
    * Find the locale in |searchSpace| that comes closest to |target|. If no
    * locale is found to be close to |target|, then |null| will be returned.
    *
@@ -308,9 +308,9 @@ export default class LanguageUtils {
   static findClosestLocale(target, searchSpace) {
     const LanguageUtils = LanguageUtils
 
-    /** @type {string} */
+    /* * @type {string} */
     const safeTarget = LanguageUtils.normalize(target)
-    /** @type {!Set.<string>} */
+    /* * @type {!Set.<string>} */
     const safeSearchSpace = new Set()
     for (const option of searchSpace) {
       safeSearchSpace.add(LanguageUtils.normalize(option))
@@ -356,7 +356,7 @@ export default class LanguageUtils {
     return null
   }
 
-  /**
+  /* *
    * Take a locale string and break it into its component. Check that each
    * component matches what we would expect internally for locales. This
    * should ONLY be used to verify locales that have been normalized.
@@ -379,7 +379,7 @@ export default class LanguageUtils {
     return components
   }
 }
-/**
+/* *
  * A map from 3-letter language codes (ISO 639-2) to 2-letter language codes
  * (ISO 639-1) for all languages which have both in the registry.
  *

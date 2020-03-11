@@ -1,6 +1,6 @@
 // import RegionTimeline from './region_timeline'
 
-/**
+/* *
  * The region observer watches a region timeline and playhead, and fires events
  * (onEnter, onExit, and onSkip) as the playhead moves.
  *
@@ -8,7 +8,7 @@
  * @final
  */
 export default class RegionObserver {
-  /**
+  /* *
    * Create a region observer for the given timeline. The observer does not
    * own the timeline, only uses it. This means that the observer should NOT
    * destroy the timeline.
@@ -16,10 +16,10 @@ export default class RegionObserver {
    * @param {!RegionTimeline} timeline
    */
   constructor(timeline) {
-    /** @private {RegionTimeline} */
+    /* * @private {RegionTimeline} */
     this.timeline_ = timeline
 
-    /**
+    /* *
      * A mapping between a region and where we previously were relative to it.
      * When the value here differs from what we calculate, it means we moved and
      * should fire an event.
@@ -29,11 +29,11 @@ export default class RegionObserver {
      */
     this.oldPosition_ = new Map()
 
-    /** @private {RegionObserver.EventListener} */
+    /* * @private {RegionObserver.EventListener} */
     this.onEnter_ = (region, seeking) => {}
-    /** @private {RegionObserver.EventListener} */
+    /* * @private {RegionObserver.EventListener} */
     this.onExit_ = (region, seeking) => {}
-    /** @private {RegionObserver.EventListener} */
+    /* * @private {RegionObserver.EventListener} */
     this.onSkip_ = (region, seeking) => {}
 
     // To make the rules easier to read, alias all the relative positions.
@@ -42,7 +42,7 @@ export default class RegionObserver {
     const IN_THE_REGION = RelativePosition.IN_THE_REGION
     const AFTER_THE_REGION = RelativePosition.AFTER_THE_REGION
 
-    /**
+    /* *
      * A read-only collection of rules for what to do when we change position
      * relative to a region.
      *
@@ -87,7 +87,7 @@ export default class RegionObserver {
     ]
   }
 
-  /** @override */
+  /* * @override */
   release() {
     this.timeline_ = null
 
@@ -102,7 +102,7 @@ export default class RegionObserver {
     this.onSkip_ = (region, seeking) => {}
   }
 
-  /** @override */
+  /* * @override */
   poll(positionInSeconds, wasSeeking) {
     const RegionObserver = RegionObserver
 
@@ -123,7 +123,7 @@ export default class RegionObserver {
     }
   }
 
-  /**
+  /* *
    * Set all the listeners. This overrides any previous calls to |setListeners|.
    *
    * @param {RegionObserver.EventListener} onEnter
@@ -140,7 +140,7 @@ export default class RegionObserver {
     this.onSkip_ = onSkip
   }
 
-  /**
+  /* *
    * Get the relative position of the playhead to |region| when the playhead is
    * at |seconds|. We treat the region's start and end times as inclusive
    * bounds.
@@ -165,7 +165,7 @@ export default class RegionObserver {
   }
 }
 
-/**
+/* *
  * An enum of relative positions between the playhead and a region. Each is
  * phrased so that it works in 'The playhead is X' where 'X' is any value in
  * the enum.
@@ -179,7 +179,7 @@ RegionObserver.RelativePosition_ = {
   AFTER_THE_REGION: 3
 }
 
-/**
+/* *
  * All region observer events (onEnter, onExit, and onSkip) will be passed the
  * region that the playhead is interacting with and whether or not the playhead
  * moving is part of a seek event.
@@ -188,7 +188,7 @@ RegionObserver.RelativePosition_ = {
  */
 RegionObserver.EventListener
 
-/**
+/* *
  * @typedef {{
  *    weWere: ?RegionObserver.RelativePosition_,
  *    weAre: ?RegionObserver.RelativePosition_,

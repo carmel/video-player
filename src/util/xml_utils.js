@@ -1,10 +1,10 @@
 import StringUtils from './string_utils'
 
-/**
+/* *
  * @summary A set of XML utility functions.
  */
 export class XmlUtils {
-  /**
+  /* *
    * Finds a child XML element.
    * @param {!Node} elem The parent XML element.
    * @param {string} name The child XML element's tag name.
@@ -19,7 +19,7 @@ export class XmlUtils {
     }
     return children[0]
   }
-  /**
+  /* *
    * Finds a namespace-qualified child XML element.
    * @param {!Node} elem The parent XML element.
    * @param {string} ns The child XML element's namespace URI.
@@ -35,7 +35,7 @@ export class XmlUtils {
     }
     return children[0]
   }
-  /**
+  /* *
    * Finds child XML elements.
    * @param {!Node} elem The parent XML element.
    * @param {string} name The child XML element's tag name.
@@ -46,7 +46,7 @@ export class XmlUtils {
       return child instanceof Element && child.tagName === name
     })
   }
-  /**
+  /* *
    * Finds namespace-qualified child XML elements.
    * @param {!Node} elem The parent XML element.
    * @param {string} ns The child XML element's namespace URI.
@@ -59,7 +59,7 @@ export class XmlUtils {
           child.namespaceURI === ns
     })
   }
-  /**
+  /* *
    * Gets a namespace-qualified attribute.
    * @param {!Element} elem The element to get from.
    * @param {string} ns The namespace URI.
@@ -71,7 +71,7 @@ export class XmlUtils {
     // so check if it exists first.  See: https://mzl.la/2L7F0UK
     return elem.hasAttributeNS(ns, name) ? elem.getAttributeNS(ns, name) : null
   }
-  /**
+  /* *
    * Gets the text contents of a node.
    * @param {!Node} elem The XML element.
    * @return {?string} The text contents, or null if there are none.
@@ -88,7 +88,7 @@ export class XmlUtils {
     // Read merged text content from all text nodes.
     return elem.textContent.trim()
   }
-  /**
+  /* *
    * Parses an attribute by its name.
    * @param {!Element} elem The XML element.
    * @param {string} name The attribute name.
@@ -110,7 +110,7 @@ export class XmlUtils {
     }
     return parsedValue === null ? defaultValue : parsedValue
   }
-  /**
+  /* *
    * Parses an XML date string.
    * @param {string} dateString
    * @return {?number} The parsed date in seconds on success; otherwise, return
@@ -132,7 +132,7 @@ export class XmlUtils {
     const result = Date.parse(dateString)
     return (!isNaN(result) ? Math.floor(result / 1000.0) : null)
   }
-  /**
+  /* *
    * Parses an XML duration string.
    * Negative values are not supported. Years and months are treated as exactly
    * 365 and 30 days respectively.
@@ -173,7 +173,7 @@ export class XmlUtils {
             seconds
     return isFinite(d) ? d : null
   }
-  /**
+  /* *
    * Parses a range string.
    * @param {string} rangeString The range string, e.g., '101-9213'.
    * @return {?{start: number, end: number}} The parsed range on success;
@@ -198,7 +198,7 @@ export class XmlUtils {
 
     return { start: start, end: end }
   }
-  /**
+  /* *
    * Parses an integer.
    * @param {string} intString The integer string.
    * @return {?number} The parsed integer on success; otherwise, return null.
@@ -207,7 +207,7 @@ export class XmlUtils {
     const n = Number(intString)
     return (n % 1 === 0) ? n : null
   }
-  /**
+  /* *
    * Parses a positive integer.
    * @param {string} intString The integer string.
    * @return {?number} The parsed positive integer on success; otherwise,
@@ -217,7 +217,7 @@ export class XmlUtils {
     const n = Number(intString)
     return (n % 1 === 0) && (n > 0) ? n : null
   }
-  /**
+  /* *
    * Parses a non-negative integer.
    * @param {string} intString The integer string.
    * @return {?number} The parsed non-negative integer on success; otherwise,
@@ -227,7 +227,7 @@ export class XmlUtils {
     const n = Number(intString)
     return (n % 1 === 0) && (n >= 0) ? n : null
   }
-  /**
+  /* *
    * Parses a floating point number.
    * @param {string} floatString The floating point number string.
    * @return {?number} The parsed floating point number on success; otherwise,
@@ -237,7 +237,7 @@ export class XmlUtils {
     const n = Number(floatString)
     return !isNaN(n) ? n : null
   }
-  /**
+  /* *
    * Evaluate a division expressed as a string.
    * @param {string} exprString
    *   The expression to evaluate, e.g. '200/2'. Can also be a single number.
@@ -254,7 +254,7 @@ export class XmlUtils {
     }
     return !isNaN(n) ? n : null
   }
-  /**
+  /* *
    * Parse a string and return the resulting root element if
    * it was valid XML.
    * @param {string} xmlString
@@ -281,7 +281,7 @@ export class XmlUtils {
 
     return rootElem
   }
-  /**
+  /* *
    * Parse some UTF8 data and return the resulting root element if
    * it was valid XML.
    * @param {BufferSource} data

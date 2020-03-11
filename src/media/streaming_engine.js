@@ -1,6 +1,6 @@
 // import MediaSourceEngine from './media_source_engine'
 import Backoff from '../net/backoff'
-import NetworkingEngine from '../net/networking_engine'
+import { NetworkingEngine } from '../net/networking_engine'
 import DelayedTick from '../util/delayed_tick'
 import Destroyer from '../util/destroyer'
 import Error from '../util/error'
@@ -12,9 +12,9 @@ import MimeUtils from '../util/mime_utils'
 import Mp4Parser from '../util/mp4_parser'
 import Networking from '../util/networking'
 import Periods from '../util/periods'
-import Player from '../main'
+import conf from '../config'
 
-/**
+/* *
  * @summary Creates a Streaming Engine.
  * The StreamingEngine is responsible for setting up the Manifest's Streams
  * (i.e., for calling each Stream's createSegmentIndex() function), for
@@ -46,24 +46,24 @@ import Player from '../main'
  * @implements {IDestroyable}
  */
 export default class StreamingEngine {
-  /**
+  /* *
    * @param {shaka.extern.Manifest} manifest
    * @param {StreamingEngine.PlayerInterface} playerInterface
    */
   constructor(manifest, playerInterface) {
-    /** @private {?StreamingEngine.PlayerInterface} */
+    /* * @private {?StreamingEngine.PlayerInterface} */
     this.playerInterface_ = playerInterface
 
-    /** @private {?shaka.extern.Manifest} */
+    /* * @private {?shaka.extern.Manifest} */
     this.manifest_ = manifest
 
-    /** @private {?shaka.extern.StreamingConfiguration} */
+    /* * @private {?shaka.extern.StreamingConfiguration} */
     this.config_ = null
 
-    /** @private {number} */
+    /* * @private {number} */
     this.bufferingGoalScale_ = 1
 
-    /**
+    /* *
      * Maps a content type, e.g., 'audio', 'video', or 'text', to a MediaState.
      *
      * @private {!Map.<ManifestParserUtils.ContentType,
@@ -71,14 +71,14 @@ export default class StreamingEngine {
      */
     this.mediaStates_ = new Map()
 
-    /**
+    /* *
      * Set to true once one segment of each content type has been buffered.
      *
      * @private {boolean}
      */
     this.startupComplete_ = false
 
-    /**
+    /* *
      * Used for delay and backoff of failure callbacks, so that apps do not
      * retry instantly.
      *
@@ -86,14 +86,14 @@ export default class StreamingEngine {
      */
     this.failureCallbackBackoff_ = null
 
-    /**
+    /* *
      * Set to true on fatal error.  Interrupts fetchAndAppend_().
      *
      * @private {boolean}
      */
     this.fatalError_ = false
 
-    /**
+    /* *
      * Set to true when a request to unload text stream comes in. This is used
      * since loading new text stream is async, the request of unloading text
      * stream might come in before setting up new text stream is finished.
@@ -101,19 +101,19 @@ export default class StreamingEngine {
      */
     this.unloadingTextStream_ = false
 
-    /** @private {number} */
+    /* * @private {number} */
     this.textStreamSequenceId_ = 0
 
-    /** @private {!Destroyer} */
+    /* * @private {!Destroyer} */
     this.destroyer_ = new Destroyer(() => this.doDestroy_())
   }
 
-  /** @override */
+  /* * @override */
   destroy() {
     return this.destroyer_.destroy()
   }
 
-  /**
+  /* *
    * @return {!Promise}
    * @private
    */
@@ -131,7 +131,7 @@ export default class StreamingEngine {
     return Promise.resolve()
   }
 
-  /**
+  /* *
    * Called by the Player to provide an updated configuration any time it
    * changes. Must be called at least once before init().
    *
@@ -142,7 +142,7 @@ export default class StreamingEngine {
 
     // Create separate parameters for backoff during streaming failure.
 
-    /** @type {shaka.extern.RetryParameters} */
+    /* * @type {shaka.extern.RetryParameters} */
     const failureRetryParams = {
       // The term 'attempts' includes the initial attempt, plus all retries.
       // In order to see a delay, there would have to be at least 2 attempts.
@@ -159,7 +159,7 @@ export default class StreamingEngine {
     this.failureCallbackBackoff_ =
         new Backoff(failureRetryParams, autoReset)
   }
-  /**
+  /* *
    * Initialize and start streaming.
    *
    * By calling this method, streaming engine will choose the initial streams by
@@ -223,7 +223,7 @@ export default class StreamingEngine {
       this.playerInterface_.onInitialStreamsSetup()
     }
   }
-  /**
+  /* *
    * Gets the Period in which we are currently buffering.  This might be
    * different from the Period which contains the Playhead.
    * @return {?shaka.extern.Period}
@@ -243,7 +243,7 @@ export default class StreamingEngine {
 
     return null
   }
-  /**
+  /* *
    * Get the audio stream which we are currently buffering.  Returns null if
    * there is no audio streaming.
    * @return {?shaka.extern.Stream}
@@ -252,7 +252,7 @@ export default class StreamingEngine {
     const ContentType = ManifestParserUtils.ContentType
     return this.getStream_(ContentType.AUDIO)
   }
-  /**
+  /* *
    * Get the video stream which we are currently buffering.  Returns null if
    * there is no video streaming.
    * @return {?shaka.extern.Stream}
@@ -261,7 +261,7 @@ export default class StreamingEngine {
     const ContentType = ManifestParserUtils.ContentType
     return this.getStream_(ContentType.VIDEO)
   }
-  /**
+  /* *
    * Get the text stream which we are currently buffering.  Returns null if
    * there is no text streaming.
    * @return {?shaka.extern.Stream}
@@ -271,7 +271,7 @@ export default class StreamingEngine {
     return this.getStream_(ContentType.TEXT)
   }
 
-  /**
+  /* *
    * Get the stream of the given type which we are currently buffering.  Returns
    * null if there is no stream for the given type.
    * @param {ManifestParserUtils.ContentType} type
@@ -290,7 +290,7 @@ export default class StreamingEngine {
     }
   }
 
-  /**
+  /* *
    * Notifies StreamingEngine that a new text stream was added to the manifest.
    * This initializes the given stream. This returns a Promise that resolves
    * when the stream has been set up, and a media state has been created.
@@ -321,7 +321,7 @@ export default class StreamingEngine {
     streamMap.set(ContentType.TEXT, stream)
     streamSet.add(stream)
 
-    await mediaSourceEngine.init(streamMap, /* forceTansmuxTS= */ false)
+    await mediaSourceEngine.init(streamMap, /*  forceTansmuxTS= */ false)
     this.destroyer_.ensureNotDestroyed()
 
     const textDisplayer =
@@ -335,7 +335,7 @@ export default class StreamingEngine {
     const state = this.createMediaState_(
       stream,
       needPeriodIndex,
-      /* resumeAt= */ 0)
+      /*  resumeAt= */ 0)
 
     if ((this.textStreamSequenceId_ === currentSequenceId) &&
         !this.mediaStates_.has(ContentType.TEXT) &&
@@ -344,7 +344,7 @@ export default class StreamingEngine {
       this.scheduleUpdate_(state, 0)
     }
   }
-  /**
+  /* *
    * Stop fetching text stream when the user chooses to hide the captions.
    */
   unloadTextStream() {
@@ -358,7 +358,7 @@ export default class StreamingEngine {
     }
   }
 
-  /**
+  /* *
    * Set trick play on or off.
    * If trick play is on, related trick play streams will be used when possible.
    * @param {boolean} on
@@ -389,8 +389,8 @@ export default class StreamingEngine {
       }
 
       console.debug('Engaging trick mode stream', trickModeVideo)
-      this.switchInternal_(trickModeVideo, /* clearBuffer= */ false,
-        /* safeMargin= */ 0, /* force= */ false)
+      this.switchInternal_(trickModeVideo, /*  clearBuffer= */ false,
+        /*  safeMargin= */ 0, /*  force= */ false)
 
       mediaState.restoreStreamAfterTrickPlay = stream
     } else {
@@ -401,11 +401,11 @@ export default class StreamingEngine {
 
       console.debug('Restoring non-trick-mode stream', normalVideo)
       mediaState.restoreStreamAfterTrickPlay = null
-      this.switchInternal_(normalVideo, /* clearBuffer= */ true,
-        /* safeMargin= */ 0, /* force= */ false)
+      this.switchInternal_(normalVideo, /*  clearBuffer= */ true,
+        /*  safeMargin= */ 0, /*  force= */ false)
     }
   }
-  /**
+  /* *
    * @param {shaka.extern.Variant} variant
    * @param {boolean} clearBuffer
    * @param {number} safeMargin
@@ -415,19 +415,19 @@ export default class StreamingEngine {
     let ret = false
     if (variant.video) {
       const changed = this.switchInternal_(
-        variant.video, /* clearBuffer= */ clearBuffer,
-        /* safeMargin= */ safeMargin, /* force= */ false)
+        variant.video, /*  clearBuffer= */ clearBuffer,
+        /*  safeMargin= */ safeMargin, /*  force= */ false)
       ret = ret || changed
     }
     if (variant.audio) {
       const changed = this.switchInternal_(
-        variant.audio, /* clearBuffer= */ clearBuffer,
-        /* safeMargin= */ safeMargin, /* force= */ false)
+        variant.audio, /*  clearBuffer= */ clearBuffer,
+        /*  safeMargin= */ safeMargin, /*  force= */ false)
       ret = ret || changed
     }
     return ret
   }
-  /**
+  /* *
    * @param {shaka.extern.Stream} textStream
    * @return {boolean} Whether we actually switched streams.
    */
@@ -436,20 +436,20 @@ export default class StreamingEngine {
     console.assert(textStream && textStream.type === ContentType.TEXT,
       'Wrong stream type passed to switchTextStream!')
     return this.switchInternal_(
-      textStream, /* clearBuffer= */ true,
-      /* safeMargin= */ 0, /* force= */ false)
+      textStream, /*  clearBuffer= */ true,
+      /*  safeMargin= */ 0, /*  force= */ false)
   }
-  /** Reload the current text stream. */
+  /* * Reload the current text stream. */
   reloadTextStream() {
     const ContentType = ManifestParserUtils.ContentType
     const mediaState = this.mediaStates_.get(ContentType.TEXT)
     if (mediaState) { // Don't reload if there's no text to begin with.
       this.switchInternal_(
-        mediaState.stream, /* clearBuffer= */ true,
-        /* safeMargin= */ 0, /* force= */ true)
+        mediaState.stream, /*  clearBuffer= */ true,
+        /*  safeMargin= */ 0, /*  force= */ true)
     }
   }
-  /**
+  /* *
    * Switches to the given Stream. |stream| may be from any Variant or any
    * Period.
    *
@@ -463,7 +463,7 @@ export default class StreamingEngine {
    */
   switchInternal_(stream, clearBuffer, safeMargin, force) {
     const ContentType = ManifestParserUtils.ContentType
-    const type = /** @type {!ContentType} */(stream.type)
+    const type = /* * @type {!ContentType} */(stream.type)
     const mediaState = this.mediaStates_.get(type)
 
     if (!mediaState && stream.type === ContentType.TEXT &&
@@ -551,7 +551,7 @@ export default class StreamingEngine {
         // Cancel the update timer, if any.
         this.cancelUpdate_(mediaState)
         // Clear right away.
-        this.clearBuffer_(mediaState, /* flush= */ true, safeMargin)
+        this.clearBuffer_(mediaState, /*  flush= */ true, safeMargin)
           .catch((error) => {
             if (this.playerInterface_) {
               this.playerInterface_.onError(error)
@@ -567,7 +567,7 @@ export default class StreamingEngine {
     })
     return true
   }
-  /**
+  /* *
    * Decide if it makes sense to abort the current operation, and abort it if
    * so.
    *
@@ -607,7 +607,7 @@ export default class StreamingEngine {
     }
   }
 
-  /**
+  /* *
    * Returns whether we should abort the current request.
    *
    * @param {!StreamingEngine.MediaState_} mediaState
@@ -672,7 +672,7 @@ export default class StreamingEngine {
     // Otherwise, complete the operation in progress.
     return false
   }
-  /**
+  /* *
    * Notifies the StreamingEngine that the playhead has moved to a valid time
    * within the presentation timeline.
    */
@@ -728,7 +728,7 @@ export default class StreamingEngine {
         '(all): seeked: buffered seek: presentationTime=' + presentationTime)
     }
   }
-  /**
+  /* *
    * Clear the buffer for a given stream.  Unlike clearBuffer_, this will handle
    * cases where a MediaState is performing an update.  After this runs, every
    * MediaState will have a pending update.
@@ -779,13 +779,13 @@ export default class StreamingEngine {
     // buffer right away. Note: clearBuffer_() will schedule the next update.
     console.debug(logPrefix, 'clear: handling right now')
     this.cancelUpdate_(mediaState)
-    this.clearBuffer_(mediaState, /* flush= */ false, 0).catch((error) => {
+    this.clearBuffer_(mediaState, /*  flush= */ false, 0).catch((error) => {
       if (this.playerInterface_) {
         this.playerInterface_.onError(error)
       }
     })
   }
-  /**
+  /* *
    * Initializes the given streams and media states if required.  This will
    * schedule updates for the given types.
    *
@@ -808,12 +808,12 @@ export default class StreamingEngine {
     // text.
     const ContentType = ManifestParserUtils.ContentType
 
-    /**
+    /* *
      * @type {!Map.<ManifestParserUtils.ContentType,
      *              shaka.extern.Stream>}
      */
     const streamsByType = new Map()
-    /** @type {!Set.<shaka.extern.Stream>} */
+    /* * @type {!Set.<shaka.extern.Stream>} */
     const streams = new Set()
 
     if (audio) {
@@ -850,7 +850,7 @@ export default class StreamingEngine {
       }
     }
   }
-  /**
+  /* *
    * Creates a media state.
    *
    * @param {shaka.extern.Stream} stream
@@ -860,7 +860,7 @@ export default class StreamingEngine {
    * @private
    */
   createMediaState_(stream, needPeriodIndex, resumeAt) {
-    return /** @type {StreamingEngine.MediaState_} */ ({
+    return /* * @type {StreamingEngine.MediaState_} */ ({
       stream: stream,
       type: stream.type,
       lastStream: null,
@@ -882,7 +882,7 @@ export default class StreamingEngine {
       operation: null
     })
   }
-  /**
+  /* *
    * Sets the MediaSource's duration.
    * @private
    */
@@ -896,7 +896,7 @@ export default class StreamingEngine {
       this.playerInterface_.mediaSourceEngine.setDuration(Math.pow(2, 32))
     }
   }
-  /**
+  /* *
    * Called when |mediaState|'s update timer has expired.
    *
    * @param {!StreamingEngine.MediaState_} mediaState
@@ -996,7 +996,7 @@ export default class StreamingEngine {
       }
     }
   }
-  /**
+  /* *
    * Updates the given MediaState.
    *
    * @param {StreamingEngine.MediaState_} mediaState
@@ -1140,7 +1140,7 @@ export default class StreamingEngine {
     p.catch(() => {}) // TODO(#1993): Handle asynchronous errors.
     return null
   }
-  /**
+  /* *
    * Gets the next timestamp needed. Returns the playhead's position if the
    * buffer is empty; otherwise, returns the time at which the last segment
    * appended ends.
@@ -1164,7 +1164,7 @@ export default class StreamingEngine {
 
     return mediaState.lastSegmentReference.endTime
   }
-  /**
+  /* *
    * Gets the SegmentReference of the next segment needed.
    *
    * @param {StreamingEngine.MediaState_} mediaState
@@ -1187,7 +1187,7 @@ export default class StreamingEngine {
       return this.getSegmentReferenceIfAvailable_(mediaState, position)
     }
 
-    /** @type {?number} */
+    /* * @type {?number} */
     let position
 
     if (mediaState.lastSegmentReference) {
@@ -1232,7 +1232,7 @@ export default class StreamingEngine {
     }
     return reference
   }
-  /**
+  /* *
    * Looks up the position of the segment containing the given timestamp.
    *
    * @param {StreamingEngine.MediaState_} mediaState
@@ -1259,7 +1259,7 @@ export default class StreamingEngine {
 
     return position
   }
-  /**
+  /* *
    * Gets the SegmentReference at the given position if it's available.
    *
    * @param {StreamingEngine.MediaState_} mediaState
@@ -1296,7 +1296,7 @@ export default class StreamingEngine {
 
     return reference
   }
-  /**
+  /* *
    * Fetches and appends the given segment. Sets up the given MediaState's
    * associated SourceBuffer and evicts segments if either are required
    * beforehand. Schedules another update after completing successfully.
@@ -1405,7 +1405,7 @@ export default class StreamingEngine {
       }
     }
   }
-  /**
+  /* *
    * Clear per-stream error states and retry any failed streams.
    * @return {boolean} False if unable to retry.
    */
@@ -1432,7 +1432,7 @@ export default class StreamingEngine {
 
     return true
   }
-  /**
+  /* *
    * Handles a QUOTA_EXCEEDED_ERROR.
    *
    * @param {StreamingEngine.MediaState_} mediaState
@@ -1495,7 +1495,7 @@ export default class StreamingEngine {
     // advance, so we don't immidiately throw again.
     this.scheduleUpdate_(mediaState, 4)
   }
-  /**
+  /* *
    * Sets the given MediaState's associated SourceBuffer's timestamp offset and
    * init segment if either are required. If an error occurs then neither the
    * timestamp offset or init segment are unset, since another call to switch()
@@ -1574,8 +1574,8 @@ export default class StreamingEngine {
         const hasClosedCaptions = mediaState.stream.closedCaptions &&
             mediaState.stream.closedCaptions.size > 0
         await this.playerInterface_.mediaSourceEngine.appendBuffer(
-          mediaState.type, initSegment, /* startTime= */ null,
-          /* endTime= */ null, hasClosedCaptions)
+          mediaState.type, initSegment, /*  startTime= */ null,
+          /*  endTime= */ null, hasClosedCaptions)
       } catch (error) {
         mediaState.needInitSegment = true
         mediaState.lastInitSegmentReference = null
@@ -1585,7 +1585,7 @@ export default class StreamingEngine {
 
     await Promise.all([setStreamProperties, append()])
   }
-  /**
+  /* *
    * Appends the given segment and evicts content if required to append.
    *
    * @param {!StreamingEngine.MediaState_} mediaState
@@ -1628,7 +1628,7 @@ export default class StreamingEngine {
     mediaState.lastStream = stream
     mediaState.lastSegmentReference = reference
   }
-  /**
+  /* *
    * Parse the EMSG box from a MP4 container.
    *
    * @param {!SegmentReference} reference
@@ -1659,7 +1659,7 @@ export default class StreamingEngine {
       if (schemeId === 'urn:mpeg:dash:event:2012') {
         this.playerInterface_.onManifestUpdate()
       } else {
-        /** @type {shaka.extern.EmsgInfo} */
+        /* * @type {shaka.extern.EmsgInfo} */
         const emsg = {
           startTime: startTime,
           endTime: startTime + (eventDuration / timescale),
@@ -1673,13 +1673,12 @@ export default class StreamingEngine {
         }
 
         // Dispatch an event to notify the application about the emsg box.
-        const eventName = Player.EventName.Emsg
-        const event = new FakeEvent(eventName, { 'detail': emsg })
+        const event = new FakeEvent(conf.EventName.Emsg, { 'detail': emsg })
         this.playerInterface_.onEvent(event)
       }
     }
   }
-  /**
+  /* *
    * Evicts media to meet the max buffer behind limit.
    *
    * @param {StreamingEngine.MediaState_} mediaState
@@ -1731,7 +1730,7 @@ export default class StreamingEngine {
     this.destroyer_.ensureNotDestroyed()
     console.info(logPrefix, 'evicted ' + overflow + ' seconds')
   }
-  /**
+  /* *
    * Sets up all known Periods when startup completes; otherwise, does nothing.
    *
    * @param {StreamingEngine.MediaState_} mediaState The last
@@ -1791,7 +1790,7 @@ export default class StreamingEngine {
       this.playerInterface_.onStartupComplete()
     }
   }
-  /**
+  /* *
    * Calls onChooseStreams() when necessary.
    *
    * @param {StreamingEngine.MediaState_} mediaState The last
@@ -1810,7 +1809,7 @@ export default class StreamingEngine {
 
     const needPeriodIndex = mediaState.needPeriodIndex
 
-    /** @type {Array.<StreamingEngine.MediaState_>} */
+    /* * @type {Array.<StreamingEngine.MediaState_>} */
     const mediaStates = Array.from(this.mediaStates_.values())
 
     // For a Period transition to work, all media states must need the same
@@ -1882,7 +1881,7 @@ export default class StreamingEngine {
       console.info(logPrefix, 'calling onChooseStreams()...')
       const chosenStreams = this.playerInterface_.onChooseStreams(needPeriod)
 
-      /** @type {!Map.<!ManifestParserUtils.ContentType,
+      /* * @type {!Map.<!ManifestParserUtils.ContentType,
         *              shaka.extern.Stream>} */
       const streamsByType = new Map()
       if (chosenStreams.variant && chosenStreams.variant.video) {
@@ -1920,9 +1919,9 @@ export default class StreamingEngine {
         if (type === ContentType.TEXT) {
           // initStreams_ will switch streams and schedule an update.
           this.initStreams_(
-            /* audio= */ null,
-            /* video= */ null,
-            /* text= */ streamsByType.get(ContentType.TEXT),
+            /*  audio= */ null,
+            /*  video= */ null,
+            /*  text= */ streamsByType.get(ContentType.TEXT),
             needPeriod.startTime)
           streamsByType.delete(type)
           continue
@@ -1956,9 +1955,9 @@ export default class StreamingEngine {
 
           this.switchInternal_(
             stream,
-            /* clearBuffer= */ false,
-            /* safeMargin= */ 0,
-            /* force= */ false)
+            /*  clearBuffer= */ false,
+            /*  safeMargin= */ 0,
+            /*  force= */ false)
 
           // Don't schedule an update when changing from embedded text to
           // another embedded text since the update will try to load existing
@@ -1981,10 +1980,12 @@ export default class StreamingEngine {
       // All streams for the new period are active, so call onCanSwitch().
       console.info(logPrefix, 'calling onCanSwitch()...')
       this.playerInterface_.onCanSwitch()
-    } catch (e) {}
+    } catch (e) {
+      console.log(e)
+    }
   }
 
-  /**
+  /* *
    * @param {StreamingEngine.MediaState_} mediaState
    * @return {boolean}
    * @private
@@ -1995,7 +1996,7 @@ export default class StreamingEngine {
         mediaState.type === ManifestParserUtils.ContentType.TEXT &&
         mediaState.stream.mimeType === MimeUtils.CLOSED_CAPTION_MIMETYPE
   }
-  /**
+  /* *
    * @param {StreamingEngine.MediaState_} mediaState
    * @return {boolean} True if the given MediaState is idle; otherwise, return
    *   false.
@@ -2007,7 +2008,7 @@ export default class StreamingEngine {
            !mediaState.waitingToClearBuffer &&
            !mediaState.clearingBuffer
   }
-  /**
+  /* *
    * Get the index in the manifest of the period that contains the given
    * presentation time. If |time| is before all periods, this will default to
    * returning the first period.
@@ -2025,12 +2026,12 @@ export default class StreamingEngine {
     const adjustedTime = time + threshold
 
     const period = Periods.findPeriodForTime(
-      /* periods= */ this.manifest_.periods,
-      /* time= */ adjustedTime)
+      /*  periods= */ this.manifest_.periods,
+      /*  time= */ adjustedTime)
 
     return period ? this.manifest_.periods.indexOf(period) : 0
   }
-  /**
+  /* *
    * See if |stream| can be found in our manifest and return the period index.
    * If |stream| cannot be found, -1 will be returned.
    *
@@ -2052,7 +2053,7 @@ export default class StreamingEngine {
       return period.textStreams.includes(stream)
     })
   }
-  /**
+  /* *
    * Fetches the given segment.
    *
    * @param {!StreamingEngine.MediaState_} mediaState
@@ -2079,7 +2080,7 @@ export default class StreamingEngine {
     mediaState.operation = null
     return response.data
   }
-  /**
+  /* *
    * Clears the buffer and schedules another update.
    * The optional parameter safeMargin allows to retain a certain amount
    * of buffer, which can help avoiding rebuffering events.
@@ -2127,7 +2128,7 @@ export default class StreamingEngine {
     mediaState.endOfStream = false
     this.scheduleUpdate_(mediaState, 0)
   }
-  /**
+  /* *
    * Schedules |mediaState|'s next update.
    *
    * @param {!StreamingEngine.MediaState_} mediaState
@@ -2150,7 +2151,7 @@ export default class StreamingEngine {
       }
     }).tickAfter(delay)
   }
-  /**
+  /* *
    * If |mediaState| is scheduled to update, stop it.
    *
    * @param {StreamingEngine.MediaState_} mediaState
@@ -2164,7 +2165,7 @@ export default class StreamingEngine {
     mediaState.updateTimer.stop()
     mediaState.updateTimer = null
   }
-  /**
+  /* *
    * Handle streaming errors by delaying, then notifying the application by
    * error callback and by streaming failure callback.
    *
@@ -2188,7 +2189,7 @@ export default class StreamingEngine {
     }
   }
 
-  /**
+  /* *
    * @param {StreamingEngine.MediaState_} mediaState
    * @return {string} A log prefix of the form ($CONTENT_TYPE:$STREAM_ID), e.g.,
    *   '(audio:5)' or '(video:hd)'.
@@ -2198,7 +2199,7 @@ export default class StreamingEngine {
     return '(' + mediaState.type + ':' + mediaState.stream.id + ')'
   }
 }
-/**
+/* *
  * @typedef {{
  *   variant: (?shaka.extern.Variant|undefined),
  *   text: ?shaka.extern.Stream
@@ -2210,7 +2211,7 @@ export default class StreamingEngine {
  *   The chosen text stream.
  */
 StreamingEngine.ChosenStreams
-/**
+/* *
  * @typedef {{
  *   getPresentationTime: function():number,
  *   getBandwidthEstimate: function():number,
@@ -2263,7 +2264,7 @@ StreamingEngine.ChosenStreams
  *   be used by tests.
  */
 StreamingEngine.PlayerInterface
-/**
+/* *
  * @typedef {{
  *   type: ManifestParserUtils.ContentType,
  *   stream: shaka.extern.Stream,
@@ -2338,7 +2339,7 @@ StreamingEngine.PlayerInterface
  *   Operation with the number of bytes to be downloaded.
  */
 StreamingEngine.MediaState_
-/**
+/* *
  * The fudge factor for appendWindowStart.  By adjusting the window backward, we
  * avoid rounding errors that could cause us to remove the keyframe at the start
  * of the Period.
@@ -2350,7 +2351,7 @@ StreamingEngine.MediaState_
  * @private
  */
 StreamingEngine.APPEND_WINDOW_START_FUDGE_ = 0.1
-/**
+/* *
  * The fudge factor for appendWindowEnd.  By adjusting the window backward, we
  * avoid rounding errors that could cause us to remove the last few samples of
  * the Period.  This rounding error could then create an artificial gap and a
@@ -2362,7 +2363,7 @@ StreamingEngine.APPEND_WINDOW_START_FUDGE_ = 0.1
  * @private
  */
 StreamingEngine.APPEND_WINDOW_END_FUDGE_ = 0.01
-/**
+/* *
  * The maximum number of segments by which a stream can get ahead of other
  * streams.
  *

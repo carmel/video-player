@@ -6,12 +6,12 @@ import StringUtils from '../util/string_utils'
 import Uint8ArrayUtils from '../util/uint8array_utils'
 import XmlUtils from '../util/xml_utils'
 
-/**
+/* *
  * @summary A set of functions for parsing and interpreting ContentProtection
  *   elements.
  */
 export default class ContentProtection {
-  /**
+  /* *
    * Parses info from the ContentProtection elements at the AdaptationSet level.
    *
    * @param {!Array.<!Element>} elems
@@ -22,9 +22,9 @@ export default class ContentProtection {
   static parseFromAdaptationSet(elems, callback, ignoreDrmInfo) {
     const ContentProtection = ContentProtection
     const parsed = ContentProtection.parseElements_(elems)
-    /** @type {Array.<shaka.extern.InitDataOverride>} */
+    /* * @type {Array.<shaka.extern.InitDataOverride>} */
     let defaultInit = null
-    /** @type {!Array.<shaka.extern.DrmInfo>} */
+    /* * @type {!Array.<shaka.extern.DrmInfo>} */
     let drmInfos = []
     let parsedNonCenc = []
 
@@ -103,7 +103,7 @@ export default class ContentProtection {
     }
   }
 
-  /**
+  /* *
    * Parses the given ContentProtection elements found at the Representation
    * level.  This may update the |context|.
    *
@@ -152,7 +152,7 @@ export default class ContentProtection {
     return repContext.defaultKeyId || context.defaultKeyId
   }
 
-  /**
+  /* *
    * Gets a Widevine license URL from a content protection element
    * containing a custom `ms:laurl` element
    *
@@ -168,7 +168,7 @@ export default class ContentProtection {
     return ''
   }
 
-  /**
+  /* *
    * Parses an Array buffer starting at byteOffset for PlayReady Object Records.
    * Each PRO Record is preceded by its PlayReady Record type and length in
    * bytes.
@@ -208,7 +208,7 @@ export default class ContentProtection {
     return records
   }
 
-  /**
+  /* *
    * Parses a buffer for PlayReady Objects.  The data
    * should contain a 32-bit integer indicating the length of
    * the PRO in bytes.  Following that, a 16-bit integer for
@@ -226,7 +226,7 @@ export default class ContentProtection {
     const view = BufferUtils.toDataView(data)
 
     // First 4 bytes is the PRO length (DWORD)
-    const byteLength = view.getUint32(byteOffset, /* littleEndian= */ true)
+    const byteLength = view.getUint32(byteOffset, /*  littleEndian= */ true)
     byteOffset += 4
 
     if (byteLength !== data.byteLength) {
@@ -243,7 +243,7 @@ export default class ContentProtection {
     return ContentProtection.parseMsProRecords_(view, byteOffset)
   }
 
-  /**
+  /* *
    * PlayReady Header format: https://goo.gl/dBzxNA
    *
    * @param {!Element} xml
@@ -263,7 +263,7 @@ export default class ContentProtection {
     return ''
   }
 
-  /**
+  /* *
    * Gets a PlayReady license URL from a content protection element
    * containing a PlayReady Header Object
    *
@@ -300,7 +300,7 @@ export default class ContentProtection {
     return ContentProtection.getLaurl_(rootElement)
   }
 
-  /**
+  /* *
    * Gets a PlayReady initData from a content protection element
    * containing a PlayReady Pro Object
    *
@@ -330,7 +330,7 @@ export default class ContentProtection {
     ]
   }
 
-  /**
+  /* *
    * Creates DrmInfo objects from the given element.
    *
    * @param {Array.<shaka.extern.InitDataOverride>} defaultInit
@@ -345,7 +345,7 @@ export default class ContentProtection {
     const defaultKeySystems = ContentProtection.defaultKeySystems_
     const licenseUrlParsers = ContentProtection.licenseUrlParsers_
 
-    /** @type {!Array.<shaka.extern.DrmInfo>} */
+    /* * @type {!Array.<shaka.extern.DrmInfo>} */
     const out = []
 
     for (const element of elements) {
@@ -376,7 +376,7 @@ export default class ContentProtection {
     return out
   }
 
-  /**
+  /* *
    * Parses the given ContentProtection elements.  If there is an error, it
    * removes those elements.
    *
@@ -385,7 +385,7 @@ export default class ContentProtection {
    * @private
    */
   static parseElements_(elems) {
-    /** @type {!Array.<ContentProtection.Element>} */
+    /* * @type {!Array.<ContentProtection.Element>} */
     const out = []
 
     for (const elem of elems) {
@@ -398,7 +398,7 @@ export default class ContentProtection {
     return out
   }
 
-  /**
+  /* *
    * Parses the given ContentProtection element.
    *
    * @param {!Element} elem
@@ -408,11 +408,11 @@ export default class ContentProtection {
   static parseElement_(elem) {
     const NS = ContentProtection.CencNamespaceUri_
 
-    /** @type {?string} */
+    /* * @type {?string} */
     let schemeUri = elem.getAttribute('schemeIdUri')
-    /** @type {?string} */
+    /* * @type {?string} */
     let keyId = XmlUtils.getAttributeNS(elem, NS, 'default_KID')
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     const psshs = XmlUtils.findChildrenNS(elem, NS, 'pssh')
       .map(XmlUtils.getContents)
 
@@ -433,7 +433,7 @@ export default class ContentProtection {
       }
     }
 
-    /** @type {!Array.<shaka.extern.InitDataOverride>} */
+    /* * @type {!Array.<shaka.extern.InitDataOverride>} */
     let init = []
     try {
       // Try parsing PSSH data.
@@ -460,7 +460,7 @@ export default class ContentProtection {
   }
 }
 
-/**
+/* *
  * @typedef {{
  *   type: number,
  *   value: !Uint8Array
@@ -476,7 +476,7 @@ export default class ContentProtection {
  */
 ContentProtection.PlayReadyRecord
 
-/**
+/* *
  * Enum for PlayReady record types.
  * @enum {number}
  */
@@ -486,7 +486,7 @@ ContentProtection.PLAYREADY_RECORD_TYPES = {
   EMBEDDED_LICENSE: 0x003
 }
 
-/**
+/* *
  * @typedef {{
  *   defaultKeyId: ?string,
  *   defaultInit: Array.<shaka.extern.InitDataOverride>,
@@ -513,7 +513,7 @@ ContentProtection.PLAYREADY_RECORD_TYPES = {
  *   from the AdaptationSet.
  */
 ContentProtection.Context
-/**
+/* *
  * @typedef {{
  *   node: !Element,
  *   schemeUri: string,
@@ -535,7 +535,7 @@ ContentProtection.Context
  *   this is non-null, there is at least one element.
  */
 ContentProtection.Element
-/**
+/* *
  * A map of scheme URI to key system name.
  *
  * @const {!Map.<string, string>}
@@ -551,7 +551,7 @@ ContentProtection.defaultKeySystems_ = new Map()
   .set('urn:uuid:f239e769-efa3-4850-9c16-a903c6932efb',
     'com.adobe.primetime')
 
-/**
+/* *
  * A map of key system name to license server url parser.
  *
  * @const {!Map.<string, function(ContentProtection.Element)>}
@@ -563,13 +563,13 @@ ContentProtection.licenseUrlParsers_ = new Map()
   .set('com.microsoft.playready',
     ContentProtection.getPlayReadyLicenseUrl)
 
-/**
+/* *
  * @const {string}
  * @private
  */
 ContentProtection.MP4Protection_ =
     'urn:mpeg:dash:mp4protection:2011'
-/**
+/* *
  * @const {string}
  * @private
  */

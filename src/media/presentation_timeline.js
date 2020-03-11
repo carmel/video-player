@@ -1,36 +1,35 @@
 // import { SegmentReference } from './segment_reference'
-import conf from '../config'
-/**
+/* *
  * PresentationTimeline.
  * @export
  */
 export default class PresentationTimeline {
-  /**
+  /* *
    * @param {?number} presentationStartTime The wall-clock time, in seconds,
    *   when the presentation started or will start. Only required for live.
    * @param {number} presentationDelay The delay to give the presentation, in
    *   seconds.  Only required for live.
    * @param {boolean=} autoCorrectDrift Whether to account for drift when
-   *   determining the availability window.
+   *   determining the availability
    *
    * @see {shaka.extern.Manifest}
    * @see {@tutorial architecture}
    */
   constructor(presentationStartTime, presentationDelay,
     autoCorrectDrift = true) {
-    /** @private {?number} */
+    /* * @private {?number} */
     this.presentationStartTime_ = presentationStartTime
 
-    /** @private {number} */
+    /* * @private {number} */
     this.presentationDelay_ = presentationDelay
 
-    /** @private {number} */
+    /* * @private {number} */
     this.duration_ = Infinity
 
-    /** @private {number} */
+    /* * @private {number} */
     this.segmentAvailabilityDuration_ = Infinity
 
-    /**
+    /* *
      * The maximum segment duration (in seconds).  Can be based on explicitly-
      * known segments or on signalling in the manifest.
      *
@@ -38,7 +37,7 @@ export default class PresentationTimeline {
      */
     this.maxSegmentDuration_ = 1
 
-    /**
+    /* *
      * The minimum segment start time (in seconds, in the presentation timeline)
      * for segments we explicitly know about.
      *
@@ -49,7 +48,7 @@ export default class PresentationTimeline {
      */
     this.minSegmentStartTime_ = null
 
-    /**
+    /* *
      * The maximum segment end time (in seconds, in the presentation timeline)
      * for segments we explicitly know about.
      *
@@ -61,19 +60,19 @@ export default class PresentationTimeline {
      */
     this.maxSegmentEndTime_ = null
 
-    /** @private {number} */
+    /* * @private {number} */
     this.clockOffset_ = 0
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.static_ = true
 
-    /** @private {number} */
+    /* * @private {number} */
     this.userSeekStart_ = 0
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.autoCorrectDrift_ = autoCorrectDrift
   }
-  /**
+  /* *
    * @return {number} The presentation's duration in seconds.
    *   Infinity indicates that the presentation continues indefinitely.
    * @export
@@ -81,14 +80,14 @@ export default class PresentationTimeline {
   getDuration() {
     return this.duration_
   }
-  /**
+  /* *
    * @return {number} The presentation's max segment duration in seconds.
    * @export
    */
   getMaxSegmentDuration() {
     return this.maxSegmentDuration_
   }
-  /**
+  /* *
    * Sets the presentation's duration.
    *
    * @param {number} duration The presentation's duration in seconds.
@@ -99,14 +98,14 @@ export default class PresentationTimeline {
     console.assert(duration > 0, 'duration must be > 0')
     this.duration_ = duration
   }
-  /**
+  /* *
    * @return {?number} The presentation's start time in seconds.
    * @export
    */
   getPresentationStartTime() {
     return this.presentationStartTime_
   }
-  /**
+  /* *
    * Sets the clock offset, which is the difference between the client's clock
    * and the server's clock, in milliseconds (i.e., serverTime = Date.now() +
    * clockOffset).
@@ -117,7 +116,7 @@ export default class PresentationTimeline {
   setClockOffset(offset) {
     this.clockOffset_ = offset
   }
-  /**
+  /* *
    * Sets the presentation's static flag.
    *
    * @param {boolean} isStatic If true, the presentation is static, meaning all
@@ -128,7 +127,7 @@ export default class PresentationTimeline {
     // NOTE: the argument name is not 'static' because that's a keyword in ES6
     this.static_ = isStatic
   }
-  /**
+  /* *
    * Sets the presentation's segment availability duration. The segment
    * availability duration should only be set for live.
    *
@@ -141,7 +140,7 @@ export default class PresentationTimeline {
       'segmentAvailabilityDuration must be >= 0')
     this.segmentAvailabilityDuration_ = segmentAvailabilityDuration
   }
-  /**
+  /* *
    * Sets the presentation delay in seconds.
    *
    * @param {number} delay
@@ -154,7 +153,7 @@ export default class PresentationTimeline {
     console.assert(delay >= 0, 'delay must be >= 0')
     this.presentationDelay_ = delay
   }
-  /**
+  /* *
    * Gets the presentation delay in seconds.
    * @return {number}
    * @export
@@ -162,7 +161,7 @@ export default class PresentationTimeline {
   getDelay() {
     return this.presentationDelay_
   }
-  /**
+  /* *
    * Gives PresentationTimeline a Stream's segments so it can size and position
    * the segment availability window, and account for missing segment
    * information.  This function should be called once for each Stream (no more,
@@ -200,7 +199,7 @@ export default class PresentationTimeline {
     console.info('notifySegments:',
       'maxSegmentDuration=' + this.maxSegmentDuration_)
   }
-  /**
+  /* *
    * Gives PresentationTimeline a Stream's minimum segment start time.
    *
    * @param {number} startTime
@@ -217,9 +216,9 @@ export default class PresentationTimeline {
           Math.min(this.minSegmentStartTime_, startTime)
     }
   }
-  /**
+  /* *
    * Gives PresentationTimeline a Stream's maximum segment duration so it can
-   * size and position the segment availability window.  This function should be
+   * size and position the segment availability   This function should be
    * called once for each Stream (no more, no less), but does not have to be
    * called if notifySegments() is called instead for a particular stream.
    *
@@ -234,7 +233,7 @@ export default class PresentationTimeline {
     console.info('notifyNewSegmentDuration:',
       'maxSegmentDuration=' + this.maxSegmentDuration_)
   }
-  /**
+  /* *
    * Offsets the segment times by the given amount.
    *
    * @param {number} offset The number of seconds to offset by.  A positive
@@ -249,7 +248,7 @@ export default class PresentationTimeline {
       this.maxSegmentEndTime_ += offset
     }
   }
-  /**
+  /* *
    * @return {boolean} True if the presentation is live; otherwise, return
    *   false.
    * @export
@@ -258,7 +257,7 @@ export default class PresentationTimeline {
     return this.duration_ === Infinity &&
            !this.static_
   }
-  /**
+  /* *
    * @return {boolean} True if the presentation is in progress (meaning not
    *   live, but also not completely available); otherwise, return false.
    * @export
@@ -267,7 +266,7 @@ export default class PresentationTimeline {
     return this.duration_ !== Infinity &&
            !this.static_
   }
-  /**
+  /* *
    * Gets the presentation's current segment availability start time.  Segments
    * ending at or before this time should be assumed to be unavailable.
    *
@@ -283,7 +282,7 @@ export default class PresentationTimeline {
     const start = end - this.segmentAvailabilityDuration_
     return Math.max(this.userSeekStart_, start)
   }
-  /**
+  /* *
    * Sets the start time of the user-defined seek range.  This is only used for
    * VOD content.
    *
@@ -293,7 +292,7 @@ export default class PresentationTimeline {
   setUserSeekStart(time) {
     this.userSeekStart_ = time
   }
-  /**
+  /* *
    * Gets the presentation's current segment availability end time.  Segments
    * starting after this time should be assumed to be unavailable.
    *
@@ -309,7 +308,7 @@ export default class PresentationTimeline {
 
     return Math.min(this.getLiveEdge_(), this.duration_)
   }
-  /**
+  /* *
    * Gets the seek range start time, offset by the given amount.  This is used
    * to ensure that we don't 'fall' back out of the seek window while we are
    * buffering.
@@ -343,16 +342,16 @@ export default class PresentationTimeline {
         Math.min(availabilityStart + offset, this.getSeekRangeEnd())
     return Math.max(earliestSegmentTime, desiredStart)
   }
-  /**
+  /* *
    * Gets the seek range start time.
    *
    * @return {number}
    * @export
    */
   getSeekRangeStart() {
-    return this.getSafeSeekRangeStart(/* offset= */ 0)
+    return this.getSafeSeekRangeStart(/*  offset= */ 0)
   }
-  /**
+  /* *
    * Gets the seek range end.
    *
    * @return {number}
@@ -363,7 +362,7 @@ export default class PresentationTimeline {
     const delay = useDelay ? this.presentationDelay_ : 0
     return Math.max(0, this.getSegmentAvailabilityEnd() - delay)
   }
-  /**
+  /* *
    * True if the presentation start time is being used to calculate the live
    * edge.
    * Using the presentation start time means that the stream may be subject to
@@ -388,7 +387,7 @@ export default class PresentationTimeline {
 
     return true
   }
-  /**
+  /* *
    * @return {number} The current presentation time in seconds.
    * @private
    */
@@ -399,33 +398,5 @@ export default class PresentationTimeline {
     const now = (Date.now() + this.clockOffset_) / 1000.0
     return Math.max(
       0, now - this.maxSegmentDuration_ - this.presentationStartTime_)
-  }
-
-  /**
-   * Debug only: assert that the timeline parameters make sense for the type
-   * of presentation (VOD, IPR, live).
-   */
-  assertIsValid() {
-    if (conf.DEBUG) {
-      if (this.isLive()) {
-        // Implied by isLive(): infinite and dynamic.
-        // Live streams should have a start time.
-        console.assert(this.presentationStartTime_ !== null,
-          'Detected as live stream, but does not match our model of live!')
-      } else if (this.isInProgress()) {
-        // Implied by isInProgress(): finite and dynamic.
-        // IPR streams should have a start time, and segments should not expire.
-        console.assert(this.presentationStartTime_ !== null &&
-                            this.segmentAvailabilityDuration_ === Infinity,
-        'Detected as IPR stream, but does not match our model of IPR!')
-      } else { // VOD
-        // VOD segments should not expire and the presentation should be finite
-        // and static.
-        console.assert(this.segmentAvailabilityDuration_ === Infinity &&
-                            this.duration_ !== Infinity &&
-                            this.static_,
-        'Detected as VOD stream, but does not match our model of VOD!')
-      }
-    }
   }
 }

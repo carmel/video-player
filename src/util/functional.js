@@ -1,9 +1,9 @@
 import Deprecate from '../deprecate/deprecate'
-/**
+/* *
  * @summary A set of functional utility functions.
  */
 export default class Functional {
-  /**
+  /* *
    * Creates a promise chain that calls the given callback for each element in
    * the array in a catch of a promise.
    *
@@ -20,7 +20,7 @@ export default class Functional {
       return promise.catch(() => callback(elem))
     }, Promise.reject())
   }
-  /**
+  /* *
    * Returns the first array concatenated to the second; used to collapse an
    * array of arrays into a single array.
    *
@@ -33,17 +33,17 @@ export default class Functional {
     return all.concat(part)
   }
 
-  /**
+  /* *
    * A no-op function that ignores its arguments.  This is used to suppress
    * unused variable errors.
    * @param {...*} args
    */
   static ignored(...args) {}
-  /**
+  /* *
    * A no-op function.  Useful in promise chains.
    */
   static noop() {}
-  /**
+  /* *
    * Returns if the given value is not null; useful for filtering out null
    * values.
    *
@@ -55,7 +55,7 @@ export default class Functional {
     return value != null
   }
 
-  /**
+  /* *
    * Calls a factory function while allowing it to be a constructor for
    * reverse-compatibility.
    *

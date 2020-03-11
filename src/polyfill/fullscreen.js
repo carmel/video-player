@@ -1,16 +1,16 @@
 import polyfill from './all'
-/**
+/* *
  * @summary A polyfill to unify fullscreen APIs across browsers.
  * Many browsers have prefixed fullscreen methods on Element and document.
  * See {@link https://mzl.la/2K0xcHo Using fullscreen mode} on MDN for more
  * information.
  */
 export default class Fullscreen {
-  /**
+  /* *
    * Install the polyfill if needed.
    */
   static install() {
-    if (!window.Document) {
+    if (!Document) {
       // Avoid errors on very old browsers.
       return
     }
@@ -55,7 +55,7 @@ export default class Fullscreen {
     document.addEventListener('MSFullscreenError', proxy)
   }
 
-  /**
+  /* *
    * Proxy fullscreen events after changing their name.
    * @param {!Event} event
    * @private
@@ -66,7 +66,7 @@ export default class Fullscreen {
     let newEvent
     // IE 11 does not have an Event constructor
     if (typeof (Event) === 'function') {
-      newEvent = new Event(eventType, /** @type {EventInit} */(event))
+      newEvent = new Event(eventType, /* * @type {EventInit} */(event))
     } else {
       newEvent = document.createEvent('Event')
       newEvent.initEvent(eventType, event.bubbles, event.cancelable)

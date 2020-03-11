@@ -7,11 +7,11 @@ import Error from '../util/error'
 import ManifestParserUtils from '../util/manifest_parser_utils'
 import XmlUtils from '../util/xml_utils'
 import ObjectUtils from '../util/object_utils'
-/**
+/* *
  * @summary A set of functions for parsing SegmentBase elements.
  */
 export default class SegmentBase {
-  /**
+  /* *
    * Creates an init segment reference from a Context object.
    *
    * @param {DashParser.Context} context
@@ -47,7 +47,7 @@ export default class SegmentBase {
     return new InitSegmentReference(getUris, startByte, endByte)
   }
 
-  /**
+  /* *
    * Creates a new StreamInfo object.
    *
    * @param {DashParser.Context} context
@@ -98,7 +98,7 @@ export default class SegmentBase {
     }
   }
 
-  /**
+  /* *
    * Creates a SegmentIndex for the given URIs and context.
    *
    * @param {DashParser.Context} context
@@ -116,7 +116,7 @@ export default class SegmentBase {
     endByte, scaledPresentationTimeOffset) {
     // Unpack context right away, before we start an async process.
     // This immunizes us against changes to the context object later.
-    /** @type {PresentationTimeline} */
+    /* * @type {PresentationTimeline} */
     const presentationTimeline = context.presentationTimeline
     const fitLast = !context.dynamic || !context.periodInfo.isLastPeriod
     const periodStart = context.periodInfo.start
@@ -141,7 +141,7 @@ export default class SegmentBase {
     const results = await Promise.all(responses)
     const indexData = results[0]
     const initData = results[1] || null
-    /** @type {Array.<!SegmentReference>} */
+    /* * @type {Array.<!SegmentReference>} */
     let references = null
 
     const timestampOffset = periodStart - scaledPresentationTimeOffset
@@ -174,7 +174,7 @@ export default class SegmentBase {
     return segmentIndex
   }
 
-  /**
+  /* *
    * @param {?DashParser.InheritanceFrame} frame
    * @return {Element}
    * @private
@@ -183,7 +183,7 @@ export default class SegmentBase {
     return frame.segmentBase
   }
 
-  /**
+  /* *
    * Compute the byte range of the segment index from the container.
    *
    * @param {DashParser.Context} context
@@ -208,7 +208,7 @@ export default class SegmentBase {
     return indexRange
   }
 
-  /**
+  /* *
    * Compute the URIs of the segment index from the container.
    *
    * @param {DashParser.Context} context
@@ -235,7 +235,7 @@ export default class SegmentBase {
     return indexUris
   }
 
-  /**
+  /* *
    * Check if this type of segment index is supported.  This allows for
    * immediate errors during parsing, as opposed to an async error from
    * createSegmentIndex().
@@ -266,7 +266,7 @@ export default class SegmentBase {
     }
   }
 
-  /**
+  /* *
    * Check if this type of segment index is supported.  This allows for
    * immediate errors during parsing, as opposed to an async error from
    * createSegmentIndex().
@@ -304,7 +304,7 @@ export default class SegmentBase {
     }
   }
 
-  /**
+  /* *
    * Generate a SegmentIndex from a Context object.
    *
    * @param {DashParser.Context} context

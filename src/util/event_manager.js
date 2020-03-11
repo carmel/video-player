@@ -1,7 +1,7 @@
 // import IReleasable from '../util/i_releasable'
 import MultiMap from '../util/multi_map'
 
-/**
+/* *
  * @summary
  * An EventManager maintains a collection of 'event
  * bindings' between event targets and event listeners.
@@ -11,13 +11,13 @@ import MultiMap from '../util/multi_map'
  */
 export default class EventManager {
   constructor() {
-    /**
+    /* *
      * Maps an event type to an array of event bindings.
      * @private {MultiMap.<!EventManager.Binding_>}
      */
     this.bindingMap_ = new MultiMap()
   }
-  /**
+  /* *
    * Detaches all event listeners.
    * @override
    * @export
@@ -26,7 +26,7 @@ export default class EventManager {
     this.removeAll()
     this.bindingMap_ = null
   }
-  /**
+  /* *
    * Attaches an event listener to an event target.
    * @param {EventTarget} target The event target.
    * @param {string} type The event type.
@@ -46,7 +46,7 @@ export default class EventManager {
         new EventManager.Binding_(target, type, listener, options)
     this.bindingMap_.push(type, binding)
   }
-  /**
+  /* *
    * Attaches an event listener to an event target.  The listener will be
    * removed when the first instance of the event is fired.
    * @param {EventTarget} target The event target.
@@ -68,7 +68,7 @@ export default class EventManager {
     }
     this.listen(target, type, shim, options)
   }
-  /**
+  /* *
    * Detaches an event listener from an event target.
    * @param {EventTarget} target The event target.
    * @param {string} type The event type.
@@ -91,7 +91,7 @@ export default class EventManager {
       }
     }
   }
-  /**
+  /* *
    * Detaches all event listeners from all targets.
    * @export
    */
@@ -109,18 +109,18 @@ export default class EventManager {
     this.bindingMap_.clear()
   }
 }
-/**
+/* *
  * @typedef {function(!Event)}
  * @export
  */
 EventManager.ListenerType
-/**
+/* *
  * Creates a new Binding_ and attaches the event listener to the event target.
  *
  * @private
  */
 EventManager.Binding_ = class {
-  /**
+  /* *
    * @param {EventTarget} target The event target.
    * @param {string} type The event type.
    * @param {EventManager.ListenerType} listener The event listener.
@@ -130,22 +130,22 @@ EventManager.Binding_ = class {
    *    call preventDefault(), which improves scrolling performance.
    */
   constructor(target, type, listener, options) {
-    /** @type {EventTarget} */
+    /* * @type {EventTarget} */
     this.target = target
 
-    /** @type {string} */
+    /* * @type {string} */
     this.type = type
 
-    /** @type {?EventManager.ListenerType} */
+    /* * @type {?EventManager.ListenerType} */
     this.listener = listener
 
-    /** @type {(boolean|!AddEventListenerOptions)} */
+    /* * @type {(boolean|!AddEventListenerOptions)} */
     this.options =
         EventManager.Binding_.convertOptions_(target, options)
 
     this.target.addEventListener(type, listener, this.options)
   }
-  /**
+  /* *
    * Detaches the event listener from the event target. This does nothing if
    * the event listener is already detached.
    * @export
@@ -159,7 +159,7 @@ EventManager.Binding_ = class {
     this.options = false
   }
 
-  /**
+  /* *
    * Converts the provided options value into a value accepted by the browser.
    * Some browsers (e.g. IE11 and Tizen) don't support passing options as an
    * object.  So this detects this case and converts it.
@@ -195,7 +195,7 @@ EventManager.Binding_ = class {
     }
   }
 
-  /**
+  /* *
    * Checks whether the browser supports passing objects as the third argument
    * to addEventListener.  This caches the result value in a static field to
    * avoid a bunch of checks.
@@ -235,5 +235,5 @@ EventManager.Binding_ = class {
   }
 }
 
-/** @private {(boolean|undefined)} */
+/* * @private {(boolean|undefined)} */
 EventManager.Binding_.supportsObject_ = undefined

@@ -1,11 +1,11 @@
 import GapJumpingController from './gap_jumping_controller'
 import TimeRangesUtils from './time_ranges_utils'
-import VideoWrapper from './video_wrapper'
+import { VideoWrapper } from './video_wrapper'
 // import IReleasable from '../util/i_releasable'
 import Timer from '../util/timer'
 import EventManager from '../util/event_manager'
-import StallDetector from '../media/stall_detector'
-/**
+import { StallDetector } from '../media/stall_detector'
+/* *
  * Creates a Playhead, which manages the video's current time.
  *
  * The Playhead provides mechanisms for setting the presentation's start time,
@@ -16,7 +16,7 @@ import StallDetector from '../media/stall_detector'
  * @interface
  */
 export class Playhead {
-  /**
+  /* *
    * Set the start time. If the content has already started playback, this will
    * be ignored.
    *
@@ -24,7 +24,7 @@ export class Playhead {
    */
   setStartTime(startTime) {}
 
-  /**
+  /* *
    * Get the current playhead position. The position will be restricted to valid
    * time ranges.
    *
@@ -32,30 +32,30 @@ export class Playhead {
    */
   getTime() {}
 
-  /**
+  /* *
    * Notify the playhead that the buffered ranges have changed.
    */
   notifyOfBufferingChange() {}
 }
-/**
+/* *
  * A playhead implementation that only relies on the media element.
  *
  * @implements {Playhead}
  * @final
  */
 export class SrcEqualsPlayhead {
-  /**
+  /* *
    * @param {!HTMLMediaElement} mediaElement
    */
   constructor(mediaElement) {
-    /** @private {HTMLMediaElement} */
+    /* * @private {HTMLMediaElement} */
     this.mediaElement_ = mediaElement
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.started_ = false
-    /** @private {?number} */
+    /* * @private {?number} */
     this.startTime_ = null
 
-    /** @private {EventManager} */
+    /* * @private {EventManager} */
     this.eventManager_ = new EventManager()
 
     // We listen for the loaded-metadata-event so that we know when we can
@@ -84,7 +84,7 @@ export class SrcEqualsPlayhead {
     }
   }
 
-  /** @override */
+  /* * @override */
   release() {
     if (this.eventManager_) {
       this.eventManager_.release()
@@ -94,14 +94,14 @@ export class SrcEqualsPlayhead {
     this.mediaElement_ = null
   }
 
-  /** @override */
+  /* * @override */
   setStartTime(startTime) {
     // If we have already started playback, ignore updates to the start time.
     // This is just to make things consistent.
     this.startTime_ = this.started_ ? this.startTime_ : startTime
   }
 
-  /** @override */
+  /* * @override */
   getTime() {
     // If we have not started playback yet, return the start time. However once
     // we start playback we assume that we can always return the current time.
@@ -115,10 +115,10 @@ export class SrcEqualsPlayhead {
     return time || 0
   }
 
-  /** @override */
+  /* * @override */
   notifyOfBufferingChange() {}
 }
-/**
+/* *
  * A playhead implementation that relies on the media element and a manifest.
  * When provided with a manifest, we can provide more accurate control than
  * the SrcEqualsPlayhead.
@@ -130,7 +130,7 @@ export class SrcEqualsPlayhead {
  * @final
  */
 export class MediaSourcePlayhead {
-  /**
+  /* *
    * @param {!HTMLMediaElement} mediaElement
    * @param {shaka.extern.Manifest} manifest
    * @param {shaka.extern.StreamingConfiguration} config
@@ -144,10 +144,10 @@ export class MediaSourcePlayhead {
    *     Called when an event is raised to be sent to the application.
    */
   constructor(mediaElement, manifest, config, startTime, onSeek, onEvent) {
-    /**
+    /* *
      * The seek range must be at least this number of seconds long. If it is
      * smaller than this, change it to be this big so we don't repeatedly seek
-     * to keep within a zero-width window.
+     * to keep within a zero-width
      *
      * This is 3s long, to account for the weaker hardware on platforms like
      * Chromecast.
@@ -156,25 +156,25 @@ export class MediaSourcePlayhead {
      */
     this.minSeekRange_ = 3.0
 
-    /** @private {HTMLMediaElement} */
+    /* * @private {HTMLMediaElement} */
     this.mediaElement_ = mediaElement
 
-    /** @private {PresentationTimeline} */
+    /* * @private {PresentationTimeline} */
     this.timeline_ = manifest.presentationTimeline
 
-    /** @private {number} */
+    /* * @private {number} */
     this.minBufferTime_ = manifest.minBufferTime || 0
 
-    /** @private {?shaka.extern.StreamingConfiguration} */
+    /* * @private {?shaka.extern.StreamingConfiguration} */
     this.config_ = config
 
-    /** @private {function()} */
+    /* * @private {function()} */
     this.onSeek_ = onSeek
 
-    /** @private {?number} */
+    /* * @private {?number} */
     this.lastCorrectiveSeek_ = null
 
-    /** @private {GapJumpingController} */
+    /* * @private {GapJumpingController} */
     this.gapController_ = new GapJumpingController(
       mediaElement,
       manifest.presentationTimeline,
@@ -182,19 +182,19 @@ export class MediaSourcePlayhead {
       this.createStallDetector_(mediaElement, config),
       onEvent)
 
-    /** @private {VideoWrapper} */
+    /* * @private {VideoWrapper} */
     this.videoWrapper_ = new VideoWrapper(
       mediaElement,
       () => this.onSeeking_(),
       this.getStartTime_(startTime))
 
-    /** @type {Timer} */
+    /* * @type {Timer} */
     this.checkWindowTimer_ = new Timer(() => {
       this.onPollWindow_()
-    }).tickEvery(/* seconds= */ 0.25)
+    }).tickEvery(/*  seconds= */ 0.25)
   }
 
-  /** @override */
+  /* * @override */
   release() {
     if (this.videoWrapper_) {
       this.videoWrapper_.release()
@@ -219,18 +219,18 @@ export class MediaSourcePlayhead {
     this.onSeek_ = () => {}
   }
 
-  /** @override */
+  /* * @override */
   setStartTime(startTime) {
     this.videoWrapper_.setTime(startTime)
   }
 
-  /** @override */
+  /* * @override */
   getTime() {
     const time = this.videoWrapper_.getTime()
 
     // Although we restrict the video's currentTime elsewhere, clamp it here to
     // ensure timing issues don't cause us to return a time outside the segment
-    // availability window.  E.g., the user agent seeks and calls this function
+    // availability   E.g., the user agent seeks and calls this function
     // before we receive the 'seeking' event.
     //
     // We don't buffer when the livestream video is paused and the playhead time
@@ -244,7 +244,7 @@ export class MediaSourcePlayhead {
     return time
   }
 
-  /**
+  /* *
    * Gets the playhead's initial position in seconds.
    *
    * @param {?number} startTime
@@ -272,14 +272,14 @@ export class MediaSourcePlayhead {
     return this.clampSeekToDuration_(this.clampTime_(startTime))
   }
 
-  /** @override */
+  /* * @override */
   notifyOfBufferingChange() {
     this.gapController_.onSegmentAppended()
   }
 
-  /**
+  /* *
    * Called on a recurring timer to keep the playhead from falling outside the
-   * availability window.
+   * availability
    *
    * @private
    */
@@ -310,7 +310,7 @@ export class MediaSourcePlayhead {
     }
   }
 
-  /**
+  /* *
    * Handles when a seek happens on the video.
    *
    * @private
@@ -337,7 +337,7 @@ export class MediaSourcePlayhead {
     this.onSeek_()
   }
 
-  /**
+  /* *
    * Clamp seek times and playback start times so that we never seek to the
    * presentation duration.  Seeking to or starting at duration does not work
    * consistently across browsers.
@@ -357,7 +357,7 @@ export class MediaSourcePlayhead {
     return time
   }
 
-  /**
+  /* *
    * Computes a new playhead position that's within the presentation timeline.
    *
    * @param {number} currentTime
@@ -369,7 +369,7 @@ export class MediaSourcePlayhead {
       this.config_,
       'Cannot reposition playhead when it has beeen destroyed')
 
-    /** @type {function(number)} */
+    /* * @type {function(number)} */
     const isBuffered = (playheadTime) => TimeRangesUtils.isBuffered(
       this.mediaElement_.buffered, playheadTime)
 
@@ -430,7 +430,7 @@ export class MediaSourcePlayhead {
     }
   }
 
-  /**
+  /* *
    * Clamps the given time to the seek range.
    *
    * @param {number} time The time in seconds.
@@ -451,7 +451,7 @@ export class MediaSourcePlayhead {
     return time
   }
 
-  /**
+  /* *
    * Create and configure a stall detector using the player's streaming
    * configuration settings. If the player is configured to have no stall
    * detector, this will return |null|.

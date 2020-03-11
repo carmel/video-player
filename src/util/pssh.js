@@ -3,28 +3,28 @@ import Mp4Parser from './mp4_parser'
 import Uint8ArrayUtils from './uint8array_utils'
 import BufferUtils from './buffer_utils'
 import Functional from './functional'
-/**
+/* *
  * @summary
  * Parse a PSSH box and extract the system IDs.
  */
 export default class Pssh {
-  /**
+  /* *
    * @param {!Uint8Array} psshBox
    */
   constructor(psshBox) {
-    /**
+    /* *
      * In hex.
      * @type {!Array.<string>}
      */
     this.systemIds = []
 
-    /**
+    /* *
      * In hex.
      * @type {!Array.<string>}
      */
     this.cencKeyIds = []
 
-    /**
+    /* *
      * Array with the pssh boxes found.
      * @type {!Array.<!Uint8Array>}
      */
@@ -39,7 +39,7 @@ export default class Pssh {
       console.warning('No pssh box found!')
     }
   }
-  /**
+  /* *
    * @param {!shaka.extern.ParsedBox} box
    * @private
    */
@@ -78,7 +78,7 @@ export default class Pssh {
     }
   }
 
-  /**
+  /* *
    * Creates a pssh blob from the given system ID and data.
    *
    * @param {!Uint8Array} data
@@ -90,9 +90,9 @@ export default class Pssh {
     const dataLength = data.length
     const psshSize = 0x4 + 0x4 + 0x4 + systemId.length + 0x4 + dataLength
 
-    /** @type {!Uint8Array} */
+    /* * @type {!Uint8Array} */
     const psshBox = new Uint8Array(psshSize)
-    /** @type {!DataView} */
+    /* * @type {!DataView} */
     const psshData = BufferUtils.toDataView(psshBox)
 
     let byteCursor = 0
@@ -112,7 +112,7 @@ export default class Pssh {
     console.assert(byteCursor === psshSize, 'PSSH invalid length.')
     return psshBox
   }
-  /**
+  /* *
    * Normalise the initData array. This is to apply browser specific
    * work-arounds, e.g. removing duplicates which appears to occur
    * intermittently when the native msneedkey event fires (i.e. event.initData
@@ -134,7 +134,7 @@ export default class Pssh {
     }
 
     // Dedupe psshData.
-    /** @type {!Array.<!Uint8Array>} */
+    /* * @type {!Array.<!Uint8Array>} */
     const dedupedInitDatas = []
     for (const initData of pssh.data) {
       const found = dedupedInitDatas.some((x) => {

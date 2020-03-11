@@ -1,6 +1,6 @@
 
 export default class Dom {
-  /**
+  /* *
    * Creates an element, and cast the type from Element to HTMLElement.
    *
    * @param {string} tagName
@@ -8,28 +8,28 @@ export default class Dom {
    */
   static createHTMLElement(tagName) {
     const element =
-      /** @type {!HTMLElement} */ (document.createElement(tagName))
+      /* * @type {!HTMLElement} */ (document.createElement(tagName))
     return element
   }
-  /**
+  /* *
    * Cast a Node/Element to an HTMLElement
    *
    * @param {!Node|!Element} original
    * @return {!HTMLElement}
    */
   static asHTMLElement(original) {
-    return /** @type {!HTMLElement}*/ (original)
+    return /* * @type {!HTMLElement}*/ (original)
   }
-  /**
+  /* *
    * Cast a Node/Element to an HTMLMediaElement
    *
    * @param {!Node|!Element} original
    * @return {!HTMLMediaElement}
    */
   static asHTMLMediaElement(original) {
-    return /** @type {!HTMLMediaElement}*/ (original)
+    return /* * @type {!HTMLMediaElement}*/ (original)
   }
-  /**
+  /* *
    * Returns the element with a given class name.
    * Assumes the class name to be unique for a given parent.
    *
@@ -44,7 +44,7 @@ export default class Dom {
 
     return Dom.asHTMLElement(elements[0])
   }
-  /**
+  /* *
    * Remove all of the child nodes of an element.
    * @param {!Element} element
    * @export

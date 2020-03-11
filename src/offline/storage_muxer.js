@@ -1,7 +1,6 @@
 import Error from '../util/error'
-import conf from '../config'
 // import IDestroyable from '../util/i_destroyable'
-/**
+/* *
  * @typedef {{
  *  mechanism: string,
  *  cell: string
@@ -14,7 +13,7 @@ import conf from '../config'
  */
 // StorageCellPath
 
-/**
+/* *
  * @typedef {{
  *   path: StorageCellPath,
  *   cell: !shaka.extern.StorageCell
@@ -26,7 +25,7 @@ import conf from '../config'
  *   The storage cell that the path points to within the storage muxer.
  */
 // StorageCellHandle
-/**
+/* *
  * StorageMuxer is responsible for managing StorageMechanisms and addressing
  * cells. The primary purpose of the muxer is to give the caller the correct
  * cell for the operations they want to perform.
@@ -44,7 +43,7 @@ import conf from '../config'
  */
 export class StorageMuxer {
   constructor() {
-    /**
+    /* *
      * A key in this map is the name given when registering a StorageMechanism.
      *
      * @private {!Map.<string, !shaka.extern.StorageMechanism>}
@@ -52,14 +51,14 @@ export class StorageMuxer {
     this.mechanisms_ = new Map()
   }
 
-  /**
+  /* *
    * Free all resources used by the muxer, mechanisms, and cells. This should
    * not affect the stored content.
    *
    * @override
    */
   destroy() {
-    /** @type {!Array.<!Promise>} */
+    /* * @type {!Array.<!Promise>} */
     const destroys = []
     for (const mechanism of this.mechanisms_.values()) {
       destroys.push(mechanism.destroy())
@@ -71,7 +70,7 @@ export class StorageMuxer {
     return Promise.all(destroys)
   }
 
-  /**
+  /* *
    * Initialize the storage muxer. This must be called before any other calls.
    * This will initialize the muxer to use all mechanisms that have been
    * registered with |StorageMuxer.register|.
@@ -91,7 +90,7 @@ export class StorageMuxer {
       }
     })
 
-    /** @type {!Array.<!Promise>} */
+    /* * @type {!Array.<!Promise>} */
     const initPromises = []
     for (const mechanism of this.mechanisms_.values()) {
       initPromises.push(mechanism.init())
@@ -100,14 +99,14 @@ export class StorageMuxer {
     return Promise.all(initPromises)
   }
 
-  /**
+  /* *
    * Get a promise that will resolve with a storage cell that supports
    * add-operations. If no cell can be found, the promise will be rejected.
    *
    * @return {StorageCellHandle}
    */
   getActive() {
-    /** @type {?StorageCellHandle} */
+    /* * @type {?StorageCellHandle} */
     let handle = null
 
     this.mechanisms_.forEach((mechanism, mechanismName) => {
@@ -131,7 +130,7 @@ export class StorageMuxer {
     })
 
     if (handle) {
-      return /** @type {StorageCellHandle} */(handle)
+      return /* * @type {StorageCellHandle} */(handle)
     }
 
     throw new Error(
@@ -141,7 +140,7 @@ export class StorageMuxer {
       'Could not find a cell that supports add-operations')
   }
 
-  /**
+  /* *
    * @param {function(!StorageCellPath,
    *                  !shaka.extern.StorageCell)} callback
    */
@@ -158,7 +157,7 @@ export class StorageMuxer {
     })
   }
 
-  /**
+  /* *
    * Get a specific storage cell. The promise will resolve with the storage
    * cell if it is found. If the storage cell is not found, the promise will
    * be rejected.
@@ -189,7 +188,7 @@ export class StorageMuxer {
     return cell
   }
 
-  /**
+  /* *
    * @param {function(!shaka.extern.EmeSessionStorageCell)} callback
    */
   forEachEmeSessionCell(callback) {
@@ -198,7 +197,7 @@ export class StorageMuxer {
     })
   }
 
-  /**
+  /* *
    * Gets an arbitrary EME session cell that can be used for storing new session
    * info.
    *
@@ -217,7 +216,7 @@ export class StorageMuxer {
     return this.mechanisms_.get(mechanisms[0]).getEmeSessionCell()
   }
 
-  /**
+  /* *
    * Find the cell that the path points to. A path is made up of a mount point
    * and a cell id. If a cell can be found, the cell will be returned. If no
    * cell is found, null will be returned.
@@ -235,7 +234,7 @@ export class StorageMuxer {
     return mechanism.getCells().get(path.cell)
   }
 
-  /**
+  /* *
    * This will erase all previous content from storage. Using paths obtained
    * before calling |erase| is discouraged, as cells may have changed during a
    * erase.
@@ -244,7 +243,7 @@ export class StorageMuxer {
    */
   async erase() {
     // If we have initialized, we will use the existing mechanism instances.
-    /** @type {!Array.<!shaka.extern.StorageMechanism>} */
+    /* * @type {!Array.<!shaka.extern.StorageMechanism>} */
     const mechanisms = Array.from(this.mechanisms_.values())
     const alreadyInitialized = mechanisms.length > 0
 
@@ -270,7 +269,7 @@ export class StorageMuxer {
     }
   }
 
-  /**
+  /* *
    * Register a storage mechanism for use with the default storage muxer. This
    * will have no effect on any storage muxer already in main memory.
    *
@@ -281,7 +280,7 @@ export class StorageMuxer {
   static register(name, factory) {
     StorageMuxer.registry_.set(name, factory)
   }
-  /**
+  /* *
    * Unregister a storage mechanism for use with the default storage muxer. This
    * will have no effect on any storage muxer already in main memory.
    *
@@ -293,7 +292,7 @@ export class StorageMuxer {
     StorageMuxer.registry_.delete(name)
   }
 
-  /**
+  /* *
    * Check if there is support for storage on this platform. It is assumed that
    * if there are any mechanisms registered, it means that storage is supported
    * on this platform. We do not check if the mechanisms have any cells.
@@ -316,7 +315,7 @@ export class StorageMuxer {
     return false
   }
 
-  /**
+  /* *
    * Replace the mechanism map used by the muxer. This should only be used
    * in testing.
    *
@@ -326,14 +325,14 @@ export class StorageMuxer {
     StorageMuxer.override_ = map
   }
 
-  /**
+  /* *
    * Undo a previous call to |overrideSupport|.
    */
   static clearOverride() {
     StorageMuxer.override_ = null
   }
 
-  /**
+  /* *
    * Get the registry. If the support has been disabled, this will always
    * an empty registry. Reading should always be done via |getRegistry_|.
    *
@@ -343,19 +342,14 @@ export class StorageMuxer {
   static getRegistry_() {
     const override = StorageMuxer.override_
     const registry = StorageMuxer.registry_
-
-    if (conf.COMPILED) {
-      return registry
-    } else {
-      return override || registry
-    }
+    return registry || override
   }
 }
-/**
+/* *
  * @private {Map.<string, function():shaka.extern.StorageMechanism>}
  */
 StorageMuxer.override_ = null
-/**
+/* *
  * @private {!Map.<string, function():shaka.extern.StorageMechanism>}
  */
 StorageMuxer.registry_ = new Map()

@@ -4,13 +4,13 @@ import Error from '../util/error'
 import StringUtils from '../util/string_utils'
 import Uint8ArrayUtils from '../util/uint8array_utils'
 
-/**
+/* *
  * @summary A networking plugin to handle data URIs.
  * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs
  * @export
  */
 export default class DataUriPlugin {
-  /**
+  /* *
    * @param {string} uri
    * @param {shaka.extern.Request} request
    * @param {NetworkingEngine.RequestType} requestType
@@ -23,7 +23,7 @@ export default class DataUriPlugin {
     try {
       const parsed = DataUriPlugin.parseRaw(uri)
 
-      /** @type {shaka.extern.Response} */
+      /* * @type {shaka.extern.Response} */
       const response = {
         uri: uri,
         originalUri: uri,
@@ -39,7 +39,7 @@ export default class DataUriPlugin {
     }
   }
 
-  /**
+  /* *
    * @param {string} uri
    * @return {{data: BufferSource, contentType: string}}
    */
@@ -67,7 +67,7 @@ export default class DataUriPlugin {
         uri)
     }
     const info = infoAndData[0]
-    const dataStr = window.decodeURIComponent(infoAndData.slice(1).join(','))
+    const dataStr = decodeURIComponent(infoAndData.slice(1).join(','))
 
     // Extract the encoding (optional).
     const typeAndEncoding = info.split(';')
@@ -77,7 +77,7 @@ export default class DataUriPlugin {
     }
 
     // Convert the data.
-    /** @type {BufferSource} */
+    /* * @type {BufferSource} */
     let data
     if (encoding === 'base64') {
       data = Uint8ArrayUtils.fromBase64(dataStr)

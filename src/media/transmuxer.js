@@ -5,7 +5,7 @@ import ManifestParserUtils from '../util/manifest_parser_utils'
 import PublicPromise from '../util/public_promise'
 import Uint8ArrayUtils from '../util/uint8array_utils'
 import * as muxjs from './mux'
-/**
+/* *
  * Transmuxer provides all operations for transmuxing from Transport
  * Stream to MP4.
  *
@@ -13,21 +13,21 @@ import * as muxjs from './mux'
  */
 export default class Transmuxer {
   constructor() {
-    /** @private {muxjs.Transmuxer} */
+    /* * @private {muxjs.Transmuxer} */
     this.muxTransmuxer_ = new muxjs.Transmuxer({
       'keepOriginalTimestamps': true
     })
 
-    /** @private {PublicPromise} */
+    /* * @private {PublicPromise} */
     this.transmuxPromise_ = null
 
-    /** @private {!Array.<!Uint8Array>} */
+    /* * @private {!Array.<!Uint8Array>} */
     this.transmuxedData_ = []
 
-    /** @private {!Array.<muxjs.ClosedCaption>} */
+    /* * @private {!Array.<muxjs.ClosedCaption>} */
     this.captions_ = []
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.isTransmuxing_ = false
 
     this.muxTransmuxer_.on('data', (segment) => this.onTransmuxed_(segment))
@@ -35,7 +35,7 @@ export default class Transmuxer {
     this.muxTransmuxer_.on('done', () => this.onTransmuxDone_())
   }
 
-  /**
+  /* *
    * @override
    */
   destroy() {
@@ -44,14 +44,14 @@ export default class Transmuxer {
     return Promise.resolve()
   }
 
-  /**
+  /* *
    * Check if the content type is Transport Stream, and if muxjs is loaded.
    * @param {string} mimeType
    * @param {string=} contentType
    * @return {boolean}
    */
   static isSupported(mimeType, contentType) {
-    if (!window.muxjs || !Transmuxer.isTsContainer(mimeType)) {
+    if (!muxjs || !Transmuxer.isTsContainer(mimeType)) {
       return false
     }
     const convertTsCodecs = Transmuxer.convertTsCodecs
@@ -65,7 +65,7 @@ export default class Transmuxer {
         MediaSource.isTypeSupported(
           convertTsCodecs(ContentType.VIDEO, mimeType))
   }
-  /**
+  /* *
    * Check if the mimetype contains 'mp2t'.
    * @param {string} mimeType
    * @return {boolean}
@@ -73,7 +73,7 @@ export default class Transmuxer {
   static isTsContainer(mimeType) {
     return mimeType.toLowerCase().split(';')[0].split('/')[1] === 'mp2t'
   }
-  /**
+  /* *
    * For transport stream, convert its codecs to MP4 codecs.
    * @param {string} contentType
    * @param {string} tsMimeType
@@ -119,7 +119,7 @@ export default class Transmuxer {
 
     return mp4MimeType
   }
-  /**
+  /* *
    * Transmux from Transport stream to MP4, using the mux.js library.
    * @param {BufferSource} data
    * @return {!Promise.<{data: !Uint8Array,
@@ -150,7 +150,7 @@ export default class Transmuxer {
     }
     return this.transmuxPromise_
   }
-  /**
+  /* *
    * Handles the 'data' event of the transmuxer.
    * Extracts the cues from the transmuxed segment, and adds them to an array.
    * Stores the transmuxed data in another array, to pass it back to
@@ -164,7 +164,7 @@ export default class Transmuxer {
     this.transmuxedData_.push(
       Uint8ArrayUtils.concat(segment.initSegment, segment.data))
   }
-  /**
+  /* *
    * Handles the 'done' event of the transmuxer.
    * Resolves the transmux Promise, and returns the transmuxed data.
    * @private

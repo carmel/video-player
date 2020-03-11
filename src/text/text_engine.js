@@ -4,38 +4,38 @@ import Functional from '../util/functional'
 // import IDestroyable from '../util/i_destroyable'
 import MimeUtils from '../util/mime_utils'
 
-/**
+/* *
  * @summary Manages text parsers and cues.
  * @implements {IDestroyable}
  */
 export default class TextEngine {
-  /** @param {shaka.extern.TextDisplayer} displayer */
+  /* * @param {shaka.extern.TextDisplayer} displayer */
   constructor(displayer) {
-    /** @private {shaka.extern.TextParser} */
+    /* * @private {shaka.extern.TextParser} */
     this.parser_ = null
 
-    /** @private {shaka.extern.TextDisplayer} */
+    /* * @private {shaka.extern.TextDisplayer} */
     this.displayer_ = displayer
 
-    /** @private {number} */
+    /* * @private {number} */
     this.timestampOffset_ = 0
 
-    /** @private {number} */
+    /* * @private {number} */
     this.appendWindowStart_ = 0
 
-    /** @private {number} */
+    /* * @private {number} */
     this.appendWindowEnd_ = Infinity
 
-    /** @private {?number} */
+    /* * @private {?number} */
     this.bufferStart_ = null
 
-    /** @private {?number} */
+    /* * @private {?number} */
     this.bufferEnd_ = null
 
-    /** @private {string} */
+    /* * @private {string} */
     this.selectedClosedCaptionId_ = ''
 
-    /**
+    /* *
      * The closed captions map stores the CEA closed captions by closed captions
      * id and start and end time.
      * It's used as the buffer of closed caption text streams, to show captions
@@ -48,7 +48,7 @@ export default class TextEngine {
     this.closedCaptionsMap_ = new Map()
   }
 
-  /**
+  /* *
    * @param {string} mimeType
    * @param {!shaka.extern.TextParserPlugin} plugin
    * @export
@@ -57,7 +57,7 @@ export default class TextEngine {
     TextEngine.parserMap_[mimeType] = plugin
   }
 
-  /**
+  /* *
    * @param {string} mimeType
    * @export
    */
@@ -65,7 +65,7 @@ export default class TextEngine {
     delete TextEngine.parserMap_[mimeType]
   }
 
-  /**
+  /* *
    * @param {string} mimeType
    * @return {boolean}
    */
@@ -74,15 +74,14 @@ export default class TextEngine {
       // An actual parser is available.
       return true
     }
-    if (window.muxjs &&
-        mimeType === MimeUtils.CLOSED_CAPTION_MIMETYPE) {
+    if (window.muxjs && mimeType === MimeUtils.CLOSED_CAPTION_MIMETYPE) {
       // Will be handled by mux.js.
       return true
     }
     return false
   }
 
-  /** @override */
+  /* * @override */
   destroy() {
     this.parser_ = null
     this.displayer_ = null
@@ -91,14 +90,14 @@ export default class TextEngine {
     return Promise.resolve()
   }
 
-  /**
+  /* *
    * @param {!shaka.extern.TextDisplayer} displayer
    */
   setDisplayer(displayer) {
     this.displayer_ = displayer
   }
 
-  /**
+  /* *
    * Initialize the parser.  This can be called multiple times, but must be
    * called at least once before appendBuffer.
    *
@@ -117,7 +116,7 @@ export default class TextEngine {
     this.parser_ = Functional.callFactory(factory)
   }
 
-  /**
+  /* *
    * @param {BufferSource} buffer
    * @param {?number} startTime relative to the start of the presentation
    * @param {?number} endTime relative to the start of the presentation
@@ -140,7 +139,7 @@ export default class TextEngine {
       return
     }
 
-    /** @type {shaka.extern.TextParser.TimeContext} **/
+    /* * @type {shaka.extern.TextParser.TimeContext} **/
     const time = {
       periodStart: this.timestampOffset_,
       segmentStart: startTime,
@@ -177,7 +176,7 @@ export default class TextEngine {
     this.bufferEnd_ = Math.min(endTime, this.appendWindowEnd_)
   }
 
-  /**
+  /* *
    * @param {number} startTime relative to the start of the presentation
    * @param {number} endTime relative to the start of the presentation
    * @return {!Promise}
@@ -219,12 +218,12 @@ export default class TextEngine {
     }
   }
 
-  /** @param {number} timestampOffset */
+  /* * @param {number} timestampOffset */
   setTimestampOffset(timestampOffset) {
     this.timestampOffset_ = timestampOffset
   }
 
-  /**
+  /* *
    * @param {number} appendWindowStart
    * @param {number} appendWindowEnd
    */
@@ -233,7 +232,7 @@ export default class TextEngine {
     this.appendWindowEnd_ = appendWindowEnd
   }
 
-  /**
+  /* *
    * @return {?number} Time in seconds of the beginning of the buffered range,
    *   or null if nothing is buffered.
    */
@@ -241,7 +240,7 @@ export default class TextEngine {
     return this.bufferStart_
   }
 
-  /**
+  /* *
    * @return {?number} Time in seconds of the end of the buffered range,
    *   or null if nothing is buffered.
    */
@@ -249,7 +248,7 @@ export default class TextEngine {
     return this.bufferEnd_
   }
 
-  /**
+  /* *
    * @param {number} t A timestamp
    * @return {boolean}
    */
@@ -260,7 +259,7 @@ export default class TextEngine {
     return t >= this.bufferStart_ && t < this.bufferEnd_
   }
 
-  /**
+  /* *
    * @param {number} t A timestamp
    * @return {number} Number of seconds ahead of 't' we have buffered
    */
@@ -276,7 +275,7 @@ export default class TextEngine {
     return this.bufferEnd_ - Math.max(t, this.bufferStart_)
   }
 
-  /**
+  /* *
    * Set the selected closed captions id.
    * Append the cues stored in the closed captions map until buffer end time.
    * This is to fill the gap between buffered and unbuffered captions, and to
@@ -292,7 +291,7 @@ export default class TextEngine {
     const captionsMap = this.closedCaptionsMap_.get(id)
     if (captionsMap) {
       for (const startAndEndTime of captionsMap.keys()) {
-        /** @type {Array.<!Cue>} */
+        /* * @type {Array.<!Cue>} */
         const cues = captionsMap.get(startAndEndTime)
           .filter((c) => c.endTime <= bufferEndTime)
         if (cues) {
@@ -302,7 +301,7 @@ export default class TextEngine {
     }
   }
 
-  /**
+  /* *
    * Store the closed captions in the text engine, and append the cues to the
    * text displayer.  This is a side-channel used for embedded text only.
    *
@@ -337,7 +336,7 @@ export default class TextEngine {
       if (!keepThisCue) {
         continue
       }
-      /** @type {!Cue} */
+      /* * @type {!Cue} */
       const cue = new Cue(
         caption.startTime, caption.endTime, caption.text)
       captionsMap.get(id).get(startAndEndTime).push(cue)
@@ -367,7 +366,7 @@ export default class TextEngine {
       this.bufferEnd_, Math.min(endTime, this.appendWindowEnd_))
   }
 
-  /**
+  /* *
    * Get the number of closed caption channels.
    *
    * This function is for TESTING ONLY. DO NOT USE in the library.
@@ -378,7 +377,7 @@ export default class TextEngine {
     return this.closedCaptionsMap_.size
   }
 
-  /**
+  /* *
    * Get the number of closed caption cues for a given channel. If there is
    * no channel for the given channel id, this will return 0.
    *
@@ -393,5 +392,5 @@ export default class TextEngine {
   }
 }
 
-/** @private {!Object.<string, !shaka.extern.TextParserPlugin>} */
+/* * @private {!Object.<string, !shaka.extern.TextParserPlugin>} */
 TextEngine.parserMap_ = {}

@@ -2,7 +2,7 @@ import Destroyer from '../util/destroyer'
 import PublicPromise from '../util/public_promise'
 // import IDestroyable from '../util/i_destroyable'
 
-/**
+/* *
  * The walker moves through a graph node-by-node executing asynchronous work
  * as it enters each node.
  *
@@ -39,7 +39,7 @@ import PublicPromise from '../util/public_promise'
  * @final
  */
 export class Walker {
-  /**
+  /* *
    * Create a new walker that starts at |startingAt| and with |startingWith|.
    * The instance of |startingWith| will be the one that the walker holds and
    * uses for its life. No one else should reference it.
@@ -52,16 +52,16 @@ export class Walker {
    * @param {Walker.Implementation} implementation
    */
   constructor(startingAt, startingWith, implementation) {
-    /** @private {?Walker.Implementation} */
+    /* * @private {?Walker.Implementation} */
     this.implementation_ = implementation
 
-    /** @private {Node} */
+    /* * @private {Node} */
     this.currentlyAt_ = startingAt
 
-    /** @private {Payload} */
+    /* * @private {Payload} */
     this.currentlyWith_ = startingWith
 
-    /**
+    /* *
      * When we run out of work to do, we will set this promise so that when
      * new work is added (and this is not null) it can be resolved. The only
      * time when this should be non-null is when we are waiting for more work.
@@ -70,16 +70,16 @@ export class Walker {
      */
     this.waitForWork_ = null
 
-    /** @private {!Array.<Walker.Request_>} */
+    /* * @private {!Array.<Walker.Request_>} */
     this.requests_ = []
 
-    /** @private {?Walker.ActiveRoute_} */
+    /* * @private {?Walker.ActiveRoute_} */
     this.currentRoute_ = null
 
-    /** @private {AbortableOperation} */
+    /* * @private {AbortableOperation} */
     this.currentStep_ = null
 
-    /**
+    /* *
      * Hold a reference to the main loop's promise so that we know when it has
      * exited. This will determine when |destroy| can resolve. Purposely make
      * the main loop start next interpreter cycle so that the constructor will
@@ -89,16 +89,16 @@ export class Walker {
      */
     this.mainLoopPromise_ = Promise.resolve().then(() => this.mainLoop_())
 
-    /** @private {!Destroyer} */
+    /* * @private {!Destroyer} */
     this.destroyer_ = new Destroyer(() => this.doDestroy_())
   }
 
-  /** @override */
+  /* * @override */
   destroy() {
     return this.destroyer_.destroy()
   }
 
-  /** @private */
+  /* * @private */
   async doDestroy_() {
     // If we are executing a current step, we want to interrupt it so that we
     // can force the main loop to terminate.
@@ -130,7 +130,7 @@ export class Walker {
     this.implementation_ = null
   }
 
-  /**
+  /* *
    * Ask the walker to start a new route. When the walker is ready to start a
    * new route, it will call |create| and |create| will provide the walker with
    * a new route to execute.
@@ -177,7 +177,7 @@ export class Walker {
     return listeners
   }
 
-  /**
+  /* *
    * @return {!Promise}
    * @private
    */
@@ -188,7 +188,7 @@ export class Walker {
     }
   }
 
-  /**
+  /* *
    * Do one thing to move the walker closer to its destination. This can be:
    *   1. Starting a new route.
    *   2. Taking one more step/finishing a route.
@@ -220,7 +220,7 @@ export class Walker {
     return this.waitForWork_
   }
 
-  /**
+  /* *
    * Check if the walker can start a new route. There are a couple ways this can
    * happen:
    *  1. We have a new request but no current route
@@ -279,7 +279,7 @@ export class Walker {
 
     return true
   }
-  /**
+  /* *
    * Move forward one step on our current route. This assumes that we have a
    * current route. A couple things can happen when moving forward:
    *  1. An error - if an error occurs, it will signal an error occurred,
@@ -315,9 +315,9 @@ export class Walker {
       // TODO: This is probably a false-positive.  See eslint/eslint#11687.
       // eslint-disable-next-line require-atomic-updates
       this.currentStep_ = this.implementation_.enterNode(
-        /* node= */ this.currentlyAt_,
-        /* has= */ this.currentlyWith_,
-        /* wants= */ this.currentRoute_.payload)
+        /*  node= */ this.currentlyAt_,
+        /*  has= */ this.currentlyWith_,
+        /*  wants= */ this.currentRoute_.payload)
 
       await this.currentStep_.promise
       this.currentStep_ = null
@@ -354,7 +354,7 @@ export class Walker {
     }
   }
 
-  /**
+  /* *
    * If the main loop is blocked waiting for new work, then resolve the promise
    * so that the next iteration of the main loop can execute.
    *
@@ -368,7 +368,7 @@ export class Walker {
   }
 }
 
-/**
+/* *
  * @typedef {{
  *   getNext: function(
  *       Node,
@@ -425,7 +425,7 @@ export class Walker {
  */
 Walker.Implementation
 
-/**
+/* *
  * @typedef {{
  *   onStart: function(),
  *   onEnd: function(),
@@ -472,7 +472,7 @@ Walker.Implementation
  */
 Walker.Listeners
 
-/**
+/* *
  * @typedef {{
  *   node: Node,
  *   payload: Payload,
@@ -501,7 +501,7 @@ Walker.Listeners
  */
 Walker.Route
 
-/**
+/* *
  * @typedef {{
  *   node: Node,
  *   payload: Payload,
@@ -538,7 +538,7 @@ Walker.Route
  */
 Walker.ActiveRoute_
 
-/**
+/* *
  * @typedef {{
  *   create: function(Payload):?Walker.Route,
  *   listeners: Walker.Listeners

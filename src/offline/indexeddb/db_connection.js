@@ -1,23 +1,23 @@
 import DBOperation from './db_operation'
 import ArrayUtils from '../../util/array_utils'
 
-/**
+/* *
  * DBConnection is used to manage an IndexedDB connection. It can create new
  * operations. If the connection is killed (via |destroy|) all pending
  * operations will be cancelled.
  */
 export default class DBConnection {
-  /**
+  /* *
    * @param {IDBDatabase} connection A connection to an IndexedDB instance.
    */
   constructor(connection) {
-    /** @private {IDBDatabase} */
+    /* * @private {IDBDatabase} */
     this.connection_ = connection
-    /** @private {!Array.<DBOperation>} */
+    /* * @private {!Array.<DBOperation>} */
     this.pending_ = []
   }
 
-  /**
+  /* *
    * @return {!Promise}
    */
   destroy() {
@@ -26,7 +26,7 @@ export default class DBConnection {
     }))
   }
 
-  /**
+  /* *
    * @param {string} store The name of the store that the operation should
    *                       occur on.
    * @return {!DBOperation}
@@ -35,7 +35,7 @@ export default class DBConnection {
     return this.startOperation_(store, 'readonly')
   }
 
-  /**
+  /* *
    * @param {string} store The name of the store that the operation should
    *                       occur on.
    * @return {!DBOperation}
@@ -44,7 +44,7 @@ export default class DBConnection {
     return this.startOperation_(store, 'readwrite')
   }
 
-  /**
+  /* *
    * @param {string} store The name of the store that the operation should
    *                       occur on.
    * @param {string} type The type of operation being performed on the store.
@@ -69,7 +69,7 @@ export default class DBConnection {
     return operation
   }
 
-  /**
+  /* *
    * @param {!DBOperation} operation
    * @private
    */

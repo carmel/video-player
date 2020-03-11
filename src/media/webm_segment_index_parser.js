@@ -3,7 +3,7 @@ import { EbmlParser } from '../util/ebml_parser'
 import Error from '../util/error'
 
 export default class WebmSegmentIndexParser {
-  /**
+  /* *
    * Parses SegmentReferences from a WebM container.
    * @param {BufferSource} cuesData The WebM container's 'Cueing Data' section.
    * @param {BufferSource} initData The WebM container's headers.
@@ -37,7 +37,7 @@ export default class WebmSegmentIndexParser {
       uris, initSegmentReference, timestampOffset, appendWindowStart,
       appendWindowEnd)
   }
-  /**
+  /* *
    * Parses a WebM container to get the segment's offset, timecode scale, and
    * duration.
    *
@@ -82,7 +82,7 @@ export default class WebmSegmentIndexParser {
       duration: segmentInfo.duration
     }
   }
-  /**
+  /* *
    * Parses a WebM Info element to get the segment's timecode scale and
    * duration.
    * @param {!EbmlElement} segmentElement
@@ -116,7 +116,7 @@ export default class WebmSegmentIndexParser {
 
     return WebmSegmentIndexParser.parseInfo_(infoElement)
   }
-  /**
+  /* *
    * Parses a WebM Info element to get the segment's timecode scale and
    * duration.
    * @param {!EbmlElement} infoElement
@@ -131,7 +131,7 @@ export default class WebmSegmentIndexParser {
     // the units used to express all other time values in the WebM container.
     // By default it's assumed that [T] === [milliseconds].
     let timecodeScaleNanoseconds = 1000000
-    /** @type {?number} */
+    /* * @type {?number} */
     let durationScale = null
 
     while (parser.hasMoreData()) {
@@ -156,7 +156,7 @@ export default class WebmSegmentIndexParser {
 
     return { timecodeScale: timecodeScale, duration: durationSeconds }
   }
-  /**
+  /* *
    * Parses a WebM CuesElement.
    * @param {!EbmlElement} cuesElement
    * @param {number} segmentOffset
@@ -205,7 +205,7 @@ export default class WebmSegmentIndexParser {
             lastTime + timestampOffset,
             currentTime + timestampOffset,
             getUris,
-            /* startByte= */ lastOffset, /* endByte= */ currentOffset - 1,
+            /*  startByte= */ lastOffset, /*  endByte= */ currentOffset - 1,
             initSegmentReference,
             timestampOffset,
             appendWindowStart,
@@ -225,7 +225,7 @@ export default class WebmSegmentIndexParser {
           lastTime + timestampOffset,
           duration + timestampOffset,
           getUris,
-          /* startByte= */ lastOffset, /* endByte= */ null,
+          /*  startByte= */ lastOffset, /*  endByte= */ null,
           initSegmentReference,
           timestampOffset,
           appendWindowStart,
@@ -234,7 +234,7 @@ export default class WebmSegmentIndexParser {
 
     return references
   }
-  /**
+  /* *
    * Parses a WebM CuePointElement to get an 'unadjusted' segment reference.
    * @param {EbmlElement} cuePointElement
    * @return {{unscaledTime: number, relativeOffset: number}} The referenced
@@ -284,23 +284,23 @@ export default class WebmSegmentIndexParser {
     return { unscaledTime: unscaledTime, relativeOffset: relativeOffset }
   }
 }
-/** @const {number} */
+/* * @const {number} */
 WebmSegmentIndexParser.EBML_ID = 0x1a45dfa3
-/** @const {number} */
+/* * @const {number} */
 WebmSegmentIndexParser.SEGMENT_ID = 0x18538067
-/** @const {number} */
+/* * @const {number} */
 WebmSegmentIndexParser.INFO_ID = 0x1549a966
-/** @const {number} */
+/* * @const {number} */
 WebmSegmentIndexParser.TIMECODE_SCALE_ID = 0x2ad7b1
-/** @const {number} */
+/* * @const {number} */
 WebmSegmentIndexParser.DURATION_ID = 0x4489
-/** @const {number} */
+/* * @const {number} */
 WebmSegmentIndexParser.CUES_ID = 0x1c53bb6b
-/** @const {number} */
+/* * @const {number} */
 WebmSegmentIndexParser.CUE_POINT_ID = 0xbb
-/** @const {number} */
+/* * @const {number} */
 WebmSegmentIndexParser.CUE_TIME_ID = 0xb3
-/** @const {number} */
+/* * @const {number} */
 WebmSegmentIndexParser.CUE_TRACK_POSITIONS_ID = 0xb7
-/** @const {number} */
+/* * @const {number} */
 WebmSegmentIndexParser.CUE_CLUSTER_POSITION = 0xf1

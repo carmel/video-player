@@ -1,4 +1,4 @@
-/**
+/* *
  * @summary
  * A utility to create Promises with convenient public resolve and reject
  * methods.
@@ -7,7 +7,7 @@
  * @template T
  */
 export default class PublicPromise {
-  /**
+  /* *
    * @return {Promise.<T>}
    */
   constructor() {
@@ -30,14 +30,14 @@ export default class PublicPromise {
 
     // Now cast the Promise object to our subclass PublicPromise so that the
     // compiler will permit us to attach resolve() and reject() to it.
-    const publicPromise = /** @type {PublicPromise} */(promise)
+    const publicPromise = /* * @type {PublicPromise} */(promise)
     publicPromise.resolve = resolvePromise
     publicPromise.reject = rejectPromise
 
     return publicPromise
   }
-  /** @param {T=} value */
+  /* * @param {T=} value */
   resolve(value) {}
-  /** @param {*=} reason */
+  /* * @param {*=} reason */
   reject(reason) {}
 }

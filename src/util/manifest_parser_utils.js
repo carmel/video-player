@@ -1,11 +1,11 @@
 import Uri from './uri'
 import Functional from './functional'
 
-/**
+/* *
  * @summary Utility functions for manifest parsing.
  */
 export default class ManifestParserUtils {
-  /**
+  /* *
    * Resolves an array of relative URIs to the given base URIs. This will result
    * in M*N number of URIs.
    *
@@ -26,7 +26,7 @@ export default class ManifestParserUtils {
       .reduce(Functional.collapseArrays, [])
       .map((uri) => uri.toString())
   }
-  /**
+  /* *
    * Creates a DrmInfo object from the given info.
    *
    * @param {string} keySystem
@@ -47,7 +47,7 @@ export default class ManifestParserUtils {
     }
   }
 }
-/**
+/* *
  * @enum {string}
  */
 ManifestParserUtils.ContentType = {
@@ -57,14 +57,14 @@ ManifestParserUtils.ContentType = {
   IMAGE: 'image',
   APPLICATION: 'application'
 }
-/**
+/* *
  * @enum {string}
  */
 ManifestParserUtils.TextStreamKind = {
   SUBTITLE: 'subtitle',
   CLOSED_CAPTION: 'caption'
 }
-/**
+/* *
  * Specifies how tolerant the player is of inaccurate segment start times and
  * end times within a manifest. For example, gaps or overlaps between segments
  * in a SegmentTimeline which are greater than or equal to this value will

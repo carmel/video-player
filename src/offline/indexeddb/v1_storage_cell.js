@@ -3,27 +3,27 @@ import Error from '../util.Error'
 import ManifestParserUtils from '../../util/manifest_parser_utils'
 import PublicPromise from '../../util/public_promise'
 
-/**
+/* *
  * The V1StorageCell is for all stores that follow the shaka.externs V1 offline
  * types, introduced in Shaka Player v2.0 and deprecated in v2.3.
  *
  * @implements {shaka.extern.StorageCell}
  */
 export default class V1StorageCell extends BaseStorageCell {
-  /** @override */
+  /* * @override */
   async updateManifestExpiration(key, newExpiration) {
     const op = this.connection_.startReadWriteOperation(this.manifestStore_)
 
-    /** @type {IDBObjectStore} */
+    /* * @type {IDBObjectStore} */
     const store = op.store()
 
-    /** @type {!PublicPromise} */
+    /* * @type {!PublicPromise} */
     const p = new PublicPromise()
 
     store.get(key).onsuccess = (event) => {
       // Make sure a defined value was found. Indexeddb treats 'no value found'
       // as a success with an undefined result.
-      const manifest = /** @type {shaka.extern.ManifestDBV1} */(
+      const manifest = /* * @type {shaka.extern.ManifestDBV1} */(
         event.target.result)
 
       // Indexeddb does not fail when you get a value that is not in the
@@ -53,7 +53,7 @@ export default class V1StorageCell extends BaseStorageCell {
     await Promise.all([op.promise(), p])
   }
 
-  /**
+  /* *
    * @override
    * @param {shaka.extern.ManifestDBV1} old
    * @return {shaka.extern.ManifestDB}
@@ -73,7 +73,7 @@ export default class V1StorageCell extends BaseStorageCell {
     }
   }
 
-  /**
+  /* *
    * @param {shaka.extern.PeriodDBV1} old
    * @return {shaka.extern.PeriodDB}
    * @private
@@ -97,7 +97,7 @@ export default class V1StorageCell extends BaseStorageCell {
     }
   }
 
-  /**
+  /* *
    * @param {shaka.extern.StreamDBV1} old
    * @return {shaka.extern.StreamDB}
    * @private
@@ -131,7 +131,7 @@ export default class V1StorageCell extends BaseStorageCell {
     }
   }
 
-  /**
+  /* *
    * @param {shaka.extern.SegmentDBV1} old
    * @return {shaka.extern.SegmentDB}
    * @private
@@ -150,7 +150,7 @@ export default class V1StorageCell extends BaseStorageCell {
     }
   }
 
-  /**
+  /* *
    * @override
    * @param {shaka.extern.SegmentDataDBV1} old
    * @return {shaka.extern.SegmentDataDB}
@@ -159,7 +159,7 @@ export default class V1StorageCell extends BaseStorageCell {
     return { data: old.data }
   }
 
-  /**
+  /* *
    * @param {string} uri
    * @return {number}
    * @private
@@ -190,7 +190,7 @@ export default class V1StorageCell extends BaseStorageCell {
       'Could not parse uri ' + uri)
   }
 
-  /**
+  /* *
    * Take a period and check if the streams need to have variants generated.
    * Before Shaka Player moved to its variants model, there were no variants.
    * This will fill missing variants into the given object.

@@ -1,11 +1,11 @@
-/** @license
+/* * @license
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Ewma from 'ewma'
+import Ewma from './ewma'
 
-/**
+/* *
  * @summary
  * This class tracks bandwidth samples and estimates available bandwidth.
  * Based on the minimum of two exponentially-weighted moving averages with
@@ -14,26 +14,26 @@ import Ewma from 'ewma'
  */
 export default class EwmaBandwidthEstimator {
   constructor() {
-    /**
+    /* *
      * A fast-moving average.
      * Half of the estimate is based on the last 2 seconds of sample history.
      * @private {!Ewma}
      */
     this.fast_ = new Ewma(2)
 
-    /**
+    /* *
      * A slow-moving average.
      * Half of the estimate is based on the last 5 seconds of sample history.
      * @private {!Ewma}
      */
     this.slow_ = new Ewma(5)
 
-    /**
+    /* *
      * Number of bytes sampled.
      * @private {number}
      */
     this.bytesSampled_ = 0
-    /**
+    /* *
      * Minimum number of bytes sampled before we trust the estimate.  If we have
      * not sampled much data, our estimate may not be accurate enough to trust.
      * If bytesSampled_ is less than minTotalBytes_, we use defaultEstimate_.
@@ -44,7 +44,7 @@ export default class EwmaBandwidthEstimator {
      */
     this.minTotalBytes_ = 128e3 // 128kB
 
-    /**
+    /* *
      * Minimum number of bytes, under which samples are discarded.  Our models
      * do not include latency information, so connection startup time (time to
      * first byte) is considered part of the download time.  Because of this, we
@@ -58,7 +58,7 @@ export default class EwmaBandwidthEstimator {
     this.minBytes_ = 16e3 // 16kB
   }
 
-  /**
+  /* *
    * Takes a bandwidth sample.
    *
    * @param {number} durationMs The amount of time, in milliseconds, for a
@@ -79,7 +79,7 @@ export default class EwmaBandwidthEstimator {
     this.fast_.sample(weight, bandwidth)
     this.slow_.sample(weight, bandwidth)
   }
-  /**
+  /* *
    * Gets the current bandwidth estimate.
    *
    * @param {number} defaultEstimate
@@ -94,7 +94,7 @@ export default class EwmaBandwidthEstimator {
     // of adapting down quickly, but up more slowly.
     return Math.min(this.fast_.getEstimate(), this.slow_.getEstimate())
   }
-  /**
+  /* *
    * @return {boolean} True if there is enough data to produce a meaningful
    *   estimate.
    */

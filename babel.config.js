@@ -8,7 +8,7 @@ module.exports = {
     require('@babel/plugin-transform-runtime') // Makes `rollup-plugin-babel` complain
   ],
   ignore: [
-    'dist/*.js',
-    'packages/**/*.js'
+    'dist/* .js',
+    'packages/* */* .js'
   ]
 }

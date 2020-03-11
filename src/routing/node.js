@@ -1,4 +1,4 @@
-/**
+/* *
  * @typedef {{
  *   name: string
  * }}

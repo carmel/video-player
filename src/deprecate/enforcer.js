@@ -1,5 +1,5 @@
 // import Version from './version'
-/**
+/* *
  * The enforcer's job is to call the correct callback when a feature will need
  * to be removed later or removed now.
  *
@@ -10,22 +10,22 @@
  * @final
  */
 export default class Enforcer {
-  /**
+  /* *
    * @param {!Version} libraryVersion
    * @param {Listener} onPending
    * @param {Listener} onExpired
    */
   constructor(libraryVersion, onPending, onExpired) {
-    /** @private {!Version} */
+    /* * @private {!Version} */
     this.libraryVersion_ = libraryVersion
 
-    /** @private {Listener} */
+    /* * @private {Listener} */
     this.onPending_ = onPending
-    /** @private {Listener} */
+    /* * @private {Listener} */
     this.onExpired_ = onExpired
   }
 
-  /**
+  /* *
    * Tell the enforcer that a feature will expire on |expiredOn| and that it
    * should notify the listeners if it is pending or expired.
    *
@@ -46,7 +46,7 @@ export default class Enforcer {
   }
 }
 
-/**
+/* *
  * A callback for listening to deprecation events.
  *
  * Parameters:

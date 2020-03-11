@@ -1,15 +1,15 @@
 import polyfill from './all'
 
-/**
+/* *
  * @summary A polyfill to provide PiP support in Safari.
  * Note that Safari only supports PiP on video elements, not audio.
  */
 export class PiPWebkit {
-  /**
+  /* *
    * Install the polyfill if needed.
    */
   static install() {
-    if (!window.HTMLVideoElement) {
+    if (!HTMLVideoElement) {
       // Avoid errors on very old browsers.
       return
     }
@@ -62,16 +62,16 @@ export class PiPWebkit {
     // possible video element.
     document.addEventListener(
       'webkitpresentationmodechanged', PiPWebkit.proxyEvent_,
-      /* useCapture= */ true)
+      /*  useCapture= */ true)
   }
 
-  /**
+  /* *
    * @param {!Event} event
    * @private
    */
   static proxyEvent_(event) {
     const PiPWebkit = PiPWebkit
-    const element = /** @type {!HTMLVideoElement} */(event.target)
+    const element = /* * @type {!HTMLVideoElement} */(event.target)
 
     if (element.webkitPresentationMode === PiPWebkit.PIP_MODE_) {
       // Keep track of the PiP element.  This element just entered PiP mode.
@@ -93,7 +93,7 @@ export class PiPWebkit {
     }
   }
 
-  /**
+  /* *
    * @this {HTMLVideoElement}
    * @return {!Promise}
    * @private
@@ -114,7 +114,7 @@ export class PiPWebkit {
     }
   }
 
-  /**
+  /* *
    * @this {Document}
    * @return {!Promise}
    * @private
@@ -123,7 +123,7 @@ export class PiPWebkit {
     const PiPWebkit = PiPWebkit
 
     const pipElement =
-    /** @type {HTMLVideoElement} */(document.pictureInPictureElement)
+    /* * @type {HTMLVideoElement} */(document.pictureInPictureElement)
     if (pipElement) {
       // Exit PiP mode.
       pipElement.webkitSetPresentationMode(PiPWebkit.INLINE_MODE_)
@@ -135,7 +135,7 @@ export class PiPWebkit {
     }
   }
 
-  /**
+  /* *
    * @this {HTMLVideoElement}
    * @return {boolean}
    * @private
@@ -154,7 +154,7 @@ export class PiPWebkit {
     return !this.webkitSupportsPresentationMode(PiPWebkit.PIP_MODE_)
   }
 
-  /**
+  /* *
    * @this {HTMLVideoElement}
    * @param {boolean} value
    * @private
@@ -168,14 +168,14 @@ export class PiPWebkit {
     }
   }
 }
-/**
+/* *
  * The presentation mode string used to indicate PiP mode in Safari.
  *
  * @const {string}
  * @private
  */
 PiPWebkit.PIP_MODE_ = 'picture-in-picture'
-/**
+/* *
  * The presentation mode string used to indicate inline mode in Safari.
  *
  * @const {string}

@@ -11,9 +11,8 @@ import ManifestParserUtils from '../util/manifest_parser_utils'
 import MimeUtils from '../util/mime_utils'
 import Platform from '../util/platform'
 import PublicPromise from '../util/public_promise'
-import conf from '../config'
 
-/**
+/* *
  * @summary
  * MediaSourceEngine wraps all operations on MediaSource and SourceBuffers.
  * All asynchronous operations return a Promise, and all operations are
@@ -23,7 +22,7 @@ import conf from '../config'
  * @implements {IDestroyable}
  */
 export default class MediaSourceEngine {
-  /**
+  /* *
    * @param {HTMLMediaElement} video The video element, whose source is tied to
    *   MediaSource during the lifetime of the MediaSourceEngine.
    * @param {!IClosedCaptionParser} closedCaptionParser
@@ -36,45 +35,45 @@ export default class MediaSourceEngine {
    *    MediaSourceEngine is destroyed, it will destroy the displayer.
    */
   constructor(video, closedCaptionParser, textDisplayer) {
-    /** @private {HTMLMediaElement} */
+    /* * @private {HTMLMediaElement} */
     this.video_ = video
 
-    /** @private {shaka.extern.TextDisplayer} */
+    /* * @private {shaka.extern.TextDisplayer} */
     this.textDisplayer_ = textDisplayer
 
-    /** @private {!Object.<ManifestParserUtils.ContentType,
+    /* * @private {!Object.<ManifestParserUtils.ContentType,
                            SourceBuffer>} */
     this.sourceBuffers_ = {}
 
-    /** @private {TextEngine} */
+    /* * @private {TextEngine} */
     this.textEngine_ = null
 
-    /**
+    /* *
      * @private {!Object.<string,
      *                    !Array.<MediaSourceEngine.Operation>>}
      */
     this.queues_ = {}
 
-    /** @private {EventManager} */
+    /* * @private {EventManager} */
     this.eventManager_ = new EventManager()
 
-    /** @private {!Object.<string, !Transmuxer>} */
+    /* * @private {!Object.<string, !Transmuxer>} */
     this.transmuxers_ = {}
 
-    /** @private {IClosedCaptionParser} */
+    /* * @private {IClosedCaptionParser} */
     this.captionParser_ = closedCaptionParser
 
-    /** @private {!PublicPromise} */
+    /* * @private {!PublicPromise} */
     this.mediaSourceOpen_ = new PublicPromise()
 
-    /** @private {MediaSource} */
+    /* * @private {MediaSource} */
     this.mediaSource_ = this.createMediaSource(this.mediaSourceOpen_)
 
-    /** @type {!Destroyer} */
+    /* * @type {!Destroyer} */
     this.destroyer_ = new Destroyer(() => this.doDestroy_())
   }
 
-  /**
+  /* *
    * Create a MediaSource object, attach it to the video element, and return it.
    * Resolves the given promise when the MediaSource is ready.
    *
@@ -94,7 +93,7 @@ export default class MediaSourceEngine {
     return mediaSource
   }
 
-  /**
+  /* *
    * Checks if a certain type is supported.
    *
    * @param {shaka.extern.Stream} stream
@@ -109,7 +108,7 @@ export default class MediaSourceEngine {
         Transmuxer.isSupported(fullMimeType, stream.type)
   }
 
-  /**
+  /* *
    * Returns a map of MediaSource support for well-known types.
    *
    * @return {!Object.<string, boolean>}
@@ -117,39 +116,39 @@ export default class MediaSourceEngine {
   static probeSupport() {
     const testMimeTypes = [
       // MP4 types
-      'video/mp4; codecs="avc1.42E01E"',
-      'video/mp4; codecs="avc3.42E01E"',
-      'video/mp4; codecs="hev1.1.6.L93.90"',
-      'video/mp4; codecs="hvc1.1.6.L93.90"',
-      'video/mp4; codecs="hev1.2.4.L153.B0"; eotf="smpte2084"', // HDR HEVC
-      'video/mp4; codecs="hvc1.2.4.L153.B0"; eotf="smpte2084"', // HDR HEVC
-      'video/mp4; codecs="vp9"',
-      'video/mp4; codecs="vp09.00.10.08"',
-      'video/mp4; codecs="av01.0.01M.08"',
-      'audio/mp4; codecs="mp4a.40.2"',
-      'audio/mp4; codecs="ac-3"',
-      'audio/mp4; codecs="ec-3"',
-      'audio/mp4; codecs="opus"',
-      'audio/mp4; codecs="flac"',
+      `video/mp4; codecs='avc1.42E01E'`,
+      `video/mp4; codecs='avc3.42E01E'`,
+      `video/mp4; codecs='hev1.1.6.L93.90'`,
+      `video/mp4; codecs='hvc1.1.6.L93.90'`,
+      `video/mp4; codecs='hev1.2.4.L153.B0'; eotf='smpte2084'`, // HDR HEVC
+      `video/mp4; codecs='hvc1.2.4.L153.B0'; eotf='smpte2084'`, // HDR HEVC
+      `video/mp4; codecs='vp9'`,
+      `video/mp4; codecs='vp09.00.10.08'`,
+      `video/mp4; codecs='av01.0.01M.08'`,
+      `audio/mp4; codecs='mp4a.40.2'`,
+      `audio/mp4; codecs='ac-3'`,
+      `audio/mp4; codecs='ec-3'`,
+      `audio/mp4; codecs='opus'`,
+      `audio/mp4; codecs='flac'`,
       // WebM types
-      'video/webm; codecs="vp8"',
-      'video/webm; codecs="vp9"',
-      'video/webm; codecs="vp09.00.10.08"',
-      'audio/webm; codecs="vorbis"',
-      'audio/webm; codecs="opus"',
+      `video/webm; codecs='vp8'`,
+      `video/webm; codecs='vp9'`,
+      `video/webm; codecs='vp09.00.10.08'`,
+      `audio/webm; codecs='vorbis'`,
+      `audio/webm; codecs='opus'`,
       // MPEG2 TS types (video/ is also used for audio: https://bit.ly/TsMse)
-      'video/mp2t; codecs="avc1.42E01E"',
-      'video/mp2t; codecs="avc3.42E01E"',
-      'video/mp2t; codecs="hvc1.1.6.L93.90"',
-      'video/mp2t; codecs="mp4a.40.2"',
-      'video/mp2t; codecs="ac-3"',
-      'video/mp2t; codecs="ec-3"',
+      `video/mp2t; codecs='avc1.42E01E'`,
+      `video/mp2t; codecs='avc3.42E01E'`,
+      `video/mp2t; codecs='hvc1.1.6.L93.90'`,
+      `video/mp2t; codecs='mp4a.40.2'`,
+      `video/mp2t; codecs='ac-3'`,
+      `video/mp2t; codecs='ec-3'`,
       // WebVTT types
       'text/vtt',
-      'application/mp4; codecs="wvtt"',
+      `application/mp4; codecs='wvtt'`,
       // TTML types
       'application/ttml+xml',
-      'application/mp4; codecs="stpp"'
+      `application/mp4; codecs='stpp'`
     ]
 
     const support = {}
@@ -173,12 +172,12 @@ export default class MediaSourceEngine {
     return support
   }
 
-  /** @override */
+  /* * @override */
   destroy() {
     return this.destroyer_.destroy()
   }
 
-  /** @private */
+  /* * @private */
   async doDestroy_() {
     const cleanup = []
 
@@ -230,17 +229,10 @@ export default class MediaSourceEngine {
     this.sourceBuffers_ = {}
     this.transmuxers_ = {}
     this.captionParser_ = null
-    if (conf.DEBUG) {
-      for (const contentType in this.queues_) {
-        console.assert(
-          this.queues_[contentType].length === 0,
-          contentType + ' queue should be empty after destroy!')
-      }
-    }
     this.queues_ = {}
   }
 
-  /**
+  /* *
    * @return {!Promise} Resolved when MediaSource is open and attached to the
    *   media element.  This process is actually initiated by the constructor.
    */
@@ -248,7 +240,7 @@ export default class MediaSourceEngine {
     return this.mediaSourceOpen_
   }
 
-  /**
+  /* *
    * Initialize MediaSourceEngine.
    *
    * Note that it is not valid to call this multiple times, except to add or
@@ -298,7 +290,7 @@ export default class MediaSourceEngine {
     }
   }
 
-  /**
+  /* *
    * Reinitialize the TextEngine for a new text type.
    * @param {string} mimeType
    */
@@ -309,7 +301,7 @@ export default class MediaSourceEngine {
     this.textEngine_.initParser(mimeType)
   }
 
-  /**
+  /* *
    * @return {boolean} True if the MediaSource is in an 'ended' state, or if the
    *   object has been destroyed.
    */
@@ -317,7 +309,7 @@ export default class MediaSourceEngine {
     return this.mediaSource_ ? this.mediaSource_.readyState === 'ended' : true
   }
 
-  /**
+  /* *
    * Gets the first timestamp in buffer for the given content type.
    *
    * @param {ManifestParserUtils.ContentType} contentType
@@ -332,7 +324,7 @@ export default class MediaSourceEngine {
       this.getBuffered_(contentType))
   }
 
-  /**
+  /* *
    * Gets the last timestamp in buffer for the given content type.
    *
    * @param {ManifestParserUtils.ContentType} contentType
@@ -347,7 +339,7 @@ export default class MediaSourceEngine {
       this.getBuffered_(contentType))
   }
 
-  /**
+  /* *
    * Determines if the given time is inside the buffered range of the given
    * content type.
    *
@@ -367,7 +359,7 @@ export default class MediaSourceEngine {
     }
   }
 
-  /**
+  /* *
    * Computes how far ahead of the given timestamp is buffered for the given
    * content type.
    *
@@ -385,7 +377,7 @@ export default class MediaSourceEngine {
     }
   }
 
-  /**
+  /* *
    * Returns info about what is currently buffered.
    * @return {shaka.extern.BufferedInfo}
    */
@@ -411,7 +403,7 @@ export default class MediaSourceEngine {
     return info
   }
 
-  /**
+  /* *
    * @param {ManifestParserUtils.ContentType} contentType
    * @return {TimeRanges} The buffered ranges for the given content type, or
    *   null if the buffered ranges could not be obtained.
@@ -431,7 +423,7 @@ export default class MediaSourceEngine {
     }
   }
 
-  /**
+  /* *
    * Enqueue an operation to append data to the SourceBuffer.
    * Start and end times are needed for TextEngine, but not for MediaSource.
    * Start and end times may be null for initialization segments; if present
@@ -496,7 +488,7 @@ export default class MediaSourceEngine {
     }
   }
 
-  /**
+  /* *
    * Set the selected closed captions Id and language.
    *
    * @param {string} id
@@ -507,7 +499,7 @@ export default class MediaSourceEngine {
     this.textEngine_.setSelectedClosedCaptionId(id, videoBufferEndTime)
   }
 
-  /**
+  /* *
    * Enqueue an operation to remove data from the SourceBuffer.
    *
    * @param {ManifestParserUtils.ContentType} contentType
@@ -530,7 +522,7 @@ export default class MediaSourceEngine {
     }
   }
 
-  /**
+  /* *
    * Enqueue an operation to clear the SourceBuffer.
    *
    * @param {ManifestParserUtils.ContentType} contentType
@@ -562,7 +554,7 @@ export default class MediaSourceEngine {
     }
   }
 
-  /**
+  /* *
    * Enqueue an operation to flush the SourceBuffer.
    * This is a workaround for what we believe is a Chromecast bug.
    *
@@ -582,7 +574,7 @@ export default class MediaSourceEngine {
       () => this.flush_(contentType))
   }
 
-  /**
+  /* *
    * Sets the timestamp offset and append window end for the given content type.
    *
    * @param {ManifestParserUtils.ContentType} contentType
@@ -628,7 +620,7 @@ export default class MediaSourceEngine {
     ])
   }
 
-  /**
+  /* *
    * @param {string=} reason Valid reasons are 'network' and 'decode'.
    * @return {!Promise}
    * @see http://w3c.github.io/media-source/#idl-def-EndOfStreamError
@@ -650,7 +642,7 @@ export default class MediaSourceEngine {
     })
   }
 
-  /**
+  /* *
    * We only support increasing duration at this time.  Decreasing duration
    * causes the MSE removal algorithm to run, which results in an 'updateend'
    * event.  Supporting this scenario would be complicated, and is not currently
@@ -670,7 +662,7 @@ export default class MediaSourceEngine {
     })
   }
 
-  /**
+  /* *
    * Get the current MediaSource duration.
    *
    * @return {number}
@@ -679,7 +671,7 @@ export default class MediaSourceEngine {
     return this.mediaSource_.duration
   }
 
-  /**
+  /* *
    * Append data to the SourceBuffer.
    * @param {ManifestParserUtils.ContentType} contentType
    * @param {BufferSource} data
@@ -690,7 +682,7 @@ export default class MediaSourceEngine {
     this.sourceBuffers_[contentType].appendBuffer(data)
   }
 
-  /**
+  /* *
    * Remove data from the SourceBuffer.
    * @param {ManifestParserUtils.ContentType} contentType
    * @param {number} startTime relative to the start of the presentation
@@ -709,7 +701,7 @@ export default class MediaSourceEngine {
     this.sourceBuffers_[contentType].remove(startTime, endTime)
   }
 
-  /**
+  /* *
    * Call abort() on the SourceBuffer.
    * This resets MSE's last_decode_timestamp on all track buffers, which should
    * trigger the splicing logic for overlapping segments.
@@ -726,7 +718,7 @@ export default class MediaSourceEngine {
     // This is only to reset MSE internals, not to abort an actual operation.
     this.sourceBuffers_[contentType].abort()
 
-    // Restore the append window.
+    // Restore the append
     this.sourceBuffers_[contentType].appendWindowStart = appendWindowStart
     this.sourceBuffers_[contentType].appendWindowEnd = appendWindowEnd
 
@@ -734,7 +726,7 @@ export default class MediaSourceEngine {
     this.onUpdateEnd_(contentType)
   }
 
-  /**
+  /* *
    * Nudge the playhead to force the media pipeline to be flushed.
    * This seems to be necessary on Chromecast to get new content to replace old
    * content.
@@ -754,7 +746,7 @@ export default class MediaSourceEngine {
     this.onUpdateEnd_(contentType)
   }
 
-  /**
+  /* *
    * Set the SourceBuffer's timestamp offset.
    * @param {ManifestParserUtils.ContentType} contentType
    * @param {number} timestampOffset
@@ -775,7 +767,7 @@ export default class MediaSourceEngine {
     this.onUpdateEnd_(contentType)
   }
 
-  /**
+  /* *
    * Set the SourceBuffer's append window end.
    * @param {ManifestParserUtils.ContentType} contentType
    * @param {number} appendWindowStart
@@ -794,7 +786,7 @@ export default class MediaSourceEngine {
     this.onUpdateEnd_(contentType)
   }
 
-  /**
+  /* *
    * @param {ManifestParserUtils.ContentType} contentType
    * @private
    */
@@ -816,7 +808,7 @@ export default class MediaSourceEngine {
     // will have no effect.
   }
 
-  /**
+  /* *
    * @param {ManifestParserUtils.ContentType} contentType
    * @private
    */
@@ -832,7 +824,7 @@ export default class MediaSourceEngine {
     this.popFromQueue_(contentType)
   }
 
-  /**
+  /* *
    * Enqueue an operation and start it if appropriate.
    *
    * @param {ManifestParserUtils.ContentType} contentType
@@ -855,7 +847,7 @@ export default class MediaSourceEngine {
     return operation.p
   }
 
-  /**
+  /* *
    * Enqueue an operation which must block all other operations on all
    * SourceBuffers.
    *
@@ -866,7 +858,7 @@ export default class MediaSourceEngine {
   async enqueueBlockingOperation_(run) {
     this.destroyer_.ensureNotDestroyed()
 
-    /** @type {Array.<!PublicPromise>} */
+    /* * @type {Array.<!PublicPromise>} */
     const allWaiters = []
 
     // Enqueue a 'wait' operation onto each queue.
@@ -899,29 +891,7 @@ export default class MediaSourceEngine {
       // uncompiled mode, we will maintain good hygiene and make sure the
       // assert at the end of destroy passes.  In compiled mode, the queues
       // are wiped in destroy.
-      if (conf.DEBUG) {
-        for (const contentType in this.sourceBuffers_) {
-          if (this.queues_[contentType].length) {
-            console.assert(
-              this.queues_[contentType].length === 1,
-              'Should be at most one item in queue!')
-            console.assert(
-              allWaiters.includes(this.queues_[contentType][0].p),
-              'The item in queue should be one of our waiters!')
-            this.queues_[contentType].shift()
-          }
-        }
-      }
       throw error
-    }
-
-    if (conf.DEBUG) {
-      // If we did it correctly, nothing is updating.
-      for (const contentType in this.sourceBuffers_) {
-        console.assert(
-          this.sourceBuffers_[contentType].updating === false,
-          'SourceBuffers should not be updating after a blocking op!')
-      }
     }
 
     // Run the real operation, which is synchronous.
@@ -941,7 +911,7 @@ export default class MediaSourceEngine {
     }
   }
 
-  /**
+  /* *
    * Pop from the front of the queue and start a new operation.
    * @param {ManifestParserUtils.ContentType} contentType
    * @private
@@ -952,7 +922,7 @@ export default class MediaSourceEngine {
     this.startOperation_(contentType)
   }
 
-  /**
+  /* *
    * Starts the next operation in the queue.
    * @param {ManifestParserUtils.ContentType} contentType
    * @private
@@ -982,7 +952,7 @@ export default class MediaSourceEngine {
     }
   }
 
-  /**
+  /* *
    * @return {!shaka.extern.TextDisplayer}
    */
   getTextDisplayer() {
@@ -993,7 +963,7 @@ export default class MediaSourceEngine {
     return this.textDisplayer_
   }
 
-  /**
+  /* *
    * @param {!shaka.extern.TextDisplayer} textDisplayer
    */
   setTextDisplayer(textDisplayer) {
@@ -1008,15 +978,15 @@ export default class MediaSourceEngine {
     }
   }
 }
-/**
- * Internal reference to window.URL.createObjectURL function to avoid
+/* *
+ * Internal reference to URL.createObjectURL function to avoid
  * compatibility issues with other libraries and frameworks such as React
  * Native. For use in unit tests only, not meant for external use.
  *
  * @type {function(?):string}
  */
-MediaSourceEngine.createObjectURL = window.URL.createObjectURL
-/**
+MediaSourceEngine.createObjectURL = URL.createObjectURL
+/* *
  * @typedef {{
  *   start: function(),
  *   p: !PublicPromise

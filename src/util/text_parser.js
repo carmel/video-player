@@ -1,25 +1,25 @@
-/**
+/* *
  * Reads elements from strings.
  */
 export default class TextParser {
-  /**
+  /* *
    * @param {string} data
    */
   constructor(data) {
-    /**
+    /* *
      * @const
      * @private {string}
      */
     this.data_ = data
 
-    /** @private {number} */
+    /* * @private {number} */
     this.position_ = 0
   }
-  /** @return {boolean} Whether it is at the end of the string. */
+  /* * @return {boolean} Whether it is at the end of the string. */
   atEnd() {
     return this.position_ === this.data_.length
   }
-  /**
+  /* *
    * Reads a line from the parser.  This will read but not return the newline.
    * Returns null at the end.
    *
@@ -28,7 +28,7 @@ export default class TextParser {
   readLine() {
     return this.readRegexReturnCapture_(/(.*?)(\n|$)/gm, 1)
   }
-  /**
+  /* *
    * Reads a word from the parser.  This will not read or return any whitespace
    * before or after the word (including newlines).  Returns null at the end.
    *
@@ -37,13 +37,13 @@ export default class TextParser {
   readWord() {
     return this.readRegexReturnCapture_(/[^ \t\n]*/gm, 0)
   }
-  /**
+  /* *
    * Skips any continuous whitespace from the parser.  Returns null at the end.
    */
   skipWhitespace() {
     this.readRegex(/[ \t]+/gm)
   }
-  /**
+  /* *
    * Reads the given regular expression from the parser.  This requires the
    * match to be at the current position; there is no need to include a head
    * anchor.
@@ -63,7 +63,7 @@ export default class TextParser {
     this.position_ += index.length
     return index.results
   }
-  /**
+  /* *
    * Reads a regex from the parser and returns the given capture.
    *
    * @param {!RegExp} regex
@@ -83,7 +83,7 @@ export default class TextParser {
       return ret[index]
     }
   }
-  /**
+  /* *
    * Returns the index info about a regular expression match.
    *
    * @param {!RegExp} regex

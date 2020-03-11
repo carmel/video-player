@@ -1,5 +1,5 @@
 export default class ObjectUtils {
-  /**
+  /* *
    * Performs a deep clone of the given simple object.  This does not copy
    * prototypes, custom properties (e.g. read-only), or multiple references to
    * the same object.  If the caller needs these fields, it will need to set
@@ -65,7 +65,7 @@ export default class ObjectUtils {
     return clone(arg)
   }
 
-  /**
+  /* *
    * Performs a shallow clone of the given simple object.  This does not copy
    * prototypes or custom properties (e.g. read-only).
    *
@@ -74,7 +74,7 @@ export default class ObjectUtils {
    * @return {T}
    */
   static shallowCloneObject(original) {
-    const clone = /** @type {?} */({})
+    const clone = /* * @type {?} */({})
     for (const k in original) {
       clone[k] = original[k]
     }

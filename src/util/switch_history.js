@@ -1,4 +1,4 @@
-/**
+/* *
  * This class is used to track changes in variant and text selections. This
  * class will make sure that redundant switches are not recorded in the history.
  *
@@ -6,17 +6,17 @@
  */
 export default class SwitchHistory {
   constructor() {
-    /** @private {?shaka.extern.Variant} */
+    /* * @private {?shaka.extern.Variant} */
     this.currentVariant_ = null
 
-    /** @private {?shaka.extern.Stream} */
+    /* * @private {?shaka.extern.Stream} */
     this.currentText_ = null
 
-    /** @private {!Array.<shaka.extern.TrackChoice>} */
+    /* * @private {!Array.<shaka.extern.TrackChoice>} */
     this.history_ = []
   }
 
-  /**
+  /* *
    * Update the history to show that we are currently playing |newVariant|. If
    * we are already playing |newVariant|, this update will be ignored.
    *
@@ -38,7 +38,7 @@ export default class SwitchHistory {
     })
   }
 
-  /**
+  /* *
    * Update the history to show that we are currently playing |newText|. If we
    * are already playing |newText|, this update will be ignored.
    *
@@ -60,7 +60,7 @@ export default class SwitchHistory {
     })
   }
 
-  /**
+  /* *
    * Get a copy of the switch history. This will make sure to expose no internal
    * references.
    *
@@ -76,7 +76,7 @@ export default class SwitchHistory {
     return copy
   }
 
-  /**
+  /* *
    * Get the system time in seconds.
    *
    * @return {number}
@@ -86,7 +86,7 @@ export default class SwitchHistory {
     return Date.now() / 1000
   }
 
-  /**
+  /* *
    * @param {shaka.extern.TrackChoice} entry
    * @return {shaka.extern.TrackChoice}
    * @private

@@ -5,7 +5,7 @@ import V2StorageCell from './v2_storage_cell'
 import Error from '../../util/error'
 import PublicPromise from '../../util/public_promise'
 
-/**
+/* *
  * A storage mechanism to manage storage cells for an indexed db instance.
  * The cells are just for interacting with the stores that are found in the
  * database instance. The mechanism is responsible for creating new stores
@@ -18,20 +18,20 @@ import PublicPromise from '../../util/public_promise'
  */
 export default class StorageMechanism {
   constructor() {
-    /** @private {IDBDatabase} */
+    /* * @private {IDBDatabase} */
     this.db_ = null
 
-    /** @private {shaka.extern.StorageCell} */
+    /* * @private {shaka.extern.StorageCell} */
     this.v1_ = null
-    /** @private {shaka.extern.StorageCell} */
+    /* * @private {shaka.extern.StorageCell} */
     this.v2_ = null
-    /** @private {shaka.extern.StorageCell} */
+    /* * @private {shaka.extern.StorageCell} */
     this.v3_ = null
-    /** @private {shaka.extern.EmeSessionStorageCell} */
+    /* * @private {shaka.extern.EmeSessionStorageCell} */
     this.sessions_ = null
   }
 
-  /**
+  /* *
    * @override
    */
   init() {
@@ -39,7 +39,7 @@ export default class StorageMechanism {
     const version = StorageMechanism.VERSION
 
     const p = new PublicPromise()
-    const open = window.indexedDB.open(name, version)
+    const open = indexedDB.open(name, version)
     open.onsuccess = (event) => {
       const db = event.target.result
       this.db_ = db
@@ -68,7 +68,7 @@ export default class StorageMechanism {
     return p
   }
 
-  /**
+  /* *
    * @override
    */
   async destroy() {
@@ -91,7 +91,7 @@ export default class StorageMechanism {
     }
   }
 
-  /**
+  /* *
    * @override
    */
   getCells() {
@@ -110,7 +110,7 @@ export default class StorageMechanism {
     return map
   }
 
-  /**
+  /* *
    * @override
    */
   getEmeSessionCell() {
@@ -118,7 +118,7 @@ export default class StorageMechanism {
     return this.sessions_
   }
 
-  /**
+  /* *
    * @override
    */
   async erase() {
@@ -152,7 +152,7 @@ export default class StorageMechanism {
     await this.init()
   }
 
-  /**
+  /* *
    * @param {!IDBDatabase} db
    * @return {shaka.extern.StorageCell}
    * @private
@@ -173,7 +173,7 @@ export default class StorageMechanism {
     return null
   }
 
-  /**
+  /* *
    * @param {!IDBDatabase} db
    * @return {shaka.extern.StorageCell}
    * @private
@@ -195,7 +195,7 @@ export default class StorageMechanism {
     return null
   }
 
-  /**
+  /* *
    * @param {!IDBDatabase} db
    * @return {shaka.extern.StorageCell}
    * @private
@@ -219,7 +219,7 @@ export default class StorageMechanism {
     return null
   }
 
-  /**
+  /* *
    * @param {!IDBDatabase} db
    * @return {shaka.extern.EmeSessionStorageCell}
    * @private
@@ -234,7 +234,7 @@ export default class StorageMechanism {
     return null
   }
 
-  /**
+  /* *
    * @param {!IDBDatabase} db
    * @private
    */
@@ -252,7 +252,7 @@ export default class StorageMechanism {
     }
   }
 
-  /**
+  /* *
    * Delete the indexed db instance so that all stores are deleted and cleared.
    * This will force the database to a like-new state next time it opens.
    *
@@ -264,7 +264,7 @@ export default class StorageMechanism {
 
     const p = new PublicPromise()
 
-    const del = window.indexedDB.deleteDatabase(name)
+    const del = indexedDB.deleteDatabase(name)
     del.onblocked = (event) => {
       console.warning('Deleting', name, 'is being blocked')
     }
@@ -286,23 +286,23 @@ export default class StorageMechanism {
   }
 }
 
-/** @const {string} */
+/* * @const {string} */
 StorageMechanism.DB_NAME = 'shaka_offline_db'
-/** @const {number} */
+/* * @const {number} */
 StorageMechanism.VERSION = 4
-/** @const {string} */
+/* * @const {string} */
 StorageMechanism.V1_SEGMENT_STORE = 'segment'
-/** @const {string} */
+/* * @const {string} */
 StorageMechanism.V2_SEGMENT_STORE = 'segment-v2'
-/** @const {string} */
+/* * @const {string} */
 StorageMechanism.V3_SEGMENT_STORE = 'segment-v3'
-/** @const {string} */
+/* * @const {string} */
 StorageMechanism.V1_MANIFEST_STORE = 'manifest'
-/** @const {string} */
+/* * @const {string} */
 StorageMechanism.V2_MANIFEST_STORE = 'manifest-v2'
-/** @const {string} */
+/* * @const {string} */
 StorageMechanism.V3_MANIFEST_STORE = 'manifest-v3'
-/** @const {string} */
+/* * @const {string} */
 StorageMechanism.SESSION_ID_STORE = 'session-ids'
 // Since this may be called before the polyfills remove indexeddb support from
 // some platforms (looking at you Chromecast), we need to check for support
@@ -313,7 +313,7 @@ StorageMechanism.SESSION_ID_STORE = 'session-ids'
 StorageMuxer.register(
   'idb',
   () => {
-    return window.indexedDB
+    return indexedDB
       ? new StorageMechanism()
       : null
   })

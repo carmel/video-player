@@ -1,29 +1,29 @@
 import PublicPromise from './public_promise'
 
-/**
+/* *
  * @summary
  * A utility class to help work with |IDestroyable| objects.
  *
  * @final
  */
 export default class Destroyer {
-  /**
+  /* *
    * @param {function():!Promise} callback
    *    A callback to destroy an object. This callback will only be called once
    *    regardless of how many times |destroy| is called.
    */
   constructor(callback) {
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.destroyed_ = false
 
-    /** @private {!PublicPromise} */
+    /* * @private {!PublicPromise} */
     this.waitOnDestroy_ = new PublicPromise()
 
-    /** @private {function():!Promise} */
+    /* * @private {function():!Promise} */
     this.onDestroy_ = callback
   }
 
-  /**
+  /* *
    * Check if |destroy| has been called. This returning |true| does not mean
    * that the promise returned by |destroy| has resolved yet.
    *
@@ -34,7 +34,7 @@ export default class Destroyer {
     return this.destroyed_
   }
 
-  /**
+  /* *
    * Request that the destroy callback be called. Will return a promise that
    * will resolve once the callback terminates. The promise will never be
    * rejected.
@@ -56,7 +56,7 @@ export default class Destroyer {
       () => { this.waitOnDestroy_.resolve() })
   }
 
-  /**
+  /* *
    * Checks if the object is destroyed and throws an error if it is.
    * @param {*=} error The inner error, if any.
    */
@@ -70,7 +70,7 @@ export default class Destroyer {
     }
   }
 
-  /**
+  /* *
    * @param {*=} error The inner error, if any.
    * @return {!Error}
    */

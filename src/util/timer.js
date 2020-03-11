@@ -1,6 +1,6 @@
 import DelayedTick from './delayed_tick'
 
-/**
+/* *
  * A timer allows a single function to be executed at a later time or at
  * regular intervals.
  *
@@ -8,7 +8,7 @@ import DelayedTick from './delayed_tick'
  * @export
  */
 export default class Timer {
-  /**
+  /* *
    * Create a new timer. A timer is committed to a single callback function.
    * While there is no technical reason to do this, it is far easier to
    * understand and use timers when they are connected to one functional idea.
@@ -16,7 +16,7 @@ export default class Timer {
    * @param {function()} onTick
    */
   constructor(onTick) {
-    /**
+    /* *
      * Each time our timer 'does work', we call that a 'tick'. The name comes
      * from old analog clocks.
      *
@@ -24,11 +24,11 @@ export default class Timer {
      */
     this.onTick_ = onTick
 
-    /** @private {DelayedTick} */
+    /* * @private {DelayedTick} */
     this.ticker_ = null
   }
 
-  /**
+  /* *
    * Have the timer call |onTick| now.
    *
    * @return {!Timer}
@@ -41,7 +41,7 @@ export default class Timer {
     return this
   }
 
-  /**
+  /* *
    * Have the timer call |onTick| after |seconds| has elapsed unless |stop| is
    * called first.
    *
@@ -59,7 +59,7 @@ export default class Timer {
     return this
   }
 
-  /**
+  /* *
    * Have the timer call |onTick| every |seconds| until |stop| is called.
    *
    * @param {number} seconds
@@ -79,7 +79,7 @@ export default class Timer {
     return this
   }
 
-  /**
+  /* *
    * Stop the timer and clear the previous behaviour. The timer is still usable
    * after calling |stop|.
    *

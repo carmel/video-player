@@ -2,38 +2,38 @@ import BufferUtils from './buffer_utils'
 import Error from './error'
 import StringUtils from './string_utils'
 
-/**
+/* *
   * @summary DataViewReader abstracts a DataView object.
   * @export
   */
 export default class DataViewReader {
-  /**
+  /* *
    * @param {BufferSource} data
    * @param {DataViewReader.Endianness} endianness The endianness.
    */
   constructor(data, endianness) {
-    /** @private {!DataView} */
+    /* * @private {!DataView} */
     this.dataView_ = BufferUtils.toDataView(data)
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.littleEndian_ =
         endianness === DataViewReader.Endianness.LITTLE_ENDIAN
 
-    /** @private {number} */
+    /* * @private {number} */
     this.position_ = 0
   }
-  /** @return {!DataView} The underlying DataView instance. */
+  /* * @return {!DataView} The underlying DataView instance. */
   getDataView() {
     return this.dataView_
   }
-  /**
+  /* *
    * @return {boolean} True if the reader has more data, false otherwise.
    * @export
    */
   hasMoreData() {
     return this.position_ < this.dataView_.byteLength
   }
-  /**
+  /* *
    * Gets the current byte position.
    * @return {number}
    * @export
@@ -41,7 +41,7 @@ export default class DataViewReader {
   getPosition() {
     return this.position_
   }
-  /**
+  /* *
    * Gets the byte length of the DataView.
    * @return {number}
    * @export
@@ -49,7 +49,7 @@ export default class DataViewReader {
   getLength() {
     return this.dataView_.byteLength
   }
-  /**
+  /* *
    * Reads an unsigned 8 bit integer, and advances the reader.
    * @return {number} The integer.
    * @export
@@ -63,7 +63,7 @@ export default class DataViewReader {
       throw this.outOfBounds_()
     }
   }
-  /**
+  /* *
    * Reads an unsigned 16 bit integer, and advances the reader.
    * @return {number} The integer.
    * @export
@@ -78,7 +78,7 @@ export default class DataViewReader {
       throw this.outOfBounds_()
     }
   }
-  /**
+  /* *
    * Reads an unsigned 32 bit integer, and advances the reader.
    * @return {number} The integer.
    * @export
@@ -93,7 +93,7 @@ export default class DataViewReader {
       throw this.outOfBounds_()
     }
   }
-  /**
+  /* *
    * Reads a signed 32 bit integer, and advances the reader.
    * @return {number} The integer.
    * @export
@@ -107,15 +107,15 @@ export default class DataViewReader {
       throw this.outOfBounds_()
     }
   }
-  /**
+  /* *
    * Reads an unsigned 64 bit integer, and advances the reader.
    * @return {number} The integer.
    * @export
    */
   readUint64() {
-    /** @type {number} */
+    /* * @type {number} */
     let low
-    /** @type {number} */
+    /* * @type {number} */
     let high
 
     try {
@@ -144,7 +144,7 @@ export default class DataViewReader {
     // You must multiply by 2^32.
     return (high * Math.pow(2, 32)) + low
   }
-  /**
+  /* *
    * Reads the specified number of raw bytes.
    * @param {number} bytes The number of bytes to read.
    * @return {!Uint8Array}
@@ -161,7 +161,7 @@ export default class DataViewReader {
     this.position_ += bytes
     return value
   }
-  /**
+  /* *
    * Skips the specified number of bytes.
    * @param {number} bytes The number of bytes to skip.
    * @export
@@ -173,7 +173,7 @@ export default class DataViewReader {
     }
     this.position_ += bytes
   }
-  /**
+  /* *
    * Rewinds the specified number of bytes.
    * @param {number} bytes The number of bytes to rewind.
    * @export
@@ -185,7 +185,7 @@ export default class DataViewReader {
     }
     this.position_ -= bytes
   }
-  /**
+  /* *
    * Seeks to a specified position.
    * @param {number} position The desired byte position within the DataView.
    * @export
@@ -197,7 +197,7 @@ export default class DataViewReader {
     }
     this.position_ = position
   }
-  /**
+  /* *
    * Keeps reading until it reaches a byte that equals to zero.  The text is
    * assumed to be UTF-8.
    * @return {string}
@@ -219,7 +219,7 @@ export default class DataViewReader {
     this.position_ += 1
     return StringUtils.fromUTF8(ret)
   }
-  /**
+  /* *
    * @return {!Error}
    * @private
    */
@@ -231,7 +231,7 @@ export default class DataViewReader {
   }
 }
 
-/**
+/* *
  * Endianness.
  * @enum {number}
  * @export

@@ -1,11 +1,11 @@
 import polyfill from './all'
 
-/**
+/* *
  * @summary A polyfill to patch math round bug on some browsers.
  * @see https://stackoverflow.com/q/12830742
  */
 export default class MathRound {
-  /**
+  /* *
    * Install the polyfill if needed.
    */
   static install() {
@@ -28,7 +28,7 @@ export default class MathRound {
   }
 }
 
-/**
+/* *
  @const {number}
  @private
  */

@@ -9,13 +9,13 @@ import Mp4Parser from '../util/mp4_parser'
 import StringUtils from '../util/string_utils'
 import TextParser from '../util/text_parser'
 
-/**
+/* *
  * @implements {shaka.extern.TextParser}
  * @export
  */
 export default class Mp4VttParser {
   constructor() {
-    /**
+    /* *
      * The current time scale used by the VTT parser.
      *
      * @type {?number}
@@ -24,7 +24,7 @@ export default class Mp4VttParser {
     this.timescale_ = null
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -80,7 +80,7 @@ export default class Mp4VttParser {
     }
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -99,11 +99,11 @@ export default class Mp4VttParser {
     const Mp4Parser = Mp4Parser
 
     let baseTime = 0
-    /** @type {!Array.<Mp4VttParser.TimeSegment>} */
+    /* * @type {!Array.<Mp4VttParser.TimeSegment>} */
     let presentations = []
-    /** @type {!Uint8Array} */
+    /* * @type {!Uint8Array} */
     let rawPayload
-    /** @type {!Array.<Cue>} */
+    /* * @type {!Array.<Cue>} */
     const cues = []
 
     let sawTFDT = false
@@ -146,7 +146,7 @@ export default class Mp4VttParser {
         sawMDAT = true
         rawPayload = data
       }))
-    parser.parse(data, /* partialOkay= */ false)
+    parser.parse(data, /*  partialOkay= */ false)
 
     if (!sawMDAT && !sawTFDT && !sawTRUN) {
       // A required box is missing.
@@ -158,7 +158,7 @@ export default class Mp4VttParser {
 
     let currentTime = baseTime
 
-    /** @type {!DataViewReader} */
+    /* * @type {!DataViewReader} */
     const reader = new DataViewReader(
       rawPayload, DataViewReader.Endianness.BIG_ENDIAN)
 
@@ -183,7 +183,7 @@ export default class Mp4VttParser {
         const payloadName = Mp4Parser.typeToString(payloadType)
 
         // Read the data payload.
-        /** @type {Uint8Array} */
+        /* * @type {Uint8Array} */
         let payload = null
         if (payloadName === 'vttc') {
           if (payloadSize > 8) {
@@ -229,11 +229,11 @@ export default class Mp4VttParser {
       'MDAT which contain VTT cues and non-VTT data are not currently ' +
         'supported!')
 
-    return /** @type {!Array.<!shaka.extern.Cue>} */ (
+    return /* * @type {!Array.<!shaka.extern.Cue>} */ (
       cues.filter(Functional.isNotNull))
   }
 
-  /**
+  /* *
    * @param {number} flags
    * @param {!DataViewReader} reader
    * @return {?number} The default_sample_duration field, if present.
@@ -262,7 +262,7 @@ export default class Mp4VttParser {
     return null
   }
 
-  /**
+  /* *
    * @param {number} version
    * @param {number} flags
    * @param {!DataViewReader} reader
@@ -286,7 +286,7 @@ export default class Mp4VttParser {
 
     for (const _ of Iterables.range(sampleCount)) {
       Functional.ignored(_)
-      /** @type {Mp4VttParser.TimeSegment} */
+      /* * @type {Mp4VttParser.TimeSegment} */
       const sample = {
         duration: null,
         sampleSize: null,
@@ -321,7 +321,7 @@ export default class Mp4VttParser {
     return samples
   }
 
-  /**
+  /* *
    * Parses a vttc box into a cue.
    *
    * @param {!Uint8Array} data
@@ -355,7 +355,7 @@ export default class Mp4VttParser {
     }
   }
 
-  /**
+  /* *
    * Take the individual components that make a cue and create a vttc cue.
    *
    * @param {string} payload
@@ -381,7 +381,7 @@ export default class Mp4VttParser {
       while (word) {
         // TODO: Check WebVTTConfigurationBox for region info.
         if (!VttTextParser.parseCueSetting(
-          cue, word, /* VTTRegions= */[])) {
+          cue, word, /*  VTTRegions= */[])) {
           console.warning(
             'VTT parser encountered an invalid VTT setting: ', word,
             ' The setting will be ignored.')
@@ -396,7 +396,7 @@ export default class Mp4VttParser {
   }
 }
 
-/**
+/* *
  * @typedef {{
  *    duration: ?number,
  *    sampleSize: ?number,
@@ -416,4 +416,4 @@ export default class Mp4VttParser {
 Mp4VttParser.TimeSegment
 
 TextEngine.registerParser(
-  'application/mp4; codecs="wvtt"', () => new Mp4VttParser())
+  'application/mp4; codecs=`wvtt`', () => new Mp4VttParser())

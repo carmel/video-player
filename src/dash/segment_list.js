@@ -6,11 +6,11 @@ import Functional from '../util/functional'
 import Iterables from '../util/iterables'
 import ManifestParserUtils from '../util/manifest_parser_utils'
 import XmlUtils from '../util/xml_utils'
-/**
+/* *
  * @summary A set of functions for parsing SegmentList elements.
  */
 export default class SegmentList {
-  /**
+  /* *
    * Creates a new StreamInfo object.
    * Updates the existing SegmentIndex, if any.
    *
@@ -29,7 +29,7 @@ export default class SegmentList {
 
     SegmentList.checkSegmentListInfo_(context, info)
 
-    /** @type {SegmentIndex} */
+    /* * @type {SegmentIndex} */
     let segmentIndex = null
     let id = null
     if (context.period.id && context.representation.id) {
@@ -67,7 +67,7 @@ export default class SegmentList {
     }
   }
 
-  /**
+  /* *
    * @param {?DashParser.InheritanceFrame} frame
    * @return {Element}
    * @private
@@ -76,7 +76,7 @@ export default class SegmentList {
     return frame.segmentList
   }
 
-  /**
+  /* *
    * Parses the SegmentList items to create an info object.
    *
    * @param {DashParser.Context} context
@@ -117,7 +117,7 @@ export default class SegmentList {
     }
   }
 
-  /**
+  /* *
    * Checks whether a SegmentListInfo object is valid.
    *
    * @param {DashParser.Context} context
@@ -164,7 +164,7 @@ export default class SegmentList {
     }
   }
 
-  /**
+  /* *
    * Creates an array of segment references for the given data.
    *
    * @param {number} periodStart in seconds.
@@ -193,7 +193,7 @@ export default class SegmentList {
     const appendWindowEnd = periodDuration
       ? periodStart + periodDuration : Infinity
 
-    /** @type {!Array.<!SegmentReference>} */
+    /* * @type {!Array.<!SegmentReference>} */
     const references = []
     let prevEndTime = info.startTime
     for (const i of Iterables.range(max)) {
@@ -236,7 +236,7 @@ export default class SegmentList {
     return references
   }
 
-  /**
+  /* *
    * Parses the media URIs from the context.
    *
    * @param {DashParser.Context} context
@@ -244,7 +244,7 @@ export default class SegmentList {
    * @private
    */
   static parseMediaSegments_(context) {
-    /** @type {!Array.<!Element>} */
+    /* * @type {!Array.<!Element>} */
     const segmentLists = [
       context.representation.segmentList,
       context.adaptationSet.segmentList,
@@ -275,7 +275,7 @@ export default class SegmentList {
   }
 }
 
-/**
+/* *
  * @typedef {{
  *   mediaUri: string,
  *   start: number,
@@ -291,7 +291,7 @@ export default class SegmentList {
  */
 SegmentList.MediaSegment
 
-/**
+/* *
  * @typedef {{
  *   segmentDuration: ?number,
  *   startTime: number,

@@ -7,11 +7,11 @@ import Iterables from '../util/iterables'
 import ManifestParserUtils from '../util/manifest_parser_utils'
 import ObjectUtils from '../util/object_utils'
 
-/**
+/* *
  * @summary A set of functions for parsing SegmentTemplate elements.
  */
 export default class SegmentTemplate {
-  /**
+  /* *
    * Creates a new StreamInfo object.
    * Updates the existing SegmentIndex, if any.
    *
@@ -68,7 +68,7 @@ export default class SegmentTemplate {
         }
       }
     } else {
-      /** @type {SegmentIndex} */
+      /* * @type {SegmentIndex} */
       let segmentIndex = null
       let id = null
       if (context.period.id && context.representation.id) {
@@ -118,7 +118,7 @@ export default class SegmentTemplate {
     }
   }
 
-  /**
+  /* *
    * @param {?DashParser.InheritanceFrame} frame
    * @return {Element}
    * @private
@@ -127,7 +127,7 @@ export default class SegmentTemplate {
     return frame.segmentTemplate
   }
 
-  /**
+  /* *
    * Parses a SegmentTemplate element into an info object.
    *
    * @param {DashParser.Context} context
@@ -158,7 +158,7 @@ export default class SegmentTemplate {
     }
   }
 
-  /**
+  /* *
    * Verifies a SegmentTemplate info object.
    *
    * @param {DashParser.Context} context
@@ -210,7 +210,7 @@ export default class SegmentTemplate {
     }
   }
 
-  /**
+  /* *
    * Generates a SegmentIndex from an index URL template.
    *
    * @param {DashParser.Context} context
@@ -236,7 +236,7 @@ export default class SegmentTemplate {
       info.scaledPresentationTimeOffset)
   }
 
-  /**
+  /* *
    * Generates a SegmentIndex from fixed-duration segments.
    *
    * @param {DashParser.Context} context
@@ -279,7 +279,7 @@ export default class SegmentTemplate {
 
     // Computes the range of presentation timestamps both within the period and
     // available.  This is an intersection of the period range and the
-    // availability window.
+    // availability
     const computeAvailablePeriodRange = () => {
       return [
         Math.max(
@@ -366,12 +366,12 @@ export default class SegmentTemplate {
         segmentStart,
         segmentEnd,
         getUris,
-        /* startByte= */ 0,
-        /* endByte= */ null,
+        /*  startByte= */ 0,
+        /*  endByte= */ null,
         initSegmentReference,
         timestampOffset,
-        /* appendWindowStart= */ periodStart,
-        /* appendWindowEnd= */ periodEnd)
+        /*  appendWindowStart= */ periodStart,
+        /*  appendWindowEnd= */ periodEnd)
     }
 
     for (let position = minPosition; position <= maxPosition; ++position) {
@@ -379,7 +379,7 @@ export default class SegmentTemplate {
       references.push(reference)
     }
 
-    /** @type {SegmentIndex} */
+    /* * @type {SegmentIndex} */
     const segmentIndex = new SegmentIndex(references)
 
     // If the availability timeline currently ends before the period, we will
@@ -389,7 +389,7 @@ export default class SegmentTemplate {
       // references once every |segmentDuration| seconds.
       let nextPosition = maxPosition + 1
       segmentIndex.updateEvery(segmentDuration, () => {
-        // Evict any references outside the window.
+        // Evict any references outside the
         segmentIndex.evict(presentationTimeline.getSegmentAvailabilityStart())
 
         // Compute any new references that need to be added.
@@ -408,7 +408,7 @@ export default class SegmentTemplate {
     return Promise.resolve(segmentIndex)
   }
 
-  /**
+  /* *
    * Creates segment references from a timeline.
    *
    * @param {DashParser.Context} context
@@ -429,7 +429,7 @@ export default class SegmentTemplate {
     const appendWindowEnd = periodDuration
       ? periodStart + periodDuration : Infinity
 
-    /** @type {!Array.<!SegmentReference>} */
+    /* * @type {!Array.<!SegmentReference>} */
     const references = []
     const enum_ = (it) => Iterables.enumerate(it)
     for (const { i, item: { start, unscaledStart, end }} of enum_(info.timeline)) {
@@ -462,8 +462,8 @@ export default class SegmentTemplate {
         periodStart + start,
         periodStart + end,
         createUris,
-        /* startByte= */ 0,
-        /* endByte= */ null,
+        /*  startByte= */ 0,
+        /*  endByte= */ null,
         initSegmentReference,
         timestampOffset,
         appendWindowStart,
@@ -473,7 +473,7 @@ export default class SegmentTemplate {
     return references
   }
 
-  /**
+  /* *
    * Creates an init segment reference from a context object.
    *
    * @param {DashParser.Context} context
@@ -507,7 +507,7 @@ export default class SegmentTemplate {
   }
 }
 
-/**
+/* *
  * @typedef {{
  *   timescale: number,
  *   segmentDuration: ?number,

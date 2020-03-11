@@ -1,8 +1,8 @@
-/**
+/* *
  * @summary A set of map/object utility functions.
  */
 export default class MapUtils {
-  /**
+  /* *
    * @param {!Object.<KEY, VALUE>} object
    * @return {!Map.<KEY, VALUE>}
    * @template KEY,VALUE
@@ -15,7 +15,7 @@ export default class MapUtils {
 
     return map
   }
-  /**
+  /* *
    * @param {!Map.<KEY, VALUE>} map
    * @return {!Object.<KEY, VALUE>}
    * @template KEY,VALUE

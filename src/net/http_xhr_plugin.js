@@ -3,12 +3,12 @@ import NetworkingEngine from './networking_engine'
 import AbortableOperation from '../util/abortable_operation'
 import Error from '../util/error'
 
-/**
+/* *
  * @summary A networking plugin to handle http and https URIs via XHR.
  * @export
  */
 export default class HttpXHRPlugin {
-  /**
+  /* *
    * @param {string} uri
    * @param {shaka.extern.Request} request
    * @param {NetworkingEngine.RequestType} requestType
@@ -46,7 +46,7 @@ export default class HttpXHRPlugin {
         const headerLines = target.getAllResponseHeaders().trim().split('\r\n')
         const headers = {}
         for (const header of headerLines) {
-          /** @type {!Array.<string>} */
+          /* * @type {!Array.<string>} */
           const parts = header.split(': ')
           headers[parts[0].toLowerCase()] = parts.slice(1).join(': ')
         }
@@ -107,13 +107,13 @@ export default class HttpXHRPlugin {
       })
   }
 }
-/**
+/* *
  * Overridden in unit tests, but compiled out in production.
  *
  * @const {function(new: XMLHttpRequest)}
  * @private
  */
-HttpXHRPlugin.Xhr_ = window.XMLHttpRequest
+HttpXHRPlugin.Xhr_ = XMLHttpRequest
 NetworkingEngine.registerScheme(
   'http', HttpXHRPlugin.parse,
   NetworkingEngine.PluginPriority.FALLBACK)

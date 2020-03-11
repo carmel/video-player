@@ -1,4 +1,4 @@
-/**
+/* *
  * This class is used to track the time spent in arbitrary states. When told of
  * a state, it will assume that state was active until a new state is provided.
  * When provided with identical states back-to-back, the existing entry will be
@@ -8,7 +8,7 @@
  */
 export default class StateHistory {
   constructor() {
-    /**
+    /* *
      * The state that we think is still the current change. It is 'open' for
      * updating.
      *
@@ -16,7 +16,7 @@ export default class StateHistory {
      */
     this.open_ = null
 
-    /**
+    /* *
      * The stats that are 'closed' for updating. The 'open' state becomes closed
      * once we move to a new state.
      *
@@ -25,7 +25,7 @@ export default class StateHistory {
     this.closed_ = []
   }
 
-  /**
+  /* *
    * @param {string} state
    */
   update(state) {
@@ -37,7 +37,7 @@ export default class StateHistory {
     }
   }
 
-  /**
+  /* *
    * Go through all entries in the history and count how much time was spend in
    * the given state.
    *
@@ -58,7 +58,7 @@ export default class StateHistory {
     return sum
   }
 
-  /**
+  /* *
    * Get a copy of each state change entry in the history. A copy of each entry
    * is created to break the reference to the internal data.
    *
@@ -84,7 +84,7 @@ export default class StateHistory {
     return copy
   }
 
-  /**
+  /* *
    * @param {string} state
    * @private
    */
@@ -101,7 +101,7 @@ export default class StateHistory {
     }
   }
 
-  /**
+  /* *
    * @param {string} state
    * @private
    */
@@ -131,7 +131,7 @@ export default class StateHistory {
     }
   }
 
-  /**
+  /* *
    * Get the system time in seconds.
    *
    * @return {number}

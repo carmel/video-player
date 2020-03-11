@@ -1,32 +1,27 @@
 import { SegmentReference } from './segment_reference'
 // import IDestroyable from '../util/i_destroyable'
 import Timer from '../util/timer'
-import conf from '../config'
-/**
+/* *
  * SegmentIndex.
  *
  * @implements {IDestroyable}
  * @export
  */
 export default class SegmentIndex {
-  /**
+  /* *
    * @param {!Array.<!SegmentReference>} references The list of
    *   SegmentReferences, which must be sorted first by their start times
    *   (ascending) and second by their end times (ascending).  They must have
    *   continuous, increasing positions.
    */
   constructor(references) {
-    if (conf.DEBUG) {
-      SegmentIndex.assertCorrectReferences_(references)
-    }
-
-    /** @private {!Array.<!SegmentReference>} */
+    /* * @private {!Array.<!SegmentReference>} */
     this.references_ = references
 
-    /** @private {Timer} */
+    /* * @private {Timer} */
     this.timer_ = null
   }
-  /**
+  /* *
    * @override
    * @export
    */
@@ -40,7 +35,7 @@ export default class SegmentIndex {
 
     return Promise.resolve()
   }
-  /**
+  /* *
    * Finds the position of the segment for the given time, in seconds, relative
    * to the start of the presentation.  Returns the position of the segment
    * with the largest end time if more than one segment is known for the given
@@ -68,7 +63,7 @@ export default class SegmentIndex {
 
     return null
   }
-  /**
+  /* *
    * Gets the SegmentReference for the segment at the given position.
    *
    * @param {number} position The position of the segment.
@@ -88,7 +83,7 @@ export default class SegmentIndex {
 
     return this.references_[index]
   }
-  /**
+  /* *
    * Offset all segment references by a fixed amount.
    *
    * @param {number} offset The amount to add to each segment's start and end
@@ -102,7 +97,7 @@ export default class SegmentIndex {
       ref.timestampOffset += offset
     }
   }
-  /**
+  /* *
    * Merges the given SegmentReferences.  Supports extending the original
    * references only.  Will not replace old references or interleave new ones.
    *
@@ -113,10 +108,6 @@ export default class SegmentIndex {
    * @export
    */
   merge(references) {
-    if (conf.DEBUG) {
-      SegmentIndex.assertCorrectReferences_(references)
-    }
-
     let newReferences = []
     let i = 0
     let j = 0
@@ -183,26 +174,18 @@ export default class SegmentIndex {
     } else {
       newReferences = references
     }
-
-    if (conf.DEBUG) {
-      SegmentIndex.assertCorrectReferences_(newReferences)
-    }
-
     this.references_ = newReferences
   }
-  /**
+  /* *
    * Replace existing references with new ones, without merging.
    *
    * @param {!Array.<!SegmentReference>} newReferences
    * @export
    */
   replace(newReferences) {
-    if (conf.DEBUG) {
-      SegmentIndex.assertCorrectReferences_(newReferences)
-    }
     this.references_ = newReferences
   }
-  /**
+  /* *
    * Removes all SegmentReferences that end before the given time.
    *
    * @param {number} time The time in seconds.
@@ -211,7 +194,7 @@ export default class SegmentIndex {
   evict(time) {
     this.references_ = this.references_.filter((ref) => ref.endTime > time)
   }
-  /**
+  /* *
    * Also expands or contracts the last SegmentReference so it ends at the end
    * of its Period.
    *
@@ -258,7 +241,7 @@ export default class SegmentIndex {
         new SegmentReference(
           lastReference.position,
           lastReference.startTime,
-          /* endTime= */ periodEnd,
+          /*  endTime= */ periodEnd,
           lastReference.getUris,
           lastReference.startByte,
           lastReference.endByte,
@@ -267,7 +250,7 @@ export default class SegmentIndex {
           lastReference.appendWindowStart,
           lastReference.appendWindowEnd)
   }
-  /**
+  /* *
    * Updates the references every so often.  Stops when the references list
    * becomes empty.
    *
@@ -287,7 +270,7 @@ export default class SegmentIndex {
     })
     this.timer_.tickEvery(interval)
   }
-  /**
+  /* *
    * Create a SegmentIndex for a single segment of the given start time and
    * duration at the given URIs.
    *
@@ -299,48 +282,17 @@ export default class SegmentIndex {
    */
   static forSingleSegment(startTime, duration, uris) {
     const reference = new SegmentReference(
-      /* position= */ 1,
-      /* startTime= */ startTime,
-      /* endTime= */ startTime + duration,
-      /* getUris= */ () => uris,
-      /* startByte= */ 0,
-      /* endByte= */ null,
-      /* initSegmentReference= */ null,
-      /* presentationTimeOffset= */ startTime,
-      /* appendWindowStart= */ startTime,
-      /* appendWindowEnd= */ startTime + duration)
+      /*  position= */ 1,
+      /*  startTime= */ startTime,
+      /*  endTime= */ startTime + duration,
+      /*  getUris= */ () => uris,
+      /*  startByte= */ 0,
+      /*  endByte= */ null,
+      /*  initSegmentReference= */ null,
+      /*  presentationTimeOffset= */ startTime,
+      /*  appendWindowStart= */ startTime,
+      /*  appendWindowEnd= */ startTime + duration)
     return new SegmentIndex([reference])
-  }
-}
-if (conf.DEBUG) {
-  /**
-   * Asserts that the given SegmentReferences are sorted and have continuous,
-   * increasing positions.
-   *
-   * @param {!Array.<SegmentReference>} references
-   * @private
-   */
-  SegmentIndex.assertCorrectReferences_ = (references) => {
-    console.assert(references.every((r2, i) => {
-      if (i === 0) {
-        return true
-      }
-      const r1 = references[i - 1]
-      if (r2.position !== r1.position + 1) {
-        return false
-      }
-      if (r1.startTime < r2.startTime) {
-        return true
-      } else if (r1.startTime > r2.startTime) {
-        return false
-      } else {
-        if (r1.endTime <= r2.endTime) {
-          return true
-        } else {
-          return false
-        }
-      }
-    }), 'SegmentReferences are incorrect')
   }
 }
 

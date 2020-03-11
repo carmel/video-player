@@ -1,10 +1,10 @@
 import Iterables from './iterables'
-/**
+/* *
  * @summary A set of BufferSource utility functions.
  * @exportInterface
  */
 export default class BufferUtils {
-  /**
+  /* *
    * Compare two buffers for equality.  For buffers of different types, this
    * compares the underlying buffers as binary data.
    *
@@ -43,7 +43,7 @@ export default class BufferUtils {
     return true
   }
 
-  /**
+  /* *
    * Gets the underlying ArrayBuffer of the given view.  The caller needs to
    * ensure it uses the 'byteOffset' and 'byteLength' fields of the view to
    * only use the same 'view' of the data.
@@ -60,7 +60,7 @@ export default class BufferUtils {
     }
   }
 
-  /**
+  /* *
    * Gets an ArrayBuffer that contains the data from the given TypedArray.  Note
    * this will allocate a new ArrayBuffer if the object is a partial view of
    * the data.
@@ -84,7 +84,7 @@ export default class BufferUtils {
     }
   }
 
-  /**
+  /* *
    * Creates a new Uint8Array view on the same buffer.  This clamps the values
    * to be within the same view (i.e. you can't use this to move past the end
    * of the view, even if the underlying buffer is larger).  However, you can
@@ -101,7 +101,7 @@ export default class BufferUtils {
     return BufferUtils.view_(data, offset, length, Uint8Array)
   }
 
-  /**
+  /* *
    * Creates a DataView over the given buffer.
    *
    * @see toUint8
@@ -115,7 +115,7 @@ export default class BufferUtils {
     return BufferUtils.view_(buffer, offset, length, DataView)
   }
 
-  /**
+  /* *
    * @param {BufferSource} data
    * @param {number} offset
    * @param {number} length

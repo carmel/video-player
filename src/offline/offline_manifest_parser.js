@@ -4,24 +4,24 @@ import OfflineUri from './offline_uri'
 import StorageMuxer from './storage_muxer'
 import Error from '../util/error'
 
-/**
+/* *
  * @summary Creates a new offline manifest parser.
  * @implements {shaka.extern.ManifestParser}
  */
 export default class OfflineManifestParser {
   constructor() {
-    /** @private {OfflineUri} */
+    /* * @private {OfflineUri} */
     this.uri_ = null
   }
 
-  /** @override */
+  /* * @override */
   configure(config) {
     // No-op
   }
 
-  /** @override */
+  /* * @override */
   async start(uriString, playerInterface) {
-    /** @type {OfflineUri} */
+    /* * @type {OfflineUri} */
     const uri = OfflineUri.parse(uriString)
     this.uri_ = uri
 
@@ -33,7 +33,7 @@ export default class OfflineManifestParser {
         uriString)
     }
 
-    /** @type {!StorageMuxer} */
+    /* * @type {!StorageMuxer} */
     const muxer = new StorageMuxer()
 
     try {
@@ -53,26 +53,26 @@ export default class OfflineManifestParser {
     }
   }
 
-  /** @override */
+  /* * @override */
   stop() {
     return Promise.resolve()
   }
 
-  /** @override */
+  /* * @override */
   update() {
     // No-op
   }
 
-  /** @override */
+  /* * @override */
   async onExpirationUpdated(sessionId, expiration) {
     console.assert(
       this.uri_,
       'Should not get update event before start has been called')
 
-    /** @type {!OfflineUri} */
+    /* * @type {!OfflineUri} */
     const uri = this.uri_
 
-    /** @type {!StorageMuxer} */
+    /* * @type {!StorageMuxer} */
     const muxer = new StorageMuxer()
 
     try {

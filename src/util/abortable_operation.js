@@ -1,7 +1,7 @@
 import Error from '../util/error'
 import PublicPromise from '../util/public_promise'
 
-/**
+/* *
  * A utility to wrap abortable operations.  Note that these are not cancelable.
  * Cancelation implies undoing what has been done so far, whereas aborting only
  * means that futher work is stopped.
@@ -11,7 +11,7 @@ import PublicPromise from '../util/public_promise'
  * @export
  */
 export default class AbortableOperation {
-  /**
+  /* *
    * @param {!Promise.<T>} promise
    *   A Promise which represents the underlying operation.  It is resolved when
    *   the operation is complete, and rejected if the operation fails or is
@@ -25,17 +25,17 @@ export default class AbortableOperation {
    *   be rejected.
    */
   constructor(promise, onAbort) {
-    /** @const {!Promise.<T>} */
+    /* * @const {!Promise.<T>} */
     this.promise = promise
 
-    /** @private {function():!Promise} */
+    /* * @private {function():!Promise} */
     this.onAbort_ = onAbort
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.aborted_ = false
   }
 
-  /**
+  /* *
    * @param {!Error} error
    * @return {!AbortableOperation} An operation which has already
    *   failed with the error given by the caller.
@@ -47,7 +47,7 @@ export default class AbortableOperation {
       () => Promise.resolve())
   }
 
-  /**
+  /* *
    * @return {!AbortableOperation} An operation which has already
    *   failed with the error OPERATION_ABORTED.
    * @export
@@ -63,7 +63,7 @@ export default class AbortableOperation {
     return new AbortableOperation(p, () => Promise.resolve())
   }
 
-  /**
+  /* *
    * @param {U} value
    * @return {!AbortableOperation.<U>} An operation which has already
    *   completed with the given value.
@@ -76,7 +76,7 @@ export default class AbortableOperation {
       () => Promise.resolve())
   }
 
-  /**
+  /* *
    * @param {!Promise.<U>} promise
    * @return {!AbortableOperation.<U>} An operation which cannot be
    *   aborted.  It will be completed when the given Promise is resolved, or
@@ -92,7 +92,7 @@ export default class AbortableOperation {
       () => promise.catch(() => {}))
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -101,7 +101,7 @@ export default class AbortableOperation {
     return this.onAbort_()
   }
 
-  /**
+  /* *
    * @param {!Array.<!AbortableOperation>} operations
    * @return {!AbortableOperation} An operation which is resolved
    *   when all operations are successful and fails when any operation fails.
@@ -114,7 +114,7 @@ export default class AbortableOperation {
       () => Promise.all(operations.map((op) => op.abort())))
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -123,7 +123,7 @@ export default class AbortableOperation {
     return this
   }
 
-  /**
+  /* *
    * @param {(undefined|
    *          function(T):U|
    *          function(T):!Promise.<U>|
@@ -197,7 +197,7 @@ export default class AbortableOperation {
       () => abort())
   }
 
-  /**
+  /* *
    * @param {(function(T):U|
    *          function(T):!Promise.<U>|
    *          function(T):!AbortableOperation.<U>|
@@ -240,7 +240,7 @@ export default class AbortableOperation {
   }
 }
 
-/**
+/* *
  * @const {!Promise.<T>}
  * @exportInterface
  */

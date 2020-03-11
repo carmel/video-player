@@ -1,11 +1,11 @@
-/**
+/* *
  * A class that defines what a library version is within the deprecation
  * system. Within deprecation we only care about the major and minor versions.
  *
  * @final
  */
 export default class Version {
-  /**
+  /* *
    * @param {number} major
    * @param {number} minor
    */
@@ -14,13 +14,13 @@ export default class Version {
     this.minor_ = minor
   }
 
-  /** @return {number} */
+  /* * @return {number} */
   major() { return this.major_ }
 
-  /** @return {number} */
+  /* * @return {number} */
   minor() { return this.minor_ }
 
-  /**
+  /* *
    * Returns:
    *  - positive if |this| > |other|
    *  - zero if |this| == |other|
@@ -36,12 +36,12 @@ export default class Version {
     return majorCheck || minorCheck
   }
 
-  /** @override */
+  /* * @override */
   toString() {
     return 'v' + this.major_ + '.' + this.minor_
   }
 
-  /**
+  /* *
    * Parse the major and minor values out of a version string that is assumed
    * to follow the grammar: 'vMAJOR.MINOR.'. What comes after the last '.' we
    * will ignore.
@@ -53,7 +53,7 @@ export default class Version {
     // Make sure to drop the 'v' from the front. We limit the number of splits
     // to two as we don't care what happens after the minor version number.
     // For example: 'a.b.c.d'.split('.', 2) == ['a', 'b']
-    const components = versionString.substring(1).split('.', /* limit= */ 2)
+    const components = versionString.substring(1).split('.', /*  limit= */ 2)
 
     return new Version(
       Number(components[0]),

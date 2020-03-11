@@ -1,13 +1,13 @@
 import Iterables from '../util/iterables'
 import MimeUtils from '../util/mime_utils'
 
-/**
+/* *
  * A set of variants that we want to adapt between.
  *
  * @final
  */
 export default class AdaptationSet {
-  /**
+  /* *
    * @param {shaka.extern.Variant} root
    *    The variant that all other variants will be tested against when being
    *    added to the adaptation set. If a variant is not compatible with the
@@ -18,9 +18,9 @@ export default class AdaptationSet {
    *    adaptation set.
    */
   constructor(root, candidates) {
-    /** @private {shaka.extern.Variant} */
+    /* * @private {shaka.extern.Variant} */
     this.root_ = root
-    /** @private {!Set.<shaka.extern.Variant>} */
+    /* * @private {!Set.<shaka.extern.Variant>} */
     this.variants_ = new Set([root])
 
     // Try to add all the candidates. If they cannot be added (because they
@@ -31,7 +31,7 @@ export default class AdaptationSet {
     }
   }
 
-  /**
+  /* *
    * @param {shaka.extern.Variant} variant
    * @return {boolean}
    */
@@ -47,7 +47,7 @@ export default class AdaptationSet {
     return false
   }
 
-  /**
+  /* *
    * Check if |variant| can be included with the set. If |canInclude| returns
    * |false|, calling |add| will result in it being ignored.
    *
@@ -58,7 +58,7 @@ export default class AdaptationSet {
     return AdaptationSet.areAdaptable(this.root_, variant)
   }
 
-  /**
+  /* *
    * @param {shaka.extern.Variant} a
    * @param {shaka.extern.Variant} b
    * @return {boolean}
@@ -100,14 +100,14 @@ export default class AdaptationSet {
     return true
   }
 
-  /**
+  /* *
    * @return {!Iterable.<shaka.extern.Variant>}
    */
   values() {
     return this.variants_.values()
   }
 
-  /**
+  /* *
    * Check if we can switch between two audio streams.
    *
    * @param {shaka.extern.Stream} a
@@ -136,7 +136,7 @@ export default class AdaptationSet {
     return true
   }
 
-  /**
+  /* *
    * Check if we can switch between two video streams.
    *
    * @param {shaka.extern.Stream} a
@@ -160,7 +160,7 @@ export default class AdaptationSet {
     return true
   }
 
-  /**
+  /* *
    * Check if we can switch between two streams based on their codec and mime
    * type.
    *
@@ -206,7 +206,7 @@ export default class AdaptationSet {
     return true
   }
 
-  /**
+  /* *
    * Check if two role lists are the equal. This will take into account all
    * unique behaviours when comparing roles.
    *

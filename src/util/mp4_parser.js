@@ -1,21 +1,21 @@
 import DataViewReader from './data_view_reader'
 import Iterables from './iterables'
 import Functional from './functional'
-/**
+/* *
  * @export
  */
 export default class Mp4Parser {
   constructor() {
-    /** @private {!Object.<number, Mp4Parser.BoxType_>} */
+    /* * @private {!Object.<number, Mp4Parser.BoxType_>} */
     this.headers_ = []
 
-    /** @private {!Object.<number, !Mp4Parser.CallbackType>} */
+    /* * @private {!Object.<number, !Mp4Parser.CallbackType>} */
     this.boxDefinitions_ = []
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.done_ = false
   }
-  /**
+  /* *
    * Declare a box type as a Box.
    *
    * @param {string} type
@@ -29,7 +29,7 @@ export default class Mp4Parser {
     this.boxDefinitions_[typeCode] = definition
     return this
   }
-  /**
+  /* *
    * Declare a box type as a Full Box.
    *
    * @param {string} type
@@ -43,7 +43,7 @@ export default class Mp4Parser {
     this.boxDefinitions_[typeCode] = definition
     return this
   }
-  /**
+  /* *
    * Stop parsing.  Useful for extracting information from partial segments and
    * avoiding an out-of-bounds error once you find what you are looking for.
    *
@@ -52,7 +52,7 @@ export default class Mp4Parser {
   stop() {
     this.done_ = true
   }
-  /**
+  /* *
    * Parse the given data using the added callbacks.
    *
    * @param {!BufferSource} data
@@ -70,7 +70,7 @@ export default class Mp4Parser {
       this.parseNext(0, reader, partialOkay)
     }
   }
-  /**
+  /* *
    * Parse the next box on the current level.
    *
    * @param {number} absStart The absolute start position in the original
@@ -124,7 +124,7 @@ export default class Mp4Parser {
       const payloadReader = new DataViewReader(
         payload, DataViewReader.Endianness.BIG_ENDIAN)
 
-      /** @type {shaka.extern.ParsedBox} */
+      /* * @type {shaka.extern.ParsedBox} */
       const box = {
         parser: this,
         partialOkay: partialOkay || false,
@@ -147,7 +147,7 @@ export default class Mp4Parser {
       reader.skip(skipLength)
     }
   }
-  /**
+  /* *
    * A callback that tells the Mp4 parser to treat the body of a box as a series
    * of boxes. The number of boxes is limited by the size of the parent box.
    *
@@ -163,7 +163,7 @@ export default class Mp4Parser {
       box.parser.parseNext(box.start + header, box.reader, box.partialOkay)
     }
   }
-  /**
+  /* *
    * A callback that tells the Mp4 parser to treat the body of a box as a sample
    * description. A sample description box has a fixed number of children. The
    * number of children is represented by a 4 byte unsigned integer. Each child
@@ -186,7 +186,7 @@ export default class Mp4Parser {
       }
     }
   }
-  /**
+  /* *
    * Create a callback that tells the Mp4 parser to treat the body of a box as a
    * binary blob and to parse the body's contents using the provided callback.
    *
@@ -200,7 +200,7 @@ export default class Mp4Parser {
       callback(box.reader.readBytes(all))
     }
   }
-  /**
+  /* *
    * Convert an ascii string name to the integer type for a box.
    *
    * @param {string} name The name of the box. The name must be four
@@ -219,7 +219,7 @@ export default class Mp4Parser {
     }
     return code
   }
-  /**
+  /* *
    * Convert an integer type from a box into an ascii string name.
    * Useful for debugging.
    *
@@ -236,12 +236,12 @@ export default class Mp4Parser {
     return name
   }
 }
-/**
+/* *
  * @typedef {function(!shaka.extern.ParsedBox)}
  * @exportInterface
  */
 Mp4Parser.CallbackType
-/**
+/* *
  * An enum used to track the type of box so that the correct values can be
  * read from the header.
  *

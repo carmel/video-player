@@ -1,8 +1,8 @@
-/**
+/* *
  * @summary A set of utility functions for dealing with MIME types.
  */
 export default class MimeUtils {
-  /**
+  /* *
    * Takes a MIME type and optional codecs string and produces the full MIME
    * type.
    *
@@ -13,12 +13,12 @@ export default class MimeUtils {
   static getFullType(mimeType, codecs) {
     let fullMimeType = mimeType
     if (codecs) {
-      fullMimeType += '; codecs="' + codecs + '"'
+      fullMimeType += `; codecs='${codecs}'`
     }
     return fullMimeType
   }
 
-  /**
+  /* *
    * Takes a Stream object and produces an extended MIME type with information
    * beyond the container and codec type, when available.
    *
@@ -32,14 +32,14 @@ export default class MimeUtils {
     extendedMimeParams.forEach((mimeKey, streamKey) => {
       const value = stream[streamKey]
       if (value) {
-        components.push(mimeKey + '="' + value + '"')
+        components.push(`${mimeKey}='${value}'`)
       }
     })
 
     return components.join(';')
   }
 
-  /**
+  /* *
    * Split a list of codecs encoded in a string into a list of codecs.
    * @param {string} codecs
    * @return {!Array.<string>}
@@ -48,7 +48,7 @@ export default class MimeUtils {
     return codecs.split(',')
   }
 
-  /**
+  /* *
    * Get the base codec from a codec string.
    *
    * @param {string} codecString
@@ -59,7 +59,7 @@ export default class MimeUtils {
     return parts[0]
   }
 
-  /**
+  /* *
    * Get the base and profile of a codec string. Where [0] will be the codec
    * base and [1] will be the profile.
    * @param {string} codecString
@@ -78,7 +78,7 @@ export default class MimeUtils {
     return [base, profile]
   }
 }
-/**
+/* *
  * A map from Stream object keys to MIME type parameters.  These should be
  * ignored by platforms that do not recognize them.
  *
@@ -94,7 +94,7 @@ MimeUtils.EXTENDED_MIME_PARAMETERS_ = new Map()
   .set('width', 'width')
   .set('height', 'height')
   .set('channelsCount', 'channels')
-/**
+/* *
  * A mimetype created for CEA closed captions.
  * @const {string}
  */

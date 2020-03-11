@@ -3,20 +3,20 @@ import TtmlTextParser from './ttml_text_parser'
 import Error from '../util/error'
 import Mp4Parser from '../util/mp4_parser'
 
-/**
+/* *
  * @implements {shaka.extern.TextParser}
  * @export
  */
 export default class Mp4TtmlParser {
   constructor() {
-    /**
+    /* *
      * @type {!shaka.extern.TextParser}
      * @private
      */
     this.parser_ = new TtmlTextParser()
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -43,7 +43,7 @@ export default class Mp4TtmlParser {
     }
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -60,7 +60,7 @@ export default class Mp4TtmlParser {
         // mdats.
         payload = payload.concat(this.parser_.parseMedia(data, time))
       }))
-    parser.parse(data, /* partialOkay= */ false)
+    parser.parse(data, /*  partialOkay= */ false)
 
     if (!sawMDAT) {
       throw new Error(
@@ -73,9 +73,9 @@ export default class Mp4TtmlParser {
   }
 }
 TextEngine.registerParser(
-  'application/mp4; codecs="stpp"', () => new Mp4TtmlParser())
+  'application/mp4; codecs=`stpp`', () => new Mp4TtmlParser())
 TextEngine.registerParser(
-  'application/mp4; codecs="stpp.ttml.im1t"',
+  'application/mp4; codecs=`stpp.ttml.im1t`',
   () => new Mp4TtmlParser())
 // Legacy codec string uses capital 'TTML', i.e.: prior to HLS rfc8216bis:
 //   Note that if a Variant Stream specifies one or more Renditions that
@@ -83,5 +83,5 @@ TextEngine.registerParser(
 //   format identifier such as 'stpp.ttml.im1t'.
 // (https://tools.ietf.org/html/draft-pantos-hls-rfc8216bis-05#section-4.4.5.2)
 TextEngine.registerParser(
-  'application/mp4; codecs="stpp.TTML.im1t"',
+  'application/mp4; codecs=`stpp.TTML.im1t`',
   () => new Mp4TtmlParser())

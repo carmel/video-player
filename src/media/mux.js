@@ -1,15 +1,15 @@
 export class CaptionParser {
-  /**
+  /* *
    * Parser for CEA closed captions embedded in video streams for Dash.
    * @constructor
    * @struct
    */
   // constructor() {}
 
-  /** Initializes the closed caption parser. */
+  /* * Initializes the closed caption parser. */
   init() {}
 
-  /**
+  /* *
    * Return true if a new video track is selected or if the timescale is
    * changed.
    * @param {!Array.<number>} videoTrackIds A list of video tracks found in the
@@ -20,7 +20,7 @@ export class CaptionParser {
    */
   isNewInit(videoTrackIds, timescales) {}
 
-  /**
+  /* *
    * Parses embedded CEA closed captions and interacts with the underlying
    * CaptionStream, and return the parsed captions.
    * @param {!Uint8Array} segment The fmp4 segment containing embedded captions
@@ -32,15 +32,15 @@ export class CaptionParser {
    */
   parse(segment, videoTrackIds, timescales) {}
 
-  /** Clear the parsed closed captions data for new data. */
+  /* * Clear the parsed closed captions data for new data. */
   clearParsedCaptions() {}
 
-  /** Reset the captions stream. */
+  /* * Reset the captions stream. */
   resetCaptionStream() {}
 }
 
 export class probe {
-  /**
+  /* *
    * Parses an MP4 initialization segment and extracts the timescale
    * values for any declared tracks.
    *
@@ -50,7 +50,7 @@ export class probe {
    */
   static timescale(init) {}
 
-  /**
+  /* *
     * Find the trackIds of the video tracks in this source.
     * Found by parsing the Handler Reference and Track Header Boxes:
     *
@@ -61,30 +61,30 @@ export class probe {
 }
 
 export class Transmuxer {
-  /** @param {Object=} options */
+  /* * @param {Object=} options */
   // constructor(options) {}
-  /** @param {number} time */
+  /* * @param {number} time */
   setBaseMediaDecodeTime(time) {}
 
-  /** @param {!Uint8Array} data */
+  /* * @param {!Uint8Array} data */
   push(data) {}
 
   flush() {}
 
-  /**
+  /* *
    * Add a handler for a specified event type.
    * @param {string} type Event name
    * @param {Function} listener The callback to be invoked
    */
   on(type, listener) {}
 
-  /**
+  /* *
    * Remove a handler for a specified event type.
    * @param {string} type Event name
    * @param {Function} listener The callback to be removed
    */
   off(type, listener) {}
 
-  /** Remove all handlers and clean up. */
+  /* * Remove all handlers and clean up. */
   dispose() {}
 }

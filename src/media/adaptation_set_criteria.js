@@ -2,7 +2,7 @@ import AdaptationSet from '../media/adaptation_set'
 import StreamUtils from '../util/stream_utils'
 import LanguageUtils from '../util/language_utils'
 
-/**
+/* *
  * An adaptation set criteria is a unit of logic that can take a set of
  * variants and return a subset of variants that should (and can) be
  * adapted between.
@@ -10,7 +10,7 @@ import LanguageUtils from '../util/language_utils'
  * @interface
  */
 export class AdaptationSetCriteria {
-  /**
+  /* *
    * Take a set of variants, and return a subset of variants that can be
    * adapted between.
    *
@@ -19,16 +19,16 @@ export class AdaptationSetCriteria {
    */
   create(variants) {}
 }
-/**
+/* *
  * @implements {AdaptationSetCriteria}
  * @final
  */
 export class ExampleBasedCriteria {
-  /**
+  /* *
    * @param {shaka.extern.Variant} example
    */
   constructor(example) {
-    /** @private {shaka.extern.Variant} */
+    /* * @private {shaka.extern.Variant} */
     this.example_ = example
 
     // We can't know if role and label are really important, so we don't use
@@ -39,12 +39,12 @@ export class ExampleBasedCriteria {
       ? example.audio.channelsCount
       : 0
 
-    /** @private {!AdaptationSetCriteria} */
+    /* * @private {!AdaptationSetCriteria} */
     this.fallback_ = new PreferenceBasedCriteria(
       example.language, role, channelCount, label)
   }
 
-  /** @override */
+  /* * @override */
   create(variants) {
     // We can't assume that the example is in |variants| because it could
     // actually be from another period.
@@ -62,12 +62,12 @@ export class ExampleBasedCriteria {
     }
   }
 }
-/**
+/* *
  * @implements {AdaptationSetCriteria}
  * @final
  */
 export class PreferenceBasedCriteria {
-  /**
+  /* *
    * @param {string} language
    * @param {string} role
    * @param {number} channelCount
@@ -75,19 +75,19 @@ export class PreferenceBasedCriteria {
    * @param {string=} type
    */
   constructor(language, role, channelCount, label = '', type = '') {
-    /** @private {string} */
+    /* * @private {string} */
     this.language_ = language
-    /** @private {string} */
+    /* * @private {string} */
     this.role_ = role
-    /** @private {number} */
+    /* * @private {number} */
     this.channelCount_ = channelCount
-    /** @private {string} */
+    /* * @private {string} */
     this.label_ = label
-    /** @private {string} */
+    /* * @private {string} */
     this.type_ = type
   }
 
-  /** @override */
+  /* * @override */
   create(variants) {
     const Class = PreferenceBasedCriteria
     let current = []
@@ -145,17 +145,17 @@ export class PreferenceBasedCriteria {
     return set
   }
 
-  /**
+  /* *
    * @param {!Array.<shaka.extern.Variant>} variants
    * @param {string} preferredLanguage
    * @return {!Array.<shaka.extern.Variant>}
    * @private
    */
   static filterByLanguage_(variants, preferredLanguage) {
-    /** @type {string} */
+    /* * @type {string} */
     const preferredLocale = LanguageUtils.normalize(preferredLanguage)
 
-    /** @type {?string} */
+    /* * @type {?string} */
     const closestLocale = LanguageUtils.findClosestLocale(
       preferredLocale,
       variants.map((variant) => LanguageUtils.getLocaleForVariant(variant)))
@@ -171,7 +171,7 @@ export class PreferenceBasedCriteria {
     })
   }
 
-  /**
+  /* *
    * Filter Variants by role.
    *
    * @param {!Array.<shaka.extern.Variant>} variants
@@ -194,7 +194,7 @@ export class PreferenceBasedCriteria {
     })
   }
 
-  /**
+  /* *
    * Filter Variants by label.
    *
    * @param {!Array.<shaka.extern.Variant>} variants

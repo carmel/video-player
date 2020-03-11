@@ -1,7 +1,7 @@
 // import IPlayheadObserver from './playhead_observer'
 import Periods from '../util/periods'
 
-/**
+/* *
  * The period observer keeps track of which period we are in and calls the
  * |onPeriodChange| callback whenever we change periods.
  *
@@ -9,17 +9,17 @@ import Periods from '../util/periods'
  * @final
  */
 export default class PeriodObserver {
-  /**
+  /* *
    * The period observer needs an always-up-to-date collection of periods,
    * and right now the only way to have that is to reference the manifest.
    *
    * @param {shaka.extern.Manifest} manifest
    */
   constructor(manifest) {
-    /** @private {?shaka.extern.Manifest} */
+    /* * @private {?shaka.extern.Manifest} */
     this.manifest_ = manifest
 
-    /**
+    /* *
      * This will be which period we think the playhead is currently in. If it is
      * |null|, it means we don't know. We say 'we think' because this may become
      * out-of-date between updates.
@@ -28,7 +28,7 @@ export default class PeriodObserver {
      */
     this.currentPeriod_ = null
 
-    /**
+    /* *
      * The callback for when we change periods. To avoid null-checks, assign it
      * a no-op when there is no external callback assigned to it. When we move
      * into a new period, this callback will be called with the new period.
@@ -38,7 +38,7 @@ export default class PeriodObserver {
     this.onChangedPeriods_ = (period) => {}
   }
 
-  /** @override */
+  /* * @override */
   release() {
     // Break all internal references.
     this.manifest_ = null
@@ -46,7 +46,7 @@ export default class PeriodObserver {
     this.onChangedPeriods_ = (period) => {}
   }
 
-  /** @override */
+  /* * @override */
   poll(positionInSeconds, wasSeeking) {
     // We detect changes in period by comparing where we think we are against
     // where we actually are.
@@ -59,7 +59,7 @@ export default class PeriodObserver {
     this.currentPeriod_ = actualPeriod
   }
 
-  /**
+  /* *
    * Set all callbacks. This will override any previous calls to |setListeners|.
    *
    * @param {function(shaka.extern.Period)} onChangedPeriods
@@ -69,7 +69,7 @@ export default class PeriodObserver {
     this.onChangedPeriods_ = onChangedPeriods
   }
 
-  /**
+  /* *
    * Find which period we are most likely in based on the current manifest and
    * current time. The value here may be different than |this.currentPeriod_|,
    * if that is true, it means we changed periods since the last time we updated

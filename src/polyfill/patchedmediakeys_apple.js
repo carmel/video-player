@@ -6,16 +6,16 @@ import FakeEvent from '../util/FakeEvent'
 import FakeEventTarget from '../util/fake_event_target'
 import PublicPromise from '../util/public_promise'
 
-/**
+/* *
  * @summary A polyfill to implement modern, standardized EME on top of Apple's
  * prefixed EME in Safari.
  */
 export default class PatchedMediaKeysApple {
-  /**
+  /* *
    * Installs the polyfill if needed.
    */
   static install() {
-    if (!window.HTMLVideoElement || !window.WebKitMediaKeys) {
+    if (!HTMLVideoElement || !window.WebKitMediaKeys) {
       // No HTML5 video or no prefixed EME.
       return
     }
@@ -52,7 +52,7 @@ export default class PatchedMediaKeysApple {
         PatchedMediaKeysApple.requestMediaKeySystemAccess
   }
 
-  /**
+  /* *
    * An implementation of navigator.requestMediaKeySystemAccess.
    * Retrieves a MediaKeySystemAccess object.
    *
@@ -64,20 +64,20 @@ export default class PatchedMediaKeysApple {
   static requestMediaKeySystemAccess(keySystem, supportedConfigurations) {
     console.debug('PatchedMediaKeysApple.requestMediaKeySystemAccess')
     console.assert(this === navigator,
-      'bad "this" for requestMediaKeySystemAccess')
+      'bad `this` for requestMediaKeySystemAccess')
 
     // Alias.
     const PatchedMediaKeysApple = PatchedMediaKeysApple
     try {
       const access = new PatchedMediaKeysApple.MediaKeySystemAccess(
         keySystem, supportedConfigurations)
-      return Promise.resolve(/** @type {!MediaKeySystemAccess} */ (access))
+      return Promise.resolve(/* * @type {!MediaKeySystemAccess} */ (access))
     } catch (exception) {
       return Promise.reject(exception)
     }
   }
 
-  /**
+  /* *
    * An implementation of HTMLMediaElement.prototype.setMediaKeys.
    * Attaches a MediaKeys object to the media element.
    *
@@ -88,16 +88,16 @@ export default class PatchedMediaKeysApple {
   static setMediaKeys(mediaKeys) {
     console.debug('PatchedMediaKeysApple.setMediaKeys')
     console.assert(this instanceof HTMLMediaElement,
-      'bad "this" for setMediaKeys')
+      'bad `this` for setMediaKeys')
 
     // Alias
     const PatchedMediaKeysApple = PatchedMediaKeysApple
 
     const newMediaKeys =
-    /** @type {PatchedMediaKeysApple.MediaKeys} */ (
+    /* * @type {PatchedMediaKeysApple.MediaKeys} */ (
         mediaKeys)
     const oldMediaKeys =
-    /** @type {PatchedMediaKeysApple.MediaKeys} */ (
+    /* * @type {PatchedMediaKeysApple.MediaKeys} */ (
         this.mediaKeys)
 
     if (oldMediaKeys && oldMediaKeys !== newMediaKeys) {
@@ -121,7 +121,7 @@ export default class PatchedMediaKeysApple {
     return Promise.resolve()
   }
 
-  /**
+  /* *
    * Handler for the native media elements webkitneedkey event.
    *
    * @this {!HTMLMediaElement}
@@ -133,14 +133,14 @@ export default class PatchedMediaKeysApple {
 
     const PatchedMediaKeysApple = PatchedMediaKeysApple
     const mediaKeys =
-    /** @type {PatchedMediaKeysApple.MediaKeys} */(
+    /* * @type {PatchedMediaKeysApple.MediaKeys} */(
         this.mediaKeys)
     console.assert(mediaKeys instanceof PatchedMediaKeysApple.MediaKeys,
       'non-polyfill instance of newMediaKeys')
 
     console.assert(event.initData !== null, 'missing init data!')
 
-    // NOTE: Because "this" is a real EventTarget, the event we dispatch here
+    // NOTE: Because `this` is a real EventTarget, the event we dispatch here
     // must also be a real Event.
     const event2 = new Event('encrypted')
     // TODO: validate this initDataType against the unprefixed version
@@ -150,23 +150,23 @@ export default class PatchedMediaKeysApple {
     this.dispatchEvent(event2)
   }
 }
-/**
+/* *
  * An implementation of MediaKeySystemAccess.
  *
  * @implements {MediaKeySystemAccess}
  */
 PatchedMediaKeysApple.MediaKeySystemAccess = class {
-  /**
+  /* *
    * @param {string} keySystem
    * @param {!Array.<!MediaKeySystemConfiguration>} supportedConfigurations
    */
   constructor(keySystem, supportedConfigurations) {
     console.debug('PatchedMediaKeysApple.MediaKeySystemAccess')
 
-    /** @type {string} */
+    /* * @type {string} */
     this.keySystem = keySystem
 
-    /** @private {!MediaKeySystemConfiguration} */
+    /* * @private {!MediaKeySystemConfiguration} */
     this.configuration_
 
     // Optimization: WebKitMediaKeys.isTypeSupported delays responses by a
@@ -191,7 +191,7 @@ PatchedMediaKeysApple.MediaKeySystemAccess = class {
     throw unsupportedKeySystemError
   }
 
-  /**
+  /* *
    * Check a single config for MediaKeySystemAccess.
    *
    * @param {MediaKeySystemConfiguration} cfg The requested config.
@@ -209,7 +209,7 @@ PatchedMediaKeysApple.MediaKeySystemAccess = class {
     // support for.  We will return this from getConfiguration() later if
     // asked.
 
-    /** @type {!MediaKeySystemConfiguration} */
+    /* * @type {!MediaKeySystemConfiguration} */
     const newCfg = {
       'audioCapabilities': [],
       'videoCapabilities': [],
@@ -269,7 +269,7 @@ PatchedMediaKeysApple.MediaKeySystemAccess = class {
     return null
   }
 
-  /** @override */
+  /* * @override */
   createMediaKeys() {
     console.debug(
       'PatchedMediaKeysApple.MediaKeySystemAccess.createMediaKeys')
@@ -278,34 +278,34 @@ PatchedMediaKeysApple.MediaKeySystemAccess = class {
     const PatchedMediaKeysApple = PatchedMediaKeysApple
 
     const mediaKeys = new PatchedMediaKeysApple.MediaKeys(this.keySystem)
-    return Promise.resolve(/** @type {!MediaKeys} */ (mediaKeys))
+    return Promise.resolve(/* * @type {!MediaKeys} */ (mediaKeys))
   }
 
-  /** @override */
+  /* * @override */
   getConfiguration() {
     console.debug(
       'PatchedMediaKeysApple.MediaKeySystemAccess.getConfiguration')
     return this.configuration_
   }
 }
-/**
+/* *
  * An implementation of MediaKeys.
  *
  * @implements {MediaKeys}
  */
 PatchedMediaKeysApple.MediaKeys = class {
-  /** @param {string} keySystem */
+  /* * @param {string} keySystem */
   constructor(keySystem) {
     console.debug('PatchedMediaKeysApple.MediaKeys')
 
-    /** @private {!WebKitMediaKeys} */
+    /* * @private {!WebKitMediaKeys} */
     this.nativeMediaKeys_ = new window.WebKitMediaKeys(keySystem)
 
-    /** @private {!EventManager} */
+    /* * @private {!EventManager} */
     this.eventManager_ = new EventManager()
   }
 
-  /** @override */
+  /* * @override */
   createSession(sessionType) {
     console.debug('PatchedMediaKeysApple.MediaKeys.createSession')
 
@@ -323,13 +323,13 @@ PatchedMediaKeysApple.MediaKeys = class {
       this.nativeMediaKeys_, sessionType)
   }
 
-  /** @override */
+  /* * @override */
   setServerCertificate(serverCertificate) {
     console.debug('PatchedMediaKeysApple.MediaKeys.setServerCertificate')
     return Promise.resolve(false)
   }
 
-  /**
+  /* *
    * @param {HTMLMediaElement} media
    * @protected
    * @return {!Promise}
@@ -349,7 +349,7 @@ PatchedMediaKeysApple.MediaKeys = class {
 
     // Intercept and translate these prefixed EME events.
     this.eventManager_.listen(media, 'webkitneedkey',
-    /** @type {EventManager.ListenerType} */
+    /* * @type {EventManager.ListenerType} */
       (PatchedMediaKeysApple.onWebkitNeedKey_))
 
     // Wrap native HTMLMediaElement.webkitSetMediaKeys with a Promise.
@@ -371,14 +371,14 @@ PatchedMediaKeysApple.MediaKeys = class {
     }
   }
 }
-/**
+/* *
  * An implementation of MediaKeySession.
  *
  * @implements {MediaKeySession}
  */
 PatchedMediaKeysApple.MediaKeySession =
       class extends FakeEventTarget {
-        /**
+        /* *
          * @param {WebKitMediaKeys} nativeMediaKeys
          * @param {string} sessionType
          */
@@ -386,41 +386,41 @@ PatchedMediaKeysApple.MediaKeySession =
           console.debug('PatchedMediaKeysApple.MediaKeySession')
           super()
 
-          /**
+          /* *
            * The native MediaKeySession, which will be created in
            * generateRequest.
            * @private {WebKitMediaKeySession}
            */
           this.nativeMediaKeySession_ = null
 
-          /** @private {WebKitMediaKeys} */
+          /* * @private {WebKitMediaKeys} */
           this.nativeMediaKeys_ = nativeMediaKeys
 
           // Promises that are resolved later
-          /** @private {PublicPromise} */
+          /* * @private {PublicPromise} */
           this.generateRequestPromise_ = null
 
-          /** @private {PublicPromise} */
+          /* * @private {PublicPromise} */
           this.updatePromise_ = null
 
-          /** @private {!EventManager} */
+          /* * @private {!EventManager} */
           this.eventManager_ = new EventManager()
 
-          /** @type {string} */
+          /* * @type {string} */
           this.sessionId = ''
 
-          /** @type {number} */
+          /* * @type {number} */
           this.expiration = NaN
 
-          /** @type {!PublicPromise} */
+          /* * @type {!PublicPromise} */
           this.closed = new PublicPromise()
 
-          /** @type {!PatchedMediaKeysApple.MediaKeyStatusMap} */
+          /* * @type {!PatchedMediaKeysApple.MediaKeyStatusMap} */
           this.keyStatuses =
           new PatchedMediaKeysApple.MediaKeyStatusMap()
         }
 
-        /** @override */
+        /* * @override */
         generateRequest(initDataType, initData) {
           console.debug(
             'PatchedMediaKeysApple.MediaKeySession.generateRequest')
@@ -441,13 +441,13 @@ PatchedMediaKeysApple.MediaKeySession =
             // Attach session event handlers here.
             this.eventManager_.listen(
               this.nativeMediaKeySession_, 'webkitkeymessage',
-              /** @type {EventManager.ListenerType} */
+              /* * @type {EventManager.ListenerType} */
               (event) => this.onWebkitKeyMessage_(event))
             this.eventManager_.listen(session, 'webkitkeyadded',
-              /** @type {EventManager.ListenerType} */
+              /* * @type {EventManager.ListenerType} */
               (event) => this.onWebkitKeyAdded_(event))
             this.eventManager_.listen(session, 'webkitkeyerror',
-              /** @type {EventManager.ListenerType} */
+              /* * @type {EventManager.ListenerType} */
               (event) => this.onWebkitKeyError_(event))
 
             this.updateKeyStatus_('status-pending')
@@ -458,7 +458,7 @@ PatchedMediaKeysApple.MediaKeySession =
           return this.generateRequestPromise_
         }
 
-        /** @override */
+        /* * @override */
         load() {
           console.debug('PatchedMediaKeysApple.MediaKeySession.load')
 
@@ -466,7 +466,7 @@ PatchedMediaKeysApple.MediaKeySession =
             new Error('MediaKeySession.load not yet supported'))
         }
 
-        /** @override */
+        /* * @override */
         update(response) {
           console.debug('PatchedMediaKeysApple.MediaKeySession.update')
 
@@ -483,7 +483,7 @@ PatchedMediaKeysApple.MediaKeySession =
           return this.updatePromise_
         }
 
-        /** @override */
+        /* * @override */
         close() {
           console.debug('PatchedMediaKeysApple.MediaKeySession.close')
 
@@ -500,7 +500,7 @@ PatchedMediaKeysApple.MediaKeySession =
           return this.closed
         }
 
-        /** @override */
+        /* * @override */
         remove() {
           console.debug('PatchedMediaKeysApple.MediaKeySession.remove')
 
@@ -509,7 +509,7 @@ PatchedMediaKeysApple.MediaKeySession =
           'this platform'))
         }
 
-        /**
+        /* *
          * Handler for the native keymessage event on WebKitMediaKeySession.
          *
          * @param {!MediaKeyEvent} event
@@ -537,7 +537,7 @@ PatchedMediaKeysApple.MediaKeySession =
           this.dispatchEvent(event2)
         }
 
-        /**
+        /* *
          * Handler for the native keyadded event on WebKitMediaKeySession.
          *
          * @param {!MediaKeyEvent} event
@@ -561,7 +561,7 @@ PatchedMediaKeysApple.MediaKeySession =
           }
         }
 
-        /**
+        /* *
          * Handler for the native keyerror event on WebKitMediaKeySession.
          *
          * @param {!MediaKeyEvent} event
@@ -601,7 +601,7 @@ PatchedMediaKeysApple.MediaKeySession =
           }
         }
 
-        /**
+        /* *
          * Updates key status and dispatch a 'keystatuseschange' event.
          *
          * @param {string} status
@@ -613,7 +613,7 @@ PatchedMediaKeysApple.MediaKeySession =
           this.dispatchEvent(event)
         }
       }
-/**
+/* *
  * @summary An implementation of MediaKeyStatusMap.
  * This fakes a map with a single key ID.
  *
@@ -622,18 +622,18 @@ PatchedMediaKeysApple.MediaKeySession =
  */
 PatchedMediaKeysApple.MediaKeyStatusMap = class {
   constructor() {
-    /**
+    /* *
      * @type {number}
      */
     this.size = 0
 
-    /**
+    /* *
      * @private {string|undefined}
      */
     this.status_ = undefined
   }
 
-  /**
+  /* *
    * An internal method used by the session to set key status.
    * @param {string|undefined} status
    */
@@ -642,7 +642,7 @@ PatchedMediaKeysApple.MediaKeyStatusMap = class {
     this.status_ = status
   }
 
-  /**
+  /* *
    * An internal method used by the session to get key status.
    * @return {string|undefined}
    */
@@ -650,14 +650,14 @@ PatchedMediaKeysApple.MediaKeyStatusMap = class {
     return this.status_
   }
 
-  /** @override */
+  /* * @override */
   forEach(fn) {
     if (this.status_) {
       fn(this.status_, DrmEngine.DUMMY_KEY_ID.value())
     }
   }
 
-  /** @override */
+  /* * @override */
   get(keyId) {
     if (this.has(keyId)) {
       return this.status_
@@ -665,7 +665,7 @@ PatchedMediaKeysApple.MediaKeyStatusMap = class {
     return undefined
   }
 
-  /** @override */
+  /* * @override */
   has(keyId) {
     const fakeKeyId = DrmEngine.DUMMY_KEY_ID.value()
     if (this.status_ && BufferUtils.equal(keyId, fakeKeyId)) {
@@ -674,7 +674,7 @@ PatchedMediaKeysApple.MediaKeyStatusMap = class {
     return false
   }
 
-  /**
+  /* *
    * @suppress {missingReturn}
    * @override
    */
@@ -682,7 +682,7 @@ PatchedMediaKeysApple.MediaKeyStatusMap = class {
     console.assert(false, 'Not used!  Provided only for the compiler.')
   }
 
-  /**
+  /* *
    * @suppress {missingReturn}
    * @override
    */
@@ -690,7 +690,7 @@ PatchedMediaKeysApple.MediaKeyStatusMap = class {
     console.assert(false, 'Not used!  Provided only for the compiler.')
   }
 
-  /**
+  /* *
    * @suppress {missingReturn}
    * @override
    */

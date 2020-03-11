@@ -1,11 +1,11 @@
 import Iterables from '../util/iterables'
-/**
+/* *
  * @summary A one-stop installer for all polyfills.
  * @see http://enwp.org/polyfill
  * @exportInterface
  */
 export default class polyfill {
-  /**
+  /* *
    * Install all polyfills.
    * @export
    */
@@ -19,7 +19,7 @@ export default class polyfill {
     }
   }
 
-  /**
+  /* *
    * Registers a new polyfill to be installed.
    *
    * @param {function()} polyfill
@@ -39,7 +39,7 @@ export default class polyfill {
     polyfill.polyfills_.push(newItem)
   }
 }
-/**
+/* *
  * Contains the polyfills that will be installed.
  * @private {!Array.<{priority: number, callback: function()}>}
  */

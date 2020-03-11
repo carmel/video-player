@@ -4,7 +4,7 @@ import Iterables from '../util/iterables'
 import Mp4Parser from '../util/mp4_parser'
 import Functional from '../util/functional'
 export default class Mp4SegmentIndexParser {
-  /**
+  /* *
    * Parses SegmentReferences from an ISO BMFF SIDX structure.
    * @param {BufferSource} sidxData The MP4's container's SIDX.
    * @param {number} sidxOffset The SIDX's offset, in bytes, from the start of
@@ -43,14 +43,14 @@ export default class Mp4SegmentIndexParser {
     if (references) {
       return references
     } else {
-      console.error('Invalid box type, expected "sidx".')
+      console.error('Invalid box type, expected `sidx`.')
       throw new Error(
         Error.Severity.CRITICAL,
         Error.Category.MEDIA,
         Error.Code.MP4_SIDX_WRONG_BOX_TYPE)
     }
   }
-  /**
+  /* *
    * Parse a SIDX box from the given reader.
    *
    * @param {number} sidxOffset

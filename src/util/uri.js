@@ -1,75 +1,22 @@
-const ComponentIndex = {
-  SCHEME: 1,
-  USER_INFO: 2,
-  DOMAIN: 3,
-  PORT: 4,
-  PATH: 5,
-  QUERY_DATA: 6,
-  FRAGMENT: 7
-}
-
-/**
-   * Regular expression for characters that are disallowed in the scheme or
-   * userInfo part of the URI.
-   * @type {RegExp}
-   * @private
-   */
-const reDisallowedInSchemeOrUserInfo_ = /[#\/\?@]/g
-
-/**
-     * Regular expression for characters that are disallowed in a relative path.
-     * Colon is included due to RFC 3986 3.3.
-     * @type {RegExp}
-     * @private
-     */
-const reDisallowedInRelativePath_ = /[\#\?:]/g
-
-/**
-     * Regular expression for characters that are disallowed in an absolute path.
-     * @type {RegExp}
-     * @private
-     */
-const reDisallowedInAbsolutePath_ = /[\#\?]/g
-
-/**
-     * Regular expression for characters that are disallowed in the query.
-     * @type {RegExp}
-     * @private
-     */
-const reDisallowedInQuery_ = /[\#\?@]/g
-
-/**
-     * Regular expression for characters that are disallowed in the fragment.
-     * @type {RegExp}
-     * @private
-     */
-const reDisallowedInFragment_ = /#/g
-
-const splitRe_ = new RegExp(
-  '^' +
-  '(?:' +
-      '([^:/?#.]+)' + // scheme - ignore special characters
-  // used by other URL parts such as :,
-  // ?, /, #, and .
-  ':)?' +
-  '(?://' +
-      '(?:([^/?#]*)@)?' + // userInfo
-      '([^/#?]*?)' + // domain
-      '(?::([0-9]+))?' + // port
-      '(?=[/#?]|$)' + // authority-terminating character
-  ')?' +
-  '([^?#]+)?' + // path
-  '(?:\\?([^#]*))?' + // query
-  '(?:#(.*))?' + // fragment
-  '$')
-
-function isString(val) {
-  return typeof val === 'string'
-}
-
 function split(uri) {
   // See @return comment -- never null.
-  return /** @type {!Array.<string|undefined>} */ (uri.match(splitRe_))
+  return /* * @type {!Array.<string|undefined>} */ (uri.match(new RegExp(
+    '^' +
+    '(?:' +
+        '([^:/?#.]+)' + // scheme - ignore special characters
+    // used by other URL parts such as :,
+    // ?, /, #, and .
+    ':)?' +
+    '(?://' +
+        '(?:([^/?#]*)@)?' + // userInfo
+        '([^/#?]*?)' + // domain
+        '(?::([0-9]+))?' + // port
+        '(?=[/#?]|$)' + // authority-terminating character
+    ')?' +
+    '([^?#]+)?' + // path
+    '(?:\\?([^#]*))?' + // query
+    '(?:#(.*))?' + // fragment
+    '$')))
 }
 
 export default class Uri {
@@ -88,15 +35,45 @@ export default class Uri {
       // Set the parts -- decoding as we do so.
       // COMPATABILITY NOTE - In IE, unmatched fields may be empty strings,
       // whereas in other browsers they will be undefined.
-      this.setScheme(m[ComponentIndex.SCHEME] || '', true)
-      this.setUserInfo(m[ComponentIndex.USER_INFO] || '', true)
-      this.setDomain(m[ComponentIndex.DOMAIN] || '', true)
-      this.setPort(m[ComponentIndex.PORT])
-      this.setPath(m[ComponentIndex.PATH] || '', true)
-      this.setQueryData(m[ComponentIndex.QUERY_DATA] || '', true)
-      this.setFragment(m[ComponentIndex.FRAGMENT] || '', true)
+      this.setScheme(m[Uri.ComponentIndex.SCHEME] || '', true)
+      this.setUserInfo(m[Uri.ComponentIndex.USER_INFO] || '', true)
+      this.setDomain(m[Uri.ComponentIndex.DOMAIN] || '', true)
+      this.setPort(m[Uri.ComponentIndex.PORT])
+      this.setPath(m[Uri.ComponentIndex.PATH] || '', true)
+      this.setQueryData(m[Uri.ComponentIndex.QUERY_DATA] || '', true)
+      this.setFragment(m[Uri.ComponentIndex.FRAGMENT] || '', true)
     } else {
       this.queryData_ = new Uri.QueryData(null, null)
+    }
+  }
+  static get reDisallowedInQuery_() {
+    // eslint-disable-next-line
+    return /[\#\?@]/g
+  }
+  static get reDisallowedInRelativePath_() {
+    // eslint-disable-next-line
+    return /[\#\?:]/g
+  }
+  static get reDisallowedInSchemeOrUserInfo_() {
+    // eslint-disable-next-line
+    return /[#\/\?@]/g
+  }
+  static get reDisallowedInAbsolutePath_() {
+    // eslint-disable-next-line
+    return /[\#\?]/g
+  }
+  static get reDisallowedInFragment_() {
+    return /#/g
+  }
+  static get ComponentIndex() {
+    return {
+      SCHEME: 1,
+      USER_INFO: 2,
+      DOMAIN: 3,
+      PORT: 4,
+      PATH: 5,
+      QUERY_DATA: 6,
+      FRAGMENT: 7
     }
   }
   toString() {
@@ -104,7 +81,7 @@ export default class Uri {
     var scheme = this.getScheme()
     if (scheme) {
       out.push(Uri.encodeSpecialChars_(
-        scheme, reDisallowedInSchemeOrUserInfo_, true), ':')
+        scheme, Uri.reDisallowedInSchemeOrUserInfo_, true), ':')
     }
 
     var domain = this.getDomain()
@@ -114,10 +91,10 @@ export default class Uri {
       var userInfo = this.getUserInfo()
       if (userInfo) {
         out.push(Uri.encodeSpecialChars_(
-          userInfo, this.reDisallowedInSchemeOrUserInfo_, true), '@')
+          userInfo, Uri.reDisallowedInSchemeOrUserInfo_, true), '@')
       }
 
-      out.push(this.removeDoubleEncoding_(encodeURIComponent(domain)))
+      out.push(Uri.removeDoubleEncoding_(encodeURIComponent(domain)))
 
       var port = this.getPort()
       if (port !== null) {
@@ -133,8 +110,8 @@ export default class Uri {
       out.push(Uri.encodeSpecialChars_(
         path,
         path.charAt(0) === '/'
-          ? reDisallowedInAbsolutePath_
-          : reDisallowedInRelativePath_,
+          ? Uri.reDisallowedInAbsolutePath_
+          : Uri.reDisallowedInRelativePath_,
         true))
     }
 
@@ -146,7 +123,7 @@ export default class Uri {
     var fragment = this.getFragment()
     if (fragment) {
       out.push('#', Uri.encodeSpecialChars_(
-        fragment, reDisallowedInFragment_))
+        fragment, Uri.reDisallowedInFragment_))
     }
     return out.join('')
   }
@@ -237,7 +214,7 @@ export default class Uri {
       : newScheme
 
     // remove an : at the end of the scheme so somebody can pass in
-    // window.location.protocol
+    // location.protocol
     if (this.scheme_) {
       this.scheme_ = this.scheme_.replace(/:$/, '')
     }
@@ -300,7 +277,7 @@ export default class Uri {
     return this.path_
   }
 
-  /**
+  /* *
    * Sets the path.
    * @param {string} newPath New path value.
    * @param {boolean=} decode Optional param for whether to decode new value.
@@ -311,21 +288,21 @@ export default class Uri {
     return this
   }
 
-  /**
+  /* *
    * @return {boolean} Whether the path has been set.
    */
   hasPath() {
     return !!this.path_
   }
 
-  /**
+  /* *
    * @return {boolean} Whether the query string has been set.
    */
   hasQuery() {
     return this.queryData_.toString() !== ''
   }
 
-  /**
+  /* *
    * Sets the query data.
    * @param {static QueryData|string|undefined} queryData QueryData object.
    * @param {boolean=} decode Optional param for whether to decode new value.
@@ -339,29 +316,28 @@ export default class Uri {
       if (!decode) {
         // QueryData accepts encoded query string, so encode it if
         // decode flag is not true.
-        queryData = Uri.encodeSpecialChars_(queryData,
-          reDisallowedInQuery_)
+        queryData = Uri.encodeSpecialChars_(queryData, Uri.reDisallowedInQuery_)
       }
       this.queryData_ = Uri.QueryData(queryData, null)
     }
     return this
   }
 
-  /**
+  /* *
    * @return {string} The encoded URI query, not including the ?.
    */
   getEncodedQuery() {
     return this.queryData_.toString()
   }
 
-  /**
+  /* *
    * @return {string} The decoded URI query, not including the ?.
    */
   getDecodedQuery() {
     return this.queryData_.toDecodedString()
   }
 
-  /**
+  /* *
    * Returns the query data.
    * @return {!static QueryData} QueryData object.
    */
@@ -369,14 +345,14 @@ export default class Uri {
     return this.queryData_
   }
 
-  /**
+  /* *
    * @return {string} The URI fragment, not including the #.
    */
   getFragment() {
     return this.fragment_
   }
 
-  /**
+  /* *
    * Sets the URI fragment.
    * @param {string} newFragment New fragment value.
    * @param {boolean=} decode Optional param for whether to decode new value.
@@ -387,14 +363,14 @@ export default class Uri {
     return this
   }
 
-  /**
+  /* *
    * @return {boolean} Whether the URI has a fragment set.
    */
   hasFragment() {
     return !!this.fragment_
   }
 
-  /** Static members
+  /* * Static members
    * Removes dot segments in given path component, as described in
    * RFC 3986, section 5.2.4.
    *
@@ -438,7 +414,7 @@ export default class Uri {
     }
   }
 
-  /**
+  /* *
    * Decodes a value or returns the empty string if it isn't defined or empty.
    * @param {string|undefined} val Value to decode.
    * @param {boolean=} preserveReserved If true, restricted characters will
@@ -455,7 +431,7 @@ export default class Uri {
     return preserveReserved ? decodeURI(val) : decodeURIComponent(val)
   }
 
-  /**
+  /* *
    * If unescapedPart is non null, then escapes any characters in it that aren't
    * valid characters in a url and also escapes any special characters that
    * appear in extra.
@@ -469,7 +445,7 @@ export default class Uri {
    */
   static encodeSpecialChars_(unescapedPart, extra,
     removeDoubleEncoding) {
-    if (isString(unescapedPart)) {
+    if (typeof unescapedPart === 'string') {
       var encoded = encodeURI(unescapedPart)
         .replace(extra, Uri.encodeChar_)
       if (removeDoubleEncoding) {
@@ -482,7 +458,7 @@ export default class Uri {
     return null
   }
 
-  /**
+  /* *
    * Converts a character in [\01-\177] to its unicode character equivalent.
    * @param {string} ch One character string.
    * @return {string} Encoded string.
@@ -493,7 +469,7 @@ export default class Uri {
     return '%' + ((n >> 4) & 0xf).toString(16) + (n & 0xf).toString(16)
   }
 
-  /**
+  /* *
    * Removes double percent-encoding from a string.
    * @param  {string} doubleEncodedString String
    * @return {string} String with double encoding removed.
@@ -504,7 +480,7 @@ export default class Uri {
   }
 }
 
-/**
+/* *
    * Class used to represent URI query parameters.  It is essentially a hash of
    * name-value pairs, though a name can be present more than once.
    *
@@ -520,14 +496,14 @@ export default class Uri {
    */
 Uri.QueryData = class {
   constructor(query, uri) {
-    /**
+    /* *
        * Encoded query string, or null if it requires computing from the key map.
        * @type {?string}
        * @private
        */
     this.encodedQuery_ = query || null
   }
-  /**
+  /* *
      * If the underlying key map is not yet initialized, it parses the
      * query string and fills the map with parsed data.
      * @private
@@ -557,7 +533,7 @@ Uri.QueryData = class {
     }
   }
 
-  /**
+  /* *
      * The map containing name/value or name/array-of-values pairs.
      * May be null if it requires parsing from the query string.
      *
@@ -570,14 +546,14 @@ Uri.QueryData = class {
   // eslint-disable-next-line
     // keyMap_ = null
 
-  /**
+  /* *
      * The number of params, or null if it requires computing.
      * @type {?number}
      * @private
      */
   // count_ = null
 
-  /**
+  /* *
      * @return {?number} The number of parameters.
      */
   getCount() {
@@ -585,7 +561,7 @@ Uri.QueryData = class {
     return this.count_
   }
 
-  /**
+  /* *
      * Adds a key value pair.
      * @param {string} key Name.
      * @param {*} value Value.
@@ -604,7 +580,7 @@ Uri.QueryData = class {
     return this
   }
 
-  /**
+  /* *
      * @return {string} Encoded query string.
      * @override
      */
@@ -636,14 +612,14 @@ Uri.QueryData = class {
     return this.encodedQuery
   }
 
-  /**
+  /* *
      * @return {string} Decoded query string.
      */
   toDecodedString() {
     return Uri.decodeOrEmpty_(this.toString())
   }
 
-  /**
+  /* *
      * Clone the query data instance.
      * @return {!static QueryData} New instance of the QueryData object.
      */

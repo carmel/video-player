@@ -1,6 +1,6 @@
 import TimeRangesUtils from '../media/time_ranges_utils'
 
-/**
+/* *
  * Some platforms/browsers can get stuck in the middle of a buffered range (e.g.
  * when seeking in a background tab). Detect when we get stuck so that the
  * player can respond.
@@ -9,24 +9,24 @@ import TimeRangesUtils from '../media/time_ranges_utils'
  * @final
  */
 export class StallDetector {
-  /**
+  /* *
    * @param {StallDetector.Implementation} implementation
    * @param {number} stallThresholdSeconds
    */
   constructor(implementation, stallThresholdSeconds) {
-    /** @private {StallDetector.Implementation} */
+    /* * @private {StallDetector.Implementation} */
     this.implementation_ = implementation
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.wasMakingProgress_ = implementation.shouldBeMakingProgress()
-    /** @private {number} */
+    /* * @private {number} */
     this.value_ = implementation.getPresentationSeconds()
-    /** @private {number} */
+    /* * @private {number} */
     this.lastUpdateSeconds_ = implementation.getWallSeconds()
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.didJump_ = false
 
-    /**
+    /* *
      * The amount of time in seconds that we must have the same value of
      * |value_| before we declare it as a stall.
      *
@@ -34,18 +34,18 @@ export class StallDetector {
      */
     this.stallThresholdSeconds_ = stallThresholdSeconds
 
-    /** @private {function(number, number)} */
+    /* * @private {function(number, number)} */
     this.onStall_ = () => {}
   }
 
-  /** @override */
+  /* * @override */
   release() {
     // Drop external references to make things easier on the GC.
     this.implementation_ = null
     this.onStall_ = () => {}
   }
 
-  /**
+  /* *
    * Set the callback that should be called when a stall is detected. Calling
    * this will override any previous calls to |onStall|.
    *
@@ -55,7 +55,7 @@ export class StallDetector {
     this.onStall_ = doThis
   }
 
-  /**
+  /* *
    * Have the detector update itself and fire the 'on stall' callback if a stall
    * was detected.
    */
@@ -91,7 +91,7 @@ export class StallDetector {
   }
 }
 
-/**
+/* *
  * Some platforms/browsers can get stuck in the middle of a buffered range (e.g.
  * when seeking in a background tab). Force a seek to help get it going again.
  *
@@ -99,15 +99,15 @@ export class StallDetector {
  * @final
  */
 export class MediaElementImplementation {
-  /**
+  /* *
    * @param {!HTMLMediaElement} mediaElement
    */
   constructor(mediaElement) {
-    /** @private {!HTMLMediaElement} */
+    /* * @private {!HTMLMediaElement} */
     this.mediaElement_ = mediaElement
   }
 
-  /** @override */
+  /* * @override */
   shouldBeMakingProgress() {
     // If we are not trying to play, the lack of change could be misidentified
     // as a stall.
@@ -126,20 +126,20 @@ export class MediaElementImplementation {
 
     return StallDetector.MediaElementImplementation.hasContentFor_(
       this.mediaElement_.buffered,
-      /* timeInSeconds= */ this.mediaElement_.currentTime)
+      /*  timeInSeconds= */ this.mediaElement_.currentTime)
   }
 
-  /** @override */
+  /* * @override */
   getPresentationSeconds() {
     return this.mediaElement_.currentTime
   }
 
-  /** @override */
+  /* * @override */
   getWallSeconds() {
     return Date.now() / 1000
   }
 
-  /**
+  /* *
    * Check if we have buffered enough content to play at |timeInSeconds|. Ignore
    * the end of the buffered range since it may not play any more on all
    * platforms.
@@ -166,7 +166,7 @@ export class MediaElementImplementation {
 }
 
 export class Implementation {
-  /**
+  /* *
    * Check if the presentation time should be changing. This will return |true|
    * when we expect the presentation time to change.
    *
@@ -174,14 +174,14 @@ export class Implementation {
    */
   shouldBeMakingProgress() {}
 
-  /**
+  /* *
    * Get the presentation time in seconds.
    *
    * @return {number}
    */
   getPresentationSeconds() {}
 
-  /**
+  /* *
    * Get the time wall time in seconds.
    *
    * @return {number}

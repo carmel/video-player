@@ -1,12 +1,12 @@
 import StreamUtils from './stream_utils'
 import MediaSourceEngine from '../media/media_source_engine'
 
-/**
+/* *
  * This utility class contains all the functions used to filter manifests
  * before playback and before storage.
  */
 export default class ManifestFilter {
-  /**
+  /* *
    * Filter the variants in |manifest| to only include the variants that meet
    * the given restrictions.
    *
@@ -22,7 +22,7 @@ export default class ManifestFilter {
       })
     }
   }
-  /**
+  /* *
    * Filter the variants in the |manifest| to only include those that are
    * supported by media source.
    *
@@ -45,7 +45,7 @@ export default class ManifestFilter {
     }
   }
 
-  /**
+  /* *
    * Filter the variants in |manifest| to only include those that are supported
    * by |drm|.
    *
@@ -60,7 +60,7 @@ export default class ManifestFilter {
     }
   }
 
-  /**
+  /* *
    * Filter the variants in |manifest| to only include those that use codecs
    * that will be supported in each variant. This ensures playback from the
    * first period to the last period by 'jumping between' compatible variants.
@@ -74,12 +74,12 @@ export default class ManifestFilter {
     const ManifestFilter = ManifestFilter
 
     // Create a set of summaries that occur in each period.
-    /** @type {!ManifestFilter.VariantCodecSummarySet} */
+    /* * @type {!ManifestFilter.VariantCodecSummarySet} */
     const common = new ManifestFilter.VariantCodecSummarySet()
 
     let first = true
     for (const period of manifest.periods) {
-      /** @type {!ManifestFilter.VariantCodecSummarySet} */
+      /* * @type {!ManifestFilter.VariantCodecSummarySet} */
       const next = ManifestFilter.VariantCodecSummarySet.fromVariants(
         period.variants)
 
@@ -101,7 +101,7 @@ export default class ManifestFilter {
     }
   }
 
-  /**
+  /* *
    * Go through each period and apply the filter to the set of variants.
    * |filter| will only be given the set of variants in the current period that
    * are compatible with at least one variant in the previous period.
@@ -113,7 +113,7 @@ export default class ManifestFilter {
   static async rollingFilter(manifest, filter) {
     // Store a reference to the variants so that the next period can easily
     // reference them too.
-    /** @type {ManifestFilter.VariantCodecSummarySet} */
+    /* * @type {ManifestFilter.VariantCodecSummarySet} */
     let previous = null
 
     for (const period of manifest.periods) {
@@ -139,7 +139,7 @@ export default class ManifestFilter {
     }
   }
 }
-/**
+/* *
  * The variant codec summary is a summary of the codec information for a given
  * codec. This can be used to test the compatibility between variants by
  * checking that their summaries contain the same information.
@@ -147,7 +147,7 @@ export default class ManifestFilter {
  * @final
  */
 ManifestFilter.VariantCodecSummary = class {
-  /**
+  /* *
    * @param {shaka.extern.Variant} variant
    */
   constructor(variant) {
@@ -159,17 +159,17 @@ ManifestFilter.VariantCodecSummary = class {
     const audio = variant.audio
     const video = variant.video
 
-    /** @private {?string} */
+    /* * @private {?string} */
     this.audioMime_ = audio ? audio.mimeType : null
-    /** @private {?string} */
+    /* * @private {?string} */
     this.audioCodec_ = audio ? audio.codecs.split('.')[0] : null
-    /** @private {?string} */
+    /* * @private {?string} */
     this.videoMime_ = video ? video.mimeType : null
-    /** @private {?string} */
+    /* * @private {?string} */
     this.videoCodec_ = video ? video.codecs.split('.')[0] : null
   }
 
-  /**
+  /* *
    * Check if this summaries is equal to another.
    *
    * @param {!ManifestFilter.VariantCodecSummary} other
@@ -182,16 +182,16 @@ ManifestFilter.VariantCodecSummary = class {
            this.videoCodec_ === other.videoCodec_
   }
 }
-/**
+/* *
  * @final
  */
 ManifestFilter.VariantCodecSummarySet = class {
   constructor() {
-    /** @private {!Array.<!ManifestFilter.VariantCodecSummary>} */
+    /* * @private {!Array.<!ManifestFilter.VariantCodecSummary>} */
     this.all_ = []
   }
 
-  /**
+  /* *
    * @param {!ManifestFilter.VariantCodecSummary} summary
    */
   add(summary) {
@@ -200,7 +200,7 @@ ManifestFilter.VariantCodecSummarySet = class {
     }
   }
 
-  /**
+  /* *
    * Add all items from |other| to |this|.
    * @param {!ManifestFilter.VariantCodecSummarySet} other
    */
@@ -210,7 +210,7 @@ ManifestFilter.VariantCodecSummarySet = class {
     }
   }
 
-  /**
+  /* *
    * Remove all items from |this| that are not in |other|.
    * @param {!ManifestFilter.VariantCodecSummarySet} other
    */
@@ -218,7 +218,7 @@ ManifestFilter.VariantCodecSummarySet = class {
     this.all_ = this.all_.filter((x) => other.contains(x))
   }
 
-  /**
+  /* *
    * @param {!ManifestFilter.VariantCodecSummary} summary
    * @return {boolean}
    */
@@ -226,7 +226,7 @@ ManifestFilter.VariantCodecSummarySet = class {
     return this.all_.some((x) => summary.equals(x))
   }
 
-  /**
+  /* *
    * Create a set of variant codec summaries for a list of variants. The set
    * may have fewer elements than the list if there are variants with similar
    * codecs.

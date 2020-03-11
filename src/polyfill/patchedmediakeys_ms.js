@@ -7,18 +7,18 @@ import FakeEventTarget from '../util/fake_event_target'
 import Pssh from '../util/pssh'
 import PublicPromise from '../util/public_promise'
 
-/**
+/* *
  * @summary A polyfill to implement
  * {@link https://bit.ly/EmeMar15 EME draft 12 March 2015}
  * on top of ms-prefixed
  * {@link https://www.w3.org/TR/2014/WD-encrypted-media-20140218/ EME v20140218}
  */
 export default class PatchedMediaKeysMs {
-  /**
+  /* *
    * Installs the polyfill if needed.
    */
   static install() {
-    if (!window.HTMLVideoElement || !window.MSMediaKeys ||
+    if (!HTMLVideoElement || !window.MSMediaKeys ||
         (navigator.requestMediaKeySystemAccess &&
          // eslint-disable-next-line no-restricted-syntax
          MediaKeySystemAccess.prototype.getConfiguration)) {
@@ -46,7 +46,7 @@ export default class PatchedMediaKeysMs {
         PatchedMediaKeysMs.MediaKeySystemAccess.setMediaKeys
   }
 
-  /**
+  /* *
    * An implementation of navigator.requestMediaKeySystemAccess.
    * Retrieves a MediaKeySystemAccess object.
    *
@@ -58,20 +58,20 @@ export default class PatchedMediaKeysMs {
   static requestMediaKeySystemAccess(keySystem, supportedConfigurations) {
     console.debug('PatchedMediaKeysMs.requestMediaKeySystemAccess')
     console.assert(this === navigator,
-      'bad "this" for requestMediaKeySystemAccess')
+      'bad `this` for requestMediaKeySystemAccess')
 
     // Alias.
     const PatchedMediaKeysMs = PatchedMediaKeysMs
     try {
       const access = new PatchedMediaKeysMs.MediaKeySystemAccess(
         keySystem, supportedConfigurations)
-      return Promise.resolve(/** @type {!MediaKeySystemAccess} */ (access))
+      return Promise.resolve(/* * @type {!MediaKeySystemAccess} */ (access))
     } catch (exception) {
       return Promise.reject(exception)
     }
   }
 
-  /**
+  /* *
    * Handler for the native media elements msNeedKey event.
    *
    * @this {!HTMLMediaElement}
@@ -84,10 +84,10 @@ export default class PatchedMediaKeysMs {
       return
     }
 
-    // NOTE: Because "this" is a real EventTarget, on IE, the event we dispatch
+    // NOTE: Because `this` is a real EventTarget, on IE, the event we dispatch
     // here must also be a real Event.
     const event2 =
-    /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'))
+    /* * @type {!CustomEvent} */ (document.createEvent('CustomEvent'))
     event2.initCustomEvent('encrypted', false, false, null)
     event2.initDataType = 'cenc'
     event2.initData = Pssh.normaliseInitData(event.initData)
@@ -95,23 +95,23 @@ export default class PatchedMediaKeysMs {
     this.dispatchEvent(event2)
   }
 }
-/**
+/* *
  * An implementation of MediaKeySystemAccess.
  *
  * @implements {MediaKeySystemAccess}
  */
 PatchedMediaKeysMs.MediaKeySystemAccess = class {
-  /**
+  /* *
    * @param {string} keySystem
    * @param {!Array.<!MediaKeySystemConfiguration>} supportedConfigurations
    */
   constructor(keySystem, supportedConfigurations) {
     console.debug('PatchedMediaKeysMs.MediaKeySystemAccess')
 
-    /** @type {string} */
+    /* * @type {string} */
     this.keySystem = keySystem
 
-    /** @private {!MediaKeySystemConfiguration} */
+    /* * @private {!MediaKeySystemConfiguration} */
     this.configuration_
 
     const allowPersistentState = false
@@ -121,7 +121,7 @@ PatchedMediaKeysMs.MediaKeySystemAccess = class {
       // Create a new config object and start adding in the pieces which we
       // find support for.  We will return this from getConfiguration() if
       // asked.
-      /** @type {!MediaKeySystemConfiguration} */
+      /* * @type {!MediaKeySystemConfiguration} */
       const newCfg = {
         'audioCapabilities': [],
         'videoCapabilities': [],
@@ -192,7 +192,7 @@ PatchedMediaKeysMs.MediaKeySystemAccess = class {
     throw unsupportedKeySystemError
   }
 
-  /** @override */
+  /* * @override */
   createMediaKeys() {
     console.debug(
       'PatchedMediaKeysMs.MediaKeySystemAccess.createMediaKeys')
@@ -201,17 +201,17 @@ PatchedMediaKeysMs.MediaKeySystemAccess = class {
     const PatchedMediaKeysMs = PatchedMediaKeysMs
 
     const mediaKeys = new PatchedMediaKeysMs.MediaKeys(this.keySystem)
-    return Promise.resolve(/** @type {!MediaKeys} */ (mediaKeys))
+    return Promise.resolve(/* * @type {!MediaKeys} */ (mediaKeys))
   }
 
-  /** @override */
+  /* * @override */
   getConfiguration() {
     console.debug(
       'PatchedMediaKeysMs.MediaKeySystemAccess.getConfiguration')
     return this.configuration_
   }
 
-  /**
+  /* *
    * An implementation of HTMLMediaElement.prototype.setMediaKeys.
    * Attaches a MediaKeys object to the media element.
    *
@@ -222,16 +222,16 @@ PatchedMediaKeysMs.MediaKeySystemAccess = class {
   static setMediaKeys(mediaKeys) {
     console.debug('PatchedMediaKeysMs.setMediaKeys')
     console.assert(this instanceof HTMLMediaElement,
-      'bad "this" for setMediaKeys')
+      'bad `this` for setMediaKeys')
 
     // Alias
     const PatchedMediaKeysMs = PatchedMediaKeysMs
 
     const newMediaKeys =
-    /** @type {PatchedMediaKeysMs.MediaKeys} */ (
+    /* * @type {PatchedMediaKeysMs.MediaKeys} */ (
         mediaKeys)
     const oldMediaKeys =
-    /** @type {PatchedMediaKeysMs.MediaKeys} */ (
+    /* * @type {PatchedMediaKeysMs.MediaKeys} */ (
         this.mediaKeys)
 
     if (oldMediaKeys && oldMediaKeys !== newMediaKeys) {
@@ -253,24 +253,24 @@ PatchedMediaKeysMs.MediaKeySystemAccess = class {
     return Promise.resolve()
   }
 }
-/**
+/* *
  * An implementation of MediaKeys.
  *
  * @implements {MediaKeys}
  */
 PatchedMediaKeysMs.MediaKeys = class {
-  /** @param {string} keySystem */
+  /* * @param {string} keySystem */
   constructor(keySystem) {
     console.debug('PatchedMediaKeysMs.MediaKeys')
 
-    /** @private {!MSMediaKeys} */
+    /* * @private {!MSMediaKeys} */
     this.nativeMediaKeys_ = new window.MSMediaKeys(keySystem)
 
-    /** @private {!EventManager} */
+    /* * @private {!EventManager} */
     this.eventManager_ = new EventManager()
   }
 
-  /** @override */
+  /* * @override */
   createSession(sessionType) {
     console.debug('PatchedMediaKeysMs.MediaKeys.createSession')
 
@@ -288,7 +288,7 @@ PatchedMediaKeysMs.MediaKeys = class {
       this.nativeMediaKeys_, sessionType)
   }
 
-  /** @override */
+  /* * @override */
   setServerCertificate(serverCertificate) {
     console.debug('PatchedMediaKeysMs.MediaKeys.setServerCertificate')
 
@@ -296,7 +296,7 @@ PatchedMediaKeysMs.MediaKeys = class {
     return Promise.resolve(false)
   }
 
-  /**
+  /* *
    * @param {HTMLMediaElement} media
    * @protected
    * @return {!Promise}
@@ -316,7 +316,7 @@ PatchedMediaKeysMs.MediaKeys = class {
 
     // Intercept and translate these prefixed EME events.
     this.eventManager_.listen(media, 'msneedkey',
-    /** @type {EventManager.ListenerType} */
+    /* * @type {EventManager.ListenerType} */
       (PatchedMediaKeysMs.onMsNeedKey_))
 
     const self = this
@@ -342,14 +342,14 @@ PatchedMediaKeysMs.MediaKeys = class {
     }
   }
 }
-/**
+/* *
  * An implementation of MediaKeySession.
  *
  * @implements {MediaKeySession}
  */
 PatchedMediaKeysMs.MediaKeySession =
     class extends FakeEventTarget {
-      /**
+      /* *
        * @param {MSMediaKeys} nativeMediaKeys
        * @param {string} sessionType
        */
@@ -359,37 +359,37 @@ PatchedMediaKeysMs.MediaKeySession =
 
         // The native MediaKeySession, which will be created in
         // generateRequest.
-        /** @private {MSMediaKeySession} */
+        /* * @private {MSMediaKeySession} */
         this.nativeMediaKeySession_ = null
 
-        /** @private {MSMediaKeys} */
+        /* * @private {MSMediaKeys} */
         this.nativeMediaKeys_ = nativeMediaKeys
 
         // Promises that are resolved later
-        /** @private {PublicPromise} */
+        /* * @private {PublicPromise} */
         this.generateRequestPromise_ = null
 
-        /** @private {PublicPromise} */
+        /* * @private {PublicPromise} */
         this.updatePromise_ = null
 
-        /** @private {!EventManager} */
+        /* * @private {!EventManager} */
         this.eventManager_ = new EventManager()
 
-        /** @type {string} */
+        /* * @type {string} */
         this.sessionId = ''
 
-        /** @type {number} */
+        /* * @type {number} */
         this.expiration = NaN
 
-        /** @type {!PublicPromise} */
+        /* * @type {!PublicPromise} */
         this.closed = new PublicPromise()
 
-        /** @type {!PatchedMediaKeysMs.MediaKeyStatusMap} */
+        /* * @type {!PatchedMediaKeysMs.MediaKeyStatusMap} */
         this.keyStatuses =
         new PatchedMediaKeysMs.MediaKeyStatusMap()
       }
 
-      /** @override */
+      /* * @override */
       generateRequest(initDataType, initData) {
         console.debug('PatchedMediaKeysMs.MediaKeySession.generateRequest')
 
@@ -406,13 +406,13 @@ PatchedMediaKeysMs.MediaKeySession =
 
           // Attach session event handlers here.
           this.eventManager_.listen(this.nativeMediaKeySession_, 'mskeymessage',
-          /** @type {EventManager.ListenerType} */
+          /* * @type {EventManager.ListenerType} */
             (event) => this.onMsKeyMessage_(event))
           this.eventManager_.listen(this.nativeMediaKeySession_, 'mskeyadded',
-          /** @type {EventManager.ListenerType} */
+          /* * @type {EventManager.ListenerType} */
             (event) => this.onMsKeyAdded_(event))
           this.eventManager_.listen(this.nativeMediaKeySession_, 'mskeyerror',
-          /** @type {EventManager.ListenerType} */
+          /* * @type {EventManager.ListenerType} */
             (event) => this.onMsKeyError_(event))
 
           this.updateKeyStatus_('status-pending')
@@ -423,7 +423,7 @@ PatchedMediaKeysMs.MediaKeySession =
         return this.generateRequestPromise_
       }
 
-      /** @override */
+      /* * @override */
       load() {
         console.debug('PatchedMediaKeysMs.MediaKeySession.load')
 
@@ -431,7 +431,7 @@ PatchedMediaKeysMs.MediaKeySession =
           new Error('MediaKeySession.load not yet supported'))
       }
 
-      /** @override */
+      /* * @override */
       update(response) {
         console.debug('PatchedMediaKeysMs.MediaKeySession.update')
 
@@ -450,7 +450,7 @@ PatchedMediaKeysMs.MediaKeySession =
         return this.updatePromise_
       }
 
-      /** @override */
+      /* * @override */
       close() {
         console.debug('PatchedMediaKeysMs.MediaKeySession.close')
 
@@ -471,7 +471,7 @@ PatchedMediaKeysMs.MediaKeySession =
         return this.closed
       }
 
-      /** @override */
+      /* * @override */
       remove() {
         console.debug('PatchedMediaKeysMs.MediaKeySession.remove')
 
@@ -480,7 +480,7 @@ PatchedMediaKeysMs.MediaKeySession =
         'this platform'))
       }
 
-      /**
+      /* *
        * Handler for the native keymessage event on MSMediaKeySession.
        *
        * @param {!MediaKeyEvent} event
@@ -508,7 +508,7 @@ PatchedMediaKeysMs.MediaKeySession =
         this.dispatchEvent(event2)
       }
 
-      /**
+      /* *
        * Handler for the native keyadded event on MSMediaKeySession.
        *
        * @param {!MediaKeyEvent} event
@@ -542,7 +542,7 @@ PatchedMediaKeysMs.MediaKeySession =
         }
       }
 
-      /**
+      /* *
        * Handler for the native keyerror event on MSMediaKeySession.
        *
        * @param {!MediaKeyEvent} event
@@ -582,7 +582,7 @@ PatchedMediaKeysMs.MediaKeySession =
         }
       }
 
-      /**
+      /* *
        * Updates key status and dispatch a 'keystatuseschange' event.
        *
        * @param {string} status
@@ -594,7 +594,7 @@ PatchedMediaKeysMs.MediaKeySession =
         this.dispatchEvent(event)
       }
     }
-/**
+/* *
  * @summary An implementation of MediaKeyStatusMap.
  * This fakes a map with a single key ID.
  *
@@ -603,18 +603,18 @@ PatchedMediaKeysMs.MediaKeySession =
  */
 PatchedMediaKeysMs.MediaKeyStatusMap = class {
   constructor() {
-    /**
+    /* *
      * @type {number}
      */
     this.size = 0
 
-    /**
+    /* *
      * @private {string|undefined}
      */
     this.status_ = undefined
   }
 
-  /**
+  /* *
    * An internal method used by the session to set key status.
    * @param {string|undefined} status
    */
@@ -623,7 +623,7 @@ PatchedMediaKeysMs.MediaKeyStatusMap = class {
     this.status_ = status
   }
 
-  /**
+  /* *
    * An internal method used by the session to get key status.
    * @return {string|undefined}
    */
@@ -631,14 +631,14 @@ PatchedMediaKeysMs.MediaKeyStatusMap = class {
     return this.status_
   }
 
-  /** @override */
+  /* * @override */
   forEach(fn) {
     if (this.status_) {
       fn(this.status_, DrmEngine.DUMMY_KEY_ID.value())
     }
   }
 
-  /** @override */
+  /* * @override */
   get(keyId) {
     if (this.has(keyId)) {
       return this.status_
@@ -646,7 +646,7 @@ PatchedMediaKeysMs.MediaKeyStatusMap = class {
     return undefined
   }
 
-  /** @override */
+  /* * @override */
   has(keyId) {
     const fakeKeyId = DrmEngine.DUMMY_KEY_ID.value()
     if (this.status_ && BufferUtils.equal(keyId, fakeKeyId)) {
@@ -655,7 +655,7 @@ PatchedMediaKeysMs.MediaKeyStatusMap = class {
     return false
   }
 
-  /**
+  /* *
    * @suppress {missingReturn}
    * @override
    */
@@ -663,7 +663,7 @@ PatchedMediaKeysMs.MediaKeyStatusMap = class {
     console.assert(false, 'Not used!  Provided only for the compiler.')
   }
 
-  /**
+  /* *
    * @suppress {missingReturn}
    * @override
    */
@@ -671,7 +671,7 @@ PatchedMediaKeysMs.MediaKeyStatusMap = class {
     console.assert(false, 'Not used!  Provided only for the compiler.')
   }
 
-  /**
+  /* *
    * @suppress {missingReturn}
    * @override
    */
