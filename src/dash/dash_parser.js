@@ -8,7 +8,7 @@ import SegmentTemplate from './segment_template'
 import ManifestParser from '../media/manifest_parser'
 import PresentationTimeline from '../media/presentation_timeline'
 import SegmentIndex from '../media/segment_index'
-import NetworkingEngine from '../net/networking_engine'
+import { NetworkingEngine } from '../net/networking_engine'
 import TextEngine from '../text/text_engine'
 import Error from '../util/error'
 import Functional from '../util/functional'
@@ -21,36 +21,35 @@ import OperationManager from '../util/operation_manager'
 import StringUtils from '../util/string_utils'
 import XmlUtils from '../util/xml_utils'
 import Timer from '../util/timer'
-import conf from '../config'
 
-/**
+/* *
  * Creates a new DASH parser.
  *
  * @implements {shaka.extern.ManifestParser}
  * @export
  */
 export default class DashParser {
-  /** Creates a new DASH parser. */
+  /* * Creates a new DASH parser. */
   constructor() {
-    /** @private {?shaka.extern.ManifestConfiguration} */
+    /* * @private {?shaka.extern.ManifestConfiguration} */
     this.config_ = null
 
-    /** @private {?shaka.extern.ManifestParser.PlayerInterface} */
+    /* * @private {?shaka.extern.ManifestParser.PlayerInterface} */
     this.playerInterface_ = null
 
-    /** @private {!Array.<string>} */
+    /* * @private {!Array.<string>} */
     this.manifestUris_ = []
 
-    /** @private {?shaka.extern.Manifest} */
+    /* * @private {?shaka.extern.Manifest} */
     this.manifest_ = null
 
-    /** @private {!Array.<string>} */
+    /* * @private {!Array.<string>} */
     this.periodIds_ = []
 
-    /** @private {number} */
+    /* * @private {number} */
     this.globalId_ = 1
 
-    /**
+    /* *
      * A map of IDs to SegmentIndex objects.
      * ID: Period@id,AdaptationSet@id,@Representation@id
      * e.g.: '1,5,23'
@@ -58,29 +57,29 @@ export default class DashParser {
      */
     this.segmentIndexMap_ = {}
 
-    /**
+    /* *
      * The update period in seconds, or 0 for no updates.
      * @private {number}
      */
     this.updatePeriod_ = 0
 
-    /**
+    /* *
      * An ewma that tracks how long updates take.
      * This is to mitigate issues caused by slow parsing on embedded devices.
      * @private {!Ewma}
      */
     this.averageUpdateDuration_ = new Ewma(5)
 
-    /** @private {Timer} */
+    /* * @private {Timer} */
     this.updateTimer_ = new Timer(() => {
       this.onUpdate_()
     })
 
-    /** @private {!OperationManager} */
+    /* * @private {!OperationManager} */
     this.operationManager_ = new OperationManager()
   }
 
-  /**
+  /* *
    * @override
    * @exportInterface
    */
@@ -91,7 +90,7 @@ export default class DashParser {
     this.config_ = config
   }
 
-  /**
+  /* *
    * @override
    * @exportInterface
    */
@@ -118,7 +117,7 @@ export default class DashParser {
     return this.manifest_
   }
 
-  /**
+  /* *
    * @override
    * @exportInterface
    */
@@ -138,7 +137,7 @@ export default class DashParser {
     return this.operationManager_.destroy()
   }
 
-  /**
+  /* *
    * @override
    * @exportInterface
    */
@@ -154,7 +153,7 @@ export default class DashParser {
     }
   }
 
-  /**
+  /* *
    * @override
    * @exportInterface
    */
@@ -162,7 +161,7 @@ export default class DashParser {
     // No-op
   }
 
-  /**
+  /* *
    * Makes a network request for the manifest and parses the resulting data.
    *
    * @return {!Promise.<number>} Resolves with the time it took, in seconds, to
@@ -203,7 +202,7 @@ export default class DashParser {
     return updateDuration
   }
 
-  /**
+  /* *
    * Parses the manifest XML.  This also handles updates and will update the
    * stored manifest.
    *
@@ -230,7 +229,7 @@ export default class DashParser {
     const finalMpd = await xlinkOperation.promise
     return this.processManifest_(finalMpd, finalManifestUri)
   }
-  /**
+  /* *
    * Takes a formatted MPD and converts it into a manifest.
    *
    * @param {!Element} mpd
@@ -242,9 +241,9 @@ export default class DashParser {
   async processManifest_(mpd, finalManifestUri) {
     // Get any Location elements.  This will update the manifest location and
     // the base URI.
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     let manifestBaseUris = [finalManifestUri]
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     const locations = XmlUtils.findChildren(mpd, 'Location')
       .map(XmlUtils.getContents)
       .filter(Functional.isNotNull)
@@ -267,7 +266,7 @@ export default class DashParser {
           XmlUtils.parseAttr(mpd, 'minBufferTime', XmlUtils.parseDuration)
     }
 
-    this.updatePeriod_ = /** @type {number} */ (XmlUtils.parseAttr(
+    this.updatePeriod_ = /* * @type {number} */ (XmlUtils.parseAttr(
       mpd, 'minimumUpdatePeriod', XmlUtils.parseDuration, -1))
 
     const presentationStartTime = XmlUtils.parseAttr(
@@ -287,7 +286,7 @@ export default class DashParser {
       mpd, 'maxSegmentDuration', XmlUtils.parseDuration)
     const mpdType = mpd.getAttribute('type') || 'static'
 
-    /** @type {!PresentationTimeline} */
+    /* * @type {!PresentationTimeline} */
     let presentationTimeline
     if (this.manifest_) {
       presentationTimeline = this.manifest_.presentationTimeline
@@ -313,7 +312,7 @@ export default class DashParser {
         this.config_.dash.autoCorrectDrift)
     }
 
-    /** @type {DashParser.Context} */
+    /* * @type {DashParser.Context} */
     const context = {
       // Don't base on updatePeriod_ since emsg boxes can cause manifest
       // updates.
@@ -356,10 +355,6 @@ export default class DashParser {
 
     // Use @maxSegmentDuration to override smaller, derived values.
     presentationTimeline.notifyMaxSegmentDuration(maxSegmentDuration || 1)
-    if (conf.DEBUG) {
-      presentationTimeline.assertIsValid()
-    }
-
     // These steps are not done on manifest update.
     if (!this.manifest_) {
       this.manifest_ = {
@@ -383,7 +378,7 @@ export default class DashParser {
     }
   }
 
-  /**
+  /* *
    * Reads and parses the periods from the manifest.  This first does some
    * partial parsing so the start and duration is available when parsing
    * children.
@@ -410,7 +405,7 @@ export default class DashParser {
     // ahead to the next element.
     const enumerate = (it) => Iterables.enumerate(it)
     for (const { i, item: elem, next } of enumerate(periodNodes)) {
-      const start = /** @type {number} */ (
+      const start = /* * @type {number} */ (
         XmlUtils.parseAttr(elem, 'start', XmlUtils.parseDuration, prevEnd))
       const givenDuration =
           XmlUtils.parseAttr(elem, 'duration', XmlUtils.parseDuration)
@@ -516,7 +511,7 @@ export default class DashParser {
     }
   }
 
-  /**
+  /* *
    * Parses a Period XML element.  Unlike the other parse methods, this is not
    * given the Node; it is given a PeriodInfo structure.  Also, partial parsing
    * was done before this was called so start and duration are valid.
@@ -643,7 +638,7 @@ export default class DashParser {
     }
   }
 
-  /**
+  /* *
    * @param {!Array.<!DashParser.AdaptationInfo>} adaptationSets
    * @param {string} type
    * @return {!Array.<!DashParser.AdaptationInfo>}
@@ -655,7 +650,7 @@ export default class DashParser {
     })
   }
 
-  /**
+  /* *
    * Combines Streams into Variants
    *
    * @param {?DashParser.AdaptationInfo} audio
@@ -674,9 +669,9 @@ export default class DashParser {
     console.assert(!video || video.contentType === ContentType.VIDEO,
       'Video parameter mismatch!')
 
-    /** @type {number} */
+    /* * @type {number} */
     let bandwidth
-    /** @type {shaka.extern.Variant} */
+    /* * @type {shaka.extern.Variant} */
     let variant
 
     if (!audio && !video) {
@@ -726,7 +721,7 @@ export default class DashParser {
     }
   }
 
-  /**
+  /* *
    * Parses an AdaptationSet XML element.
    *
    * @param {DashParser.Context} context
@@ -946,7 +941,7 @@ export default class DashParser {
     }
   }
 
-  /**
+  /* *
    * Parses a Representation XML element.
    *
    * @param {DashParser.Context} context
@@ -983,7 +978,7 @@ export default class DashParser {
     context.bandwidth =
         XmlUtils.parseAttr(node, 'bandwidth', XmlUtils.parsePositiveInt) || 0
 
-    /** @type {?DashParser.StreamInfo} */
+    /* * @type {?DashParser.StreamInfo} */
     let streamInfo
 
     const contentType = context.representation.contentType
@@ -1048,7 +1043,7 @@ export default class DashParser {
       context.representation.mimeType = 'audio/eac3-joc'
     }
 
-    /** @type {shaka.extern.Stream} */
+    /* * @type {shaka.extern.Stream} */
     const stream = {
       id: this.globalId_++,
       originalId: context.representation.id,
@@ -1083,7 +1078,7 @@ export default class DashParser {
     return stream
   }
 
-  /**
+  /* *
    * Called when the update timer ticks.
    *
    * @return {!Promise}
@@ -1121,7 +1116,7 @@ export default class DashParser {
     this.setUpdateTimer_(updateDelay)
   }
 
-  /**
+  /* *
    * Sets the update timer.  Does nothing if the manifest does not specify an
    * update period.
    *
@@ -1145,10 +1140,10 @@ export default class DashParser {
 
     // We do not run the timer as repeating because part of update is async and
     // we need schedule the update after it finished.
-    this.updateTimer_.tickAfter(/* seconds= */ finalDelay)
+    this.updateTimer_.tickAfter(/*  seconds= */ finalDelay)
   }
 
-  /**
+  /* *
    * Creates a new inheritance frame for the given element.
    *
    * @param {!Element} elem
@@ -1162,7 +1157,7 @@ export default class DashParser {
       'Must provide either parent or baseUris')
     const ManifestParserUtils = ManifestParserUtils
     const XmlUtils = XmlUtils
-    parent = parent || /** @type {DashParser.InheritanceFrame} */ ({
+    parent = parent || /* * @type {DashParser.InheritanceFrame} */ ({
       contentType: '',
       mimeType: '',
       codecs: '',
@@ -1223,7 +1218,7 @@ export default class DashParser {
     }
   }
 
-  /**
+  /* *
    * Returns a new array of InbandEventStream schemeIdUri containing the union
    * of the ones parsed from inBandEventStreams and the ones provided in
    * emsgSchemeIdUris.
@@ -1247,7 +1242,7 @@ export default class DashParser {
     return schemeIdUris
   }
 
-  /**
+  /* *
    * @param {!Array.<!Element>} audioChannelConfigs An array of
    *   AudioChannelConfiguration elements.
    * @return {?number} The number of audio channels, or null if unknown.
@@ -1314,7 +1309,7 @@ export default class DashParser {
     return null
   }
 
-  /**
+  /* *
    * Verifies that a Representation has exactly one Segment* element.  Prints
    * warnings if there is a problem.
    *
@@ -1366,7 +1361,7 @@ export default class DashParser {
     return true
   }
 
-  /**
+  /* *
    * Makes a request to the given URI and calculates the clock offset.
    *
    * @param {!Array.<string>} baseUris
@@ -1407,7 +1402,7 @@ export default class DashParser {
     return (date - Date.now())
   }
 
-  /**
+  /* *
    * Parses an array of UTCTiming elements.
    *
    * @param {!Array.<string>} baseUris
@@ -1478,7 +1473,7 @@ export default class DashParser {
     return 0
   }
 
-  /**
+  /* *
    * Parses an EventStream element.
    *
    * @param {number} periodStart
@@ -1509,7 +1504,7 @@ export default class DashParser {
         endTime = Math.min(endTime, periodStart + periodDuration)
       }
 
-      /** @type {shaka.extern.TimelineRegionInfo} */
+      /* * @type {shaka.extern.TimelineRegionInfo} */
       const region = {
         schemeIdUri: schemeIdUri,
         value: value,
@@ -1523,7 +1518,7 @@ export default class DashParser {
     }
   }
 
-  /**
+  /* *
    * Makes a network request on behalf of SegmentBase.createStreamInfo.
    *
    * @param {!Array.<string>} uris
@@ -1548,7 +1543,7 @@ export default class DashParser {
     return response.data
   }
 
-  /**
+  /* *
    * Guess the content type based on MIME type and codecs.
    *
    * @param {string} mimeType
@@ -1571,7 +1566,7 @@ export default class DashParser {
     return mimeType.split('/')[0]
   }
 }
-/**
+/* *
  * Contains the minimum amount of time, in seconds, between manifest update
  * requests.
  *
@@ -1579,13 +1574,13 @@ export default class DashParser {
  * @const {number}
  */
 DashParser.MIN_UPDATE_PERIOD_ = 3
-/**
+/* *
  * @typedef {
  *   function(!Array.<string>, ?number, ?number):!Promise.<BufferSource>
  * }
  */
 DashParser.RequestInitSegmentCallback
-/**
+/* *
  * @typedef {{
  *   segmentBase: Element,
  *   segmentList: Element,
@@ -1640,7 +1635,7 @@ DashParser.RequestInitSegmentCallback
  *   Specifies the maximum sampling rate of the content, or null if unknown.
  */
 DashParser.InheritanceFrame
-/**
+/* *
  * @typedef {{
  *   dynamic: boolean,
  *   presentationTimeline: !PresentationTimeline,
@@ -1675,7 +1670,7 @@ DashParser.InheritanceFrame
  *   True if the warning about SegmentURL@indexRange has been printed.
  */
 DashParser.Context
-/**
+/* *
  * @typedef {{
  *   start: number,
  *   duration: ?number,
@@ -1697,7 +1692,7 @@ DashParser.Context
  *   Whether this Period is the last one in the manifest.
  */
 DashParser.PeriodInfo
-/**
+/* *
  * @typedef {{
  *   id: string,
  *   contentType: ?string,
@@ -1732,13 +1727,13 @@ DashParser.PeriodInfo
  *   An array of the IDs of the Representations this AdaptationSet contains.
  */
 DashParser.AdaptationInfo
-/**
+/* *
  * @typedef {function():!Promise.<SegmentIndex>}
  * @description
  * An async function which generates and returns a SegmentIndex.
  */
 DashParser.GenerateSegmentIndexFunction
-/**
+/* *
  * @typedef {{
  *   generateSegmentIndex: DashParser.GenerateSegmentIndexFunction
  * }}

@@ -1,11 +1,11 @@
 
-/**
+/* *
  * Recreations of Array-like functions so that they work on any iterable
  * type.
  * @final
  */
 export default class Iterables {
-  /**
+  /* *
    * @param {!Iterable.<FROM>} iterable
    * @param {function(FROM):TO} mapping
    * @return {!Iterable.<TO>}
@@ -19,7 +19,7 @@ export default class Iterables {
     return array
   }
 
-  /**
+  /* *
    * @param {!Iterable.<T>} iterable
    * @param {function(T):boolean} test
    * @return {boolean}
@@ -34,7 +34,7 @@ export default class Iterables {
     return true
   }
 
-  /**
+  /* *
    * @param {!Iterable.<T>} iterable
    * @param {function(T):boolean} test
    * @return {boolean}
@@ -49,7 +49,7 @@ export default class Iterables {
     return false
   }
 
-  /**
+  /* *
    * Iterate over an iterable object and return only the items that |filter|
    * returns true for.
    *
@@ -68,7 +68,7 @@ export default class Iterables {
     return out
   }
 
-  /**
+  /* *
    * Returns an iterable that contains numbers in the range [0, end).
    *
    * @param {number=} end The exclusive end of the list.
@@ -80,7 +80,7 @@ export default class Iterables {
     }
   }
 
-  /**
+  /* *
    * Iterates over an iterable object and includes additional info about each
    * item:
    * - The zero-based index of the element.

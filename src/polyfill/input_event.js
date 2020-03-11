@@ -1,11 +1,11 @@
 import polyfill from './all'
 import Platform from '../util/platform'
 
-/**
+/* *
  * @summary A polyfill to patch 'input' event support in IE11.
  */
 export default class InputEvent {
-  /**
+  /* *
    * Install the polyfill if needed.
    */
   static install() {
@@ -42,7 +42,7 @@ export default class InputEvent {
         polyfill.InputEvent.addEventListener_
   }
 
-  /**
+  /* *
    * Add an event listener to this object and translate the event types to those
    * that work on IE11.
    *

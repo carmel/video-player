@@ -8,13 +8,13 @@ import PublicPromise from '../util/public_promise'
 import StringUtils from '../util/string_utils'
 import Timer from '../util/timer'
 import Uint8ArrayUtils from '../util/uint8array_utils'
-/**
+/* *
  * @summary A polyfill to implement
  * {@link https://bit.ly/EmeMar15 EME draft 12 March 2015} on top of
  * webkit-prefixed {@link https://bit.ly/Eme01b EME v0.1b}.
  */
 export default class PatchedMediaKeysWebkit {
-  /**
+  /* *
    * Installs the polyfill if needed.
    */
   static install() {
@@ -22,7 +22,7 @@ export default class PatchedMediaKeysWebkit {
     const PatchedMediaKeysWebkit = PatchedMediaKeysWebkit
     const prefixApi = PatchedMediaKeysWebkit.prefixApi_
 
-    if (!window.HTMLVideoElement ||
+    if (!HTMLVideoElement ||
         (navigator.requestMediaKeySystemAccess &&
          // eslint-disable-next-line no-restricted-syntax
          MediaKeySystemAccess.prototype.getConfiguration)) {
@@ -54,13 +54,12 @@ export default class PatchedMediaKeysWebkit {
     // eslint-disable-next-line no-restricted-syntax
     HTMLMediaElement.prototype['mediaKeys'] = null
     // eslint-disable-next-line no-restricted-syntax
-    HTMLMediaElement.prototype.setMediaKeys =
-        PatchedMediaKeysWebkit.setMediaKeys
+    HTMLMediaElement.prototype.setMediaKeys = PatchedMediaKeysWebkit.setMediaKeys
     window.MediaKeys = PatchedMediaKeysWebkit.MediaKeys
     window.MediaKeySystemAccess = PatchedMediaKeysWebkit.MediaKeySystemAccess
   }
 
-  /**
+  /* *
    * Prefix the api with the stored prefix.
    *
    * @param {string} api
@@ -75,7 +74,7 @@ export default class PatchedMediaKeysWebkit {
     return api
   }
 
-  /**
+  /* *
    * An implementation of navigator.requestMediaKeySystemAccess.
    * Retrieves a MediaKeySystemAccess object.
    *
@@ -87,20 +86,20 @@ export default class PatchedMediaKeysWebkit {
   static requestMediaKeySystemAccess(keySystem, supportedConfigurations) {
     console.debug('PatchedMediaKeysWebkit.requestMediaKeySystemAccess')
     console.assert(this === navigator,
-      'bad "this" for requestMediaKeySystemAccess')
+      'bad `this` for requestMediaKeySystemAccess')
 
     // Alias.
     const PatchedMediaKeysWebkit = PatchedMediaKeysWebkit
     try {
       const access = new PatchedMediaKeysWebkit.MediaKeySystemAccess(
         keySystem, supportedConfigurations)
-      return Promise.resolve(/** @type {!MediaKeySystemAccess} */ (access))
+      return Promise.resolve(/* * @type {!MediaKeySystemAccess} */ (access))
     } catch (exception) {
       return Promise.reject(exception)
     }
   }
 
-  /**
+  /* *
    * An implementation of HTMLMediaElement.prototype.setMediaKeys.
    * Attaches a MediaKeys object to the media element.
    *
@@ -111,16 +110,16 @@ export default class PatchedMediaKeysWebkit {
   static setMediaKeys(mediaKeys) {
     console.debug('PatchedMediaKeysWebkit.setMediaKeys')
     console.assert(this instanceof HTMLMediaElement,
-      'bad "this" for setMediaKeys')
+      'bad `this` for setMediaKeys')
 
     // Alias.
     const PatchedMediaKeysWebkit = PatchedMediaKeysWebkit
 
     const newMediaKeys =
-    /** @type {PatchedMediaKeysWebkit.MediaKeys} */ (
+    /* * @type {PatchedMediaKeysWebkit.MediaKeys} */ (
         mediaKeys)
     const oldMediaKeys =
-    /** @type {PatchedMediaKeysWebkit.MediaKeys} */ (
+    /* * @type {PatchedMediaKeysWebkit.MediaKeys} */ (
         this.mediaKeys)
 
     if (oldMediaKeys && oldMediaKeys !== newMediaKeys) {
@@ -144,7 +143,7 @@ export default class PatchedMediaKeysWebkit {
     return Promise.resolve()
   }
 
-  /**
+  /* *
    * For some of this polyfill's implementation, we need to query a video
    * element.  But for some embedded systems, it is memory-expensive to create
    * multiple video elements.  Therefore, we check the document to see if we can
@@ -156,29 +155,29 @@ export default class PatchedMediaKeysWebkit {
   static getVideoElement_() {
     const videos = document.getElementsByTagName('video')
     const video = videos.length ? videos[0] : document.createElement('video')
-    return /** @type {!HTMLVideoElement} */(video)
+    return /* * @type {!HTMLVideoElement} */(video)
   }
 }
-/**
+/* *
  * An implementation of MediaKeySystemAccess.
  *
  * @implements {MediaKeySystemAccess}
  */
 PatchedMediaKeysWebkit.MediaKeySystemAccess = class {
-  /**
+  /* *
    * @param {string} keySystem
    * @param {!Array.<!MediaKeySystemConfiguration>} supportedConfigurations
    */
   constructor(keySystem, supportedConfigurations) {
     console.debug('PatchedMediaKeysWebkit.MediaKeySystemAccess')
 
-    /** @type {string} */
+    /* * @type {string} */
     this.keySystem = keySystem
 
-    /** @private {string} */
+    /* * @private {string} */
     this.internalKeySystem_ = keySystem
 
-    /** @private {!MediaKeySystemConfiguration} */
+    /* * @private {!MediaKeySystemConfiguration} */
     this.configuration_
 
     // This is only a guess, since we don't really know from the prefixed API.
@@ -197,7 +196,7 @@ PatchedMediaKeysWebkit.MediaKeySystemAccess = class {
       // Create a new config object and start adding in the pieces which we
       // find support for.  We will return this from getConfiguration() if
       // asked.
-      /** @type {!MediaKeySystemConfiguration} */
+      /* * @type {!MediaKeySystemConfiguration} */
       const newCfg = {
         'audioCapabilities': [],
         'videoCapabilities': [],
@@ -276,7 +275,7 @@ PatchedMediaKeysWebkit.MediaKeySystemAccess = class {
     throw unsupportedError
   }
 
-  /** @override */
+  /* * @override */
   createMediaKeys() {
     console.debug(
       'PatchedMediaKeysWebkit.MediaKeySystemAccess.createMediaKeys')
@@ -285,50 +284,50 @@ PatchedMediaKeysWebkit.MediaKeySystemAccess = class {
     const PatchedMediaKeysWebkit = PatchedMediaKeysWebkit
     const mediaKeys =
     new PatchedMediaKeysWebkit.MediaKeys(this.internalKeySystem_)
-    return Promise.resolve(/** @type {!MediaKeys} */ (mediaKeys))
+    return Promise.resolve(/* * @type {!MediaKeys} */ (mediaKeys))
   }
 
-  /** @override */
+  /* * @override */
   getConfiguration() {
     console.debug(
       'PatchedMediaKeysWebkit.MediaKeySystemAccess.getConfiguration')
     return this.configuration_
   }
 }
-/**
+/* *
  * An implementation of MediaKeys.
  *
  * @implements {MediaKeys}
  */
 PatchedMediaKeysWebkit.MediaKeys = class {
-  /**
+  /* *
    * @param {string} keySystem
    */
   constructor(keySystem) {
     console.debug('PatchedMediaKeysWebkit.MediaKeys')
 
-    /** @private {string} */
+    /* * @private {string} */
     this.keySystem_ = keySystem
 
-    /** @private {HTMLMediaElement} */
+    /* * @private {HTMLMediaElement} */
     this.media_ = null
 
-    /** @private {!EventManager} */
+    /* * @private {!EventManager} */
     this.eventManager_ = new EventManager()
 
-    /**
+    /* *
      * @private {Array.<!PatchedMediaKeysWebkit.MediaKeySession>}
      */
     this.newSessions_ = []
 
-    /**
+    /* *
      * @private {!Map.<string,
      *                 !PatchedMediaKeysWebkit.MediaKeySession>}
      */
     this.sessionMap_ = new Map()
   }
 
-  /**
+  /* *
    * @param {HTMLMediaElement} media
    * @protected
    */
@@ -342,24 +341,24 @@ PatchedMediaKeysWebkit.MediaKeys = class {
     if (media) {
       // Intercept and translate these prefixed EME events.
       this.eventManager_.listen(media, prefix + 'needkey',
-      /** @type {EventManager.ListenerType} */
+      /* * @type {EventManager.ListenerType} */
         (event) => this.onWebkitNeedKey_(event))
 
       this.eventManager_.listen(media, prefix + 'keymessage',
-      /** @type {EventManager.ListenerType} */
+      /* * @type {EventManager.ListenerType} */
         (event) => this.onWebkitKeyMessage_(event))
 
       this.eventManager_.listen(media, prefix + 'keyadded',
-      /** @type {EventManager.ListenerType} */
+      /* * @type {EventManager.ListenerType} */
         (event) => this.onWebkitKeyAdded_(event))
 
       this.eventManager_.listen(media, prefix + 'keyerror',
-      /** @type {EventManager.ListenerType} */
+      /* * @type {EventManager.ListenerType} */
         (event) => this.onWebkitKeyError_(event))
     }
   }
 
-  /** @override */
+  /* * @override */
   createSession(sessionType) {
     console.debug('PatchedMediaKeysWebkit.MediaKeys.createSession')
 
@@ -374,7 +373,7 @@ PatchedMediaKeysWebkit.MediaKeys = class {
 
     // Unprefixed EME allows for session creation without a video tag or src.
     // Prefixed EME requires both a valid HTMLMediaElement and a src.
-    const media = this.media_ || /** @type {!HTMLMediaElement} */(
+    const media = this.media_ || /* * @type {!HTMLMediaElement} */(
       document.createElement('video'))
     if (!media.src) {
       media.src = 'about:blank'
@@ -386,7 +385,7 @@ PatchedMediaKeysWebkit.MediaKeys = class {
     return session
   }
 
-  /** @override */
+  /* * @override */
   setServerCertificate(serverCertificate) {
     console.debug('PatchedMediaKeysWebkit.MediaKeys.setServerCertificate')
 
@@ -394,7 +393,7 @@ PatchedMediaKeysWebkit.MediaKeys = class {
     return Promise.resolve(false)
   }
 
-  /**
+  /* *
    * @param {!MediaKeyEvent} event
    * @private
    */
@@ -403,7 +402,7 @@ PatchedMediaKeysWebkit.MediaKeys = class {
     console.assert(this.media_, 'media_ not set in onWebkitNeedKey_')
 
     const event2 =
-    /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'))
+    /* * @type {!CustomEvent} */ (document.createEvent('CustomEvent'))
     event2.initCustomEvent('encrypted', false, false, null)
 
     // not used by v0.1b EME, but given a valid value
@@ -413,7 +412,7 @@ PatchedMediaKeysWebkit.MediaKeys = class {
     this.media_.dispatchEvent(event2)
   }
 
-  /**
+  /* *
    * @param {!MediaKeyEvent} event
    * @private
    */
@@ -437,7 +436,7 @@ PatchedMediaKeysWebkit.MediaKeys = class {
     session.dispatchEvent(event2)
   }
 
-  /**
+  /* *
    * @param {!MediaKeyEvent} event
    * @private
    */
@@ -452,7 +451,7 @@ PatchedMediaKeysWebkit.MediaKeys = class {
     }
   }
 
-  /**
+  /* *
    * @param {!MediaKeyEvent} event
    * @private
    */
@@ -467,7 +466,7 @@ PatchedMediaKeysWebkit.MediaKeys = class {
     }
   }
 
-  /**
+  /* *
    * @param {string} sessionId
    * @return {PatchedMediaKeysWebkit.MediaKeySession}
    * @private
@@ -492,14 +491,14 @@ PatchedMediaKeysWebkit.MediaKeys = class {
     return null
   }
 }
-/**
+/* *
  * An implementation of MediaKeySession.
  *
  * @implements {MediaKeySession}
  */
 PatchedMediaKeysWebkit.MediaKeySession =
     class extends FakeEventTarget {
-      /**
+      /* *
        * @param {!HTMLMediaElement} media
        * @param {string} keySystem
        * @param {string} sessionType
@@ -508,39 +507,39 @@ PatchedMediaKeysWebkit.MediaKeySession =
         console.debug('PatchedMediaKeysWebkit.MediaKeySession')
         super()
 
-        /** @private {!HTMLMediaElement} */
+        /* * @private {!HTMLMediaElement} */
         this.media_ = media
 
-        /** @private {boolean} */
+        /* * @private {boolean} */
         this.initialized_ = false
 
-        /** @private {PublicPromise} */
+        /* * @private {PublicPromise} */
         this.generatePromise_ = null
 
-        /** @private {PublicPromise} */
+        /* * @private {PublicPromise} */
         this.updatePromise_ = null
 
-        /** @private {string} */
+        /* * @private {string} */
         this.keySystem_ = keySystem
 
-        /** @private {string} */
+        /* * @private {string} */
         this.type_ = sessionType
 
-        /** @type {string} */
+        /* * @type {string} */
         this.sessionId = ''
 
-        /** @type {number} */
+        /* * @type {number} */
         this.expiration = NaN
 
-        /** @type {!PublicPromise} */
+        /* * @type {!PublicPromise} */
         this.closed = new PublicPromise()
 
-        /** @type {!PatchedMediaKeysWebkit.MediaKeyStatusMap} */
+        /* * @type {!PatchedMediaKeysWebkit.MediaKeyStatusMap} */
         this.keyStatuses =
         new PatchedMediaKeysWebkit.MediaKeyStatusMap()
       }
 
-      /**
+      /* *
        * Signals that the license request has been generated.  This resolves the
        * 'generateRequest' promise.
        *
@@ -555,7 +554,7 @@ PatchedMediaKeysWebkit.MediaKeySession =
         }
       }
 
-      /**
+      /* *
        * Signals that the session is 'ready', which is the terminology used in
        * older versions of EME.  The new signal is to resolve the 'update'
        * promise.  This translates between the two.
@@ -573,7 +572,7 @@ PatchedMediaKeysWebkit.MediaKeySession =
         this.updatePromise_ = null
       }
 
-      /**
+      /* *
        * Either rejects a promise, or dispatches an error event, as appropriate.
        *
        * @param {!MediaKeyEvent} event
@@ -616,7 +615,7 @@ PatchedMediaKeysWebkit.MediaKeySession =
         }
       }
 
-      /**
+      /* *
        * Logic which is shared between generateRequest() and load(), both of
        * which are ultimately implemented with webkitGenerateKeyRequest in
        * prefixed EME.
@@ -634,7 +633,7 @@ PatchedMediaKeysWebkit.MediaKeySession =
 
         this.initialized_ = true
 
-        /** @type {!Uint8Array} */
+        /* * @type {!Uint8Array} */
         let mangledInitData
 
         try {
@@ -700,13 +699,13 @@ PatchedMediaKeysWebkit.MediaKeySession =
             }
           })
 
-          timer.tickAfter(/* seconds= */ 0.01)
+          timer.tickAfter(/*  seconds= */ 0.01)
         }
 
         return this.generatePromise_
       }
 
-      /**
+      /* *
        * An internal version of update which defers new calls while old ones are
        * in progress.
        *
@@ -737,7 +736,7 @@ PatchedMediaKeysWebkit.MediaKeySession =
           const StringUtils = StringUtils
           const Uint8ArrayUtils = Uint8ArrayUtils
           const licenseString = StringUtils.fromUTF8(response)
-          const jwkSet = /** @type {JWKSet} */ (JSON.parse(licenseString))
+          const jwkSet = /* * @type {JWKSet} */ (JSON.parse(licenseString))
           const kty = jwkSet.keys[0].kty
           if (kty !== 'oct') {
             // Reject the promise.
@@ -764,7 +763,7 @@ PatchedMediaKeysWebkit.MediaKeySession =
         }
       }
 
-      /**
+      /* *
        * Update key status and dispatch a 'keystatuseschange' event.
        *
        * @param {string} status
@@ -776,14 +775,14 @@ PatchedMediaKeysWebkit.MediaKeySession =
         this.dispatchEvent(event)
       }
 
-      /** @override */
+      /* * @override */
       generateRequest(initDataType, initData) {
         console.debug(
           'PatchedMediaKeysWebkit.MediaKeySession.generateRequest')
         return this.generate_(initData, null)
       }
 
-      /** @override */
+      /* * @override */
       load(sessionId) {
         console.debug('PatchedMediaKeysWebkit.MediaKeySession.load')
         if (this.type_ === 'persistent-license') {
@@ -793,7 +792,7 @@ PatchedMediaKeysWebkit.MediaKeySession =
         }
       }
 
-      /** @override */
+      /* * @override */
       update(response) {
         console.debug(
           'PatchedMediaKeysWebkit.MediaKeySession.update', response)
@@ -804,7 +803,7 @@ PatchedMediaKeysWebkit.MediaKeySession =
         return nextUpdatePromise
       }
 
-      /** @override */
+      /* * @override */
       close() {
         console.debug('PatchedMediaKeysWebkit.MediaKeySession.close')
 
@@ -828,7 +827,9 @@ PatchedMediaKeysWebkit.MediaKeySession =
           const cancelKeyRequestName = prefixApi('cancelKeyRequest')
           try {
             this.media_[cancelKeyRequestName](this.keySystem_, this.sessionId)
-          } catch (exception) {}
+          } catch (exception) {
+            console.log(exception)
+          }
         }
 
         // Resolve the 'closed' promise and return it.
@@ -836,7 +837,7 @@ PatchedMediaKeysWebkit.MediaKeySession =
         return this.closed
       }
 
-      /** @override */
+      /* * @override */
       remove() {
         console.debug('PatchedMediaKeysWebkit.MediaKeySession.remove')
 
@@ -847,7 +848,7 @@ PatchedMediaKeysWebkit.MediaKeySession =
         return this.close()
       }
     }
-/**
+/* *
  * An implementation of MediaKeyStatusMap.
  * This fakes a map with a single key ID.
  *
@@ -856,18 +857,18 @@ PatchedMediaKeysWebkit.MediaKeySession =
  */
 PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
   constructor() {
-    /**
+    /* *
      * @type {number}
      */
     this.size = 0
 
-    /**
+    /* *
      * @private {string|undefined}
      */
     this.status_ = undefined
   }
 
-  /**
+  /* *
    * An internal method used by the session to set key status.
    * @param {string|undefined} status
    */
@@ -876,7 +877,7 @@ PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
     this.status_ = status
   }
 
-  /**
+  /* *
    * An internal method used by the session to get key status.
    * @return {string|undefined}
    */
@@ -884,14 +885,14 @@ PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
     return this.status_
   }
 
-  /** @override */
+  /* * @override */
   forEach(fn) {
     if (this.status_) {
       fn(this.status_, DrmEngine.DUMMY_KEY_ID.value())
     }
   }
 
-  /** @override */
+  /* * @override */
   get(keyId) {
     if (this.has(keyId)) {
       return this.status_
@@ -899,7 +900,7 @@ PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
     return undefined
   }
 
-  /** @override */
+  /* * @override */
   has(keyId) {
     const fakeKeyId = DrmEngine.DUMMY_KEY_ID.value()
     if (this.status_ && BufferUtils.equal(keyId, fakeKeyId)) {
@@ -908,7 +909,7 @@ PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
     return false
   }
 
-  /**
+  /* *
    * @suppress {missingReturn}
    * @override
    */
@@ -916,7 +917,7 @@ PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
     console.assert(false, 'Not used!  Provided only for compiler.')
   }
 
-  /**
+  /* *
    * @suppress {missingReturn}
    * @override
    */
@@ -924,7 +925,7 @@ PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
     console.assert(false, 'Not used!  Provided only for compiler.')
   }
 
-  /**
+  /* *
    * @suppress {missingReturn}
    * @override
    */
@@ -932,7 +933,7 @@ PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
     console.assert(false, 'Not used!  Provided only for compiler.')
   }
 }
-/**
+/* *
  * Store api prefix.
  *
  * @private {string}

@@ -2,7 +2,7 @@
 import ManifestParserUtils from '../util/manifest_parser_utils'
 
 export default class Utils {
-  /**
+  /* *
    *
    * @param {!Array.<!Tag>} tags
    * @param {string} name
@@ -13,7 +13,7 @@ export default class Utils {
       return tag.name === name
     })
   }
-  /**
+  /* *
    *
    * @param {!Array.<!Tag>} tags
    * @param {string} type
@@ -25,7 +25,7 @@ export default class Utils {
       return tagType === type
     })
   }
-  /**
+  /* *
    *
    * @param {!Array.<!Tag>} tags
    * @param {string} name
@@ -39,7 +39,7 @@ export default class Utils {
 
     return tagsWithName[0]
   }
-  /**
+  /* *
    * @param {string} parentAbsoluteUri
    * @param {string} uri
    * @return {string}
@@ -49,7 +49,7 @@ export default class Utils {
       [parentAbsoluteUri], [uri])
     return uris[0]
   }
-  /**
+  /* *
    * Matches a string to an HLS comment format and returns the result.
    *
    * @param {string} line

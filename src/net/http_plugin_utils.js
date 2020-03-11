@@ -1,12 +1,12 @@
 import Error from '../util/error'
 import StringUtils from '../util/string_utils'
 
-/**
+/* *
  * @summary A set of http networking utility functions.
  * @exportDoc
  */
 export default class HttpPluginUtils {
-  /**
+  /* *
    * @param {!Object.<string,string>} headers
    * @param {BufferSource} data
    * @param {number} status
@@ -18,7 +18,7 @@ export default class HttpPluginUtils {
   static makeResponse(headers, data, status, uri, responseURL, requestType) {
     if (status >= 200 && status <= 299 && status !== 202) {
       // Most 2xx HTTP codes are success cases.
-      /** @type {shaka.extern.Response} */
+      /* * @type {shaka.extern.Response} */
       const response = {
         uri: responseURL || uri,
         originalUri: uri,

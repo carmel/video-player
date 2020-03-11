@@ -1,12 +1,12 @@
 import Uri from './uri'
 import BufferUtils from './buffer_utils'
 import StringUtils from './string_utils'
-/**
+/* *
  * @summary A set of FairPlay utility functions.
  * @exportInterface
  */
 export default class FairPlayUtils {
-  /**
+  /* *
    * Using the default method, extract a content ID from the init data.  This is
    * based on the FairPlay example documentation.
    *
@@ -20,14 +20,14 @@ export default class FairPlayUtils {
     // The first part is a 4 byte little-endian int, which is the length of
     // the second part.
     const length = dataview.getUint32(
-      /* position= */ 0, /* littleEndian= */ true)
+      /*  position= */ 0, /*  littleEndian= */ true)
     if (length + 4 !== uint8.byteLength) {
       throw new RangeError('Malformed FairPlay init data')
     }
 
     // The second part is a UTF-16 LE URI from the manifest.
     const uriString = StringUtils.fromUTF16(
-      uint8.subarray(4), /* littleEndian= */ true)
+      uint8.subarray(4), /*  littleEndian= */ true)
 
     // The domain of that URI is the content ID according to Apple's FPS
     // sample.
@@ -35,7 +35,7 @@ export default class FairPlayUtils {
     return uri.getDomain()
   }
 
-  /**
+  /* *
    * Transforms the init data buffer using the given data.  The format is:
    *
    * <pre>
@@ -66,11 +66,11 @@ export default class FairPlayUtils {
     // composed of several parts.  First, the raw init data we already got.
     // Second, a 4-byte LE length followed by the content ID in UTF-16-LE.
     // Third, a 4-byte LE length followed by the certificate.
-    /** @type {BufferSource} */
+    /* * @type {BufferSource} */
     let contentIdArray
     if (typeof contentId === 'string') {
       contentIdArray =
-          StringUtils.toUTF16(contentId, /* littleEndian= */ true)
+          StringUtils.toUTF16(contentId, /*  littleEndian= */ true)
     } else {
       contentIdArray = contentId
     }
@@ -79,16 +79,16 @@ export default class FairPlayUtils {
       8 + initData.byteLength + contentIdArray.byteLength + cert.byteLength)
 
     let offset = 0
-    /** @param {BufferSource} array */
+    /* * @param {BufferSource} array */
     const append = (array) => {
       rebuiltInitData.set(BufferUtils.toUint8(array), offset)
       offset += array.byteLength
     }
-    /** @param {BufferSource} array */
+    /* * @param {BufferSource} array */
     const appendWithLength = (array) => {
       const view = BufferUtils.toDataView(rebuiltInitData)
       const value = array.byteLength
-      view.setUint32(offset, value, /* littleEndian= */ true)
+      view.setUint32(offset, value, /*  littleEndian= */ true)
       offset += 4
       append(array)
     }

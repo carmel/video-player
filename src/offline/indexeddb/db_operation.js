@@ -1,18 +1,18 @@
 import PublicPromise from '../../util/public_promise'
-/**
+/* *
  * A DBOperation wraps an IndexedDB transaction in a promise.
  */
 export default class DBOperation {
-  /**
+  /* *
    * @param {IDBTransaction} transaction
    * @param {string} storeName
    */
   constructor(transaction, storeName) {
-    /** @private {IDBTransaction} */
+    /* * @private {IDBTransaction} */
     this.transaction_ = transaction
-    /** @private {IDBObjectStore} */
+    /* * @private {IDBObjectStore} */
     this.store_ = transaction.objectStore(storeName)
-    /** @private {!PublicPromise} */
+    /* * @private {!PublicPromise} */
     this.promise_ = new PublicPromise()
 
     // Connect the transaction and the promise together.
@@ -31,7 +31,7 @@ export default class DBOperation {
     }
   }
 
-  /**
+  /* *
    * @return {!Promise}
    */
   async abort() {
@@ -48,7 +48,7 @@ export default class DBOperation {
     } catch (e) {}
   }
 
-  /**
+  /* *
    * Calls the given callback for each entry in the database.  The callback
    * must be synchronous, but this operation happens asynchronously.
    *
@@ -77,7 +77,7 @@ export default class DBOperation {
     })
   }
 
-  /**
+  /* *
    * Get the store that the operation can interact with. Requests can be made
    * on the store. All requests made on the store will complete successfully
    * before the operation's promise will resolve. If any request fails, the
@@ -87,7 +87,7 @@ export default class DBOperation {
    */
   store() { return this.store_ }
 
-  /**
+  /* *
    * Get the promise that wraps the transaction. This promise will resolve when
    * all requests on the object store complete successfully and the transaction
    * completes. If any request fails or the operation is aborted, the promise

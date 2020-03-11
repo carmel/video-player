@@ -1,14 +1,14 @@
 import Uri from '../util/uri'
-import NetworkingEngine from '../net/networking_engine'
+import { NetworkingEngine } from '../net/networking_engine'
 import Error from '../util/error'
 import Platform from '../util/platform'
 
-/**
+/* *
  * @summary An interface to register manifest parsers.
  * @exportDoc
  */
 export default class ManifestParser {
-  /**
+  /* *
    * Registers a manifest parser by file extension.
    *
    * @param {string} extension The file extension of the manifest.
@@ -20,7 +20,7 @@ export default class ManifestParser {
     ManifestParser.parsersByExtension[extension] = parserFactory
   }
 
-  /**
+  /* *
    * Registers a manifest parser by MIME type.
    *
    * @param {string} mimeType The MIME type of the manifest.
@@ -32,7 +32,7 @@ export default class ManifestParser {
     ManifestParser.parsersByMime[mimeType] = parserFactory
   }
 
-  /**
+  /* *
    * Unregisters a manifest parser by MIME type.
    *
    * @param {string} mimeType The MIME type of the manifest.
@@ -41,7 +41,7 @@ export default class ManifestParser {
   static unregisterParserByMime(mimeType) {
     delete ManifestParser.parsersByMime[mimeType]
   }
-  /**
+  /* *
    * Returns a map of manifest support for well-known types.
    *
    * @return {!Object.<string, boolean>}
@@ -105,7 +105,7 @@ export default class ManifestParser {
 
     return support
   }
-  /**
+  /* *
    * Get a factory that can create a manifest parser that should be able to
    * parse the manifest at |uri|.
    *
@@ -162,7 +162,7 @@ export default class ManifestParser {
       Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE,
       uri)
   }
-  /**
+  /* *
    * @param {string} uri
    * @param {!NetworkingEngine} netEngine
    * @param {shaka.extern.RetryParameters} retryParams
@@ -181,7 +181,7 @@ export default class ManifestParser {
     const mimeType = response.headers['content-type']
     return mimeType ? mimeType.toLowerCase().split(';').shift() : ''
   }
-  /**
+  /* *
    * @param {string} uri
    * @return {string}
    */
@@ -198,7 +198,7 @@ export default class ManifestParser {
 
     return filenamePieces.pop().toLowerCase()
   }
-  /**
+  /* *
    * Determines whether or not this URI and MIME type are supported by our own
    * manifest parsers on this platform.  This takes into account whether or not
    * MediaSource is available, as well as which parsers are registered to the
@@ -226,13 +226,13 @@ export default class ManifestParser {
     return false
   }
 }
-/**
+/* *
  * Contains the parser factory functions indexed by MIME type.
  *
  * @type {!Object.<string, shaka.extern.ManifestParser.Factory>}
  */
 ManifestParser.parsersByMime = {}
-/**
+/* *
  * Contains the parser factory functions indexed by file extension.
  *
  * @type {!Object.<string, shaka.extern.ManifestParser.Factory>}

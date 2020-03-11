@@ -1,10 +1,10 @@
 import polyfill from './all'
 
-/**
+/* *
  * @summary A polyfill to provide VTTCue.
  */
 export default class VTTCue {
-  /**
+  /* *
    * Install the polyfill if needed.
    */
   static install() {
@@ -31,7 +31,7 @@ export default class VTTCue {
     }
   }
 
-  /**
+  /* *
    * Draft spec TextTrackCue with 3 constructor arguments.
    * @see {@link https://bit.ly/2IdyKbA W3C Working Draft 25 October 2012}.
    *
@@ -42,10 +42,10 @@ export default class VTTCue {
    * @private
    */
   static from3ArgsTextTrackCue_(startTime, endTime, text) {
-    return new window.TextTrackCue(startTime, endTime, text)
+    return new TextTrackCue(startTime, endTime, text)
   }
 
-  /**
+  /* *
    * Draft spec TextTrackCue with 6 constructor arguments (5th & 6th are
    * optional).
    * @see {@link https://bit.ly/2KaGSP2 W3C Working Draft 29 March 2012}.
@@ -62,7 +62,7 @@ export default class VTTCue {
     return new window['TextTrackCue'](id, startTime, endTime, text)
   }
 
-  /**
+  /* *
    * IE10, IE11 and Edge return TextTrackCue.length = 0, although they accept 3
    * constructor arguments.
    *

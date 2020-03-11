@@ -1,5 +1,5 @@
-import NetworkingEngine from '../net/networking_engine'
-/**
+import { NetworkingEngine } from '../net/networking_engine'
+/* *
  * A collection of shared utilities that bridge the gap between our networking
  * code and the other parts of our code base. This is to allow
  * |NetworkingEngine| to remain general.
@@ -7,7 +7,7 @@ import NetworkingEngine from '../net/networking_engine'
  * @final
  */
 export default class Networking {
-  /**
+  /* *
    * Create a request message for a segment. Providing |start| and |end|
    * will set the byte range. A non-zero start must be provided for |end| to
    * be used.

@@ -1,10 +1,10 @@
-/**
+/* *
  * This is a collection of period-focused utility methods.
  *
  * @final
  */
 export default class Periods {
-  /**
+  /* *
    * Get all the variants across all periods.
    *
    * @param {!Iterable.<shaka.extern.Period>} periods
@@ -22,7 +22,7 @@ export default class Periods {
     return found
   }
 
-  /**
+  /* *
    * Find our best guess at which period contains the given time. If
    * |timeInSeconds| starts before the first period, then |null| will be
    * returned.

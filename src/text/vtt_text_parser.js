@@ -4,12 +4,12 @@ import Error from '../util/error'
 import StringUtils from '../util/string_utils'
 import TextParser from '../util/text_parser'
 
-/**
+/* *
  * @implements {shaka.extern.TextParser}
  * @export
  */
 export default class VttTextParser {
-  /**
+  /* *
    * @override
    * @export
    */
@@ -17,7 +17,7 @@ export default class VttTextParser {
     console.assert(false, 'VTT does not have init segments')
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -79,7 +79,7 @@ export default class VttTextParser {
     }
 
     // Parse VTT regions.
-    /* !Array.<!shaka.extern.CueRegion> */
+    /*  !Array.<!shaka.extern.CueRegion> */
     const regions = []
     for (const line of blocks[0].split('\n')) {
       if (/^Region:/.test(line)) {
@@ -101,7 +101,7 @@ export default class VttTextParser {
     return ret
   }
 
-  /**
+  /* *
    * Parses a string into a Region object.
    *
    * @param {string} text
@@ -134,7 +134,7 @@ export default class VttTextParser {
     return region
   }
 
-  /**
+  /* *
    * Parses a text block into a Cue object.
    *
    * @param {!Array.<string>} text
@@ -207,7 +207,7 @@ export default class VttTextParser {
     return cue
   }
 
-  /**
+  /* *
    * Parses a WebVTT setting from the given word.
    *
    * @param {!Cue} cue
@@ -243,7 +243,7 @@ export default class VttTextParser {
     return true
   }
 
-  /**
+  /* *
    *
    * @param {!Array.<!CueRegion>} regions
    * @param {string} id
@@ -266,7 +266,7 @@ export default class VttTextParser {
     return regionsWithId[0]
   }
 
-  /**
+  /* *
    * Parses a WebVTTRegion setting from the given word.
    *
    * @param {!CueRegion} region
@@ -300,7 +300,7 @@ export default class VttTextParser {
     return true
   }
 
-  /**
+  /* *
    * @param {!Cue} cue
    * @param {string} align
    * @private
@@ -318,7 +318,7 @@ export default class VttTextParser {
     }
   }
 
-  /**
+  /* *
    * @param {!Cue} cue
    * @param {string} align
    * @private
@@ -334,7 +334,7 @@ export default class VttTextParser {
     }
   }
 
-  /**
+  /* *
    * @param {!Cue} cue
    * @param {string} value
    * @private
@@ -348,7 +348,7 @@ export default class VttTextParser {
     }
   }
 
-  /**
+  /* *
    * @param {!Cue} cue
    * @param {string} word
    * @return {boolean}
@@ -383,7 +383,7 @@ export default class VttTextParser {
     return true
   }
 
-  /**
+  /* *
    * Parses a WebVTT time from the given parser.
    *
    * @param {!TextParser} parser
@@ -410,13 +410,13 @@ export default class VttTextParser {
   }
 }
 
-/**
+/* *
  * @const {number}
  * @private
  */
 VttTextParser.MPEG_TIMESCALE_ = 90000
 
-/**
+/* *
  * At this value, timestamps roll over in TS content.
  * @const {number}
  * @private
@@ -427,4 +427,4 @@ TextEngine.registerParser(
   'text/vtt', () => new VttTextParser())
 
 TextEngine.registerParser(
-  'text/vtt; codecs="vtt"', () => new VttTextParser())
+  `text/vtt; codecs='vtt'`, () => new VttTextParser())

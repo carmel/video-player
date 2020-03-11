@@ -1,6 +1,6 @@
 import ObjectUtils from './object_utils'
 export default class ConfigUtils {
-  /**
+  /* *
    * @param {!Object} destination
    * @param {!Object} source
    * @param {!Object} template supplies default values
@@ -15,7 +15,7 @@ export default class ConfigUtils {
   static mergeConfigObjects(destination, source, template, overrides, path) {
     console.assert(destination, 'Destination config must not be null!')
 
-    /**
+    /* *
      * @type {boolean}
      * If true, don't validate the keys in the next level.
      */
@@ -79,7 +79,7 @@ export default class ConfigUtils {
 
     return isValid
   }
-  /**
+  /* *
    * Convert config from ('fieldName', value) format to a partial config object.
    *
    * E. g. from ('manifest.retryParameters.maxAttempts', 1) to

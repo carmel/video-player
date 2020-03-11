@@ -1,7 +1,7 @@
 import FakeEvent from './fake_event'
 import MultiMap from './multi_map'
 
-/**
+/* *
  * @summary A work-alike for EventTarget.  Only DOM elements may be true
  * EventTargets, but this can be used as a base class to provide event dispatch
  * to non-DOM classes.  Only FakeEvents should be dispatched.
@@ -11,19 +11,19 @@ import MultiMap from './multi_map'
  */
 export default class FakeEventTarget {
   constructor() {
-    /**
+    /* *
      * @private {!MultiMap.<FakeEventTarget.ListenerType>}
      */
     this.listeners_ = new MultiMap()
 
-    /**
+    /* *
      * The target of all dispatched events.  Defaults to |this|.
      * @type {EventTarget}
      */
     this.dispatchTarget = this
   }
 
-  /**
+  /* *
    * Add an event listener to this object.
    *
    * @param {string} type The event type to listen for.
@@ -37,7 +37,7 @@ export default class FakeEventTarget {
     this.listeners_.push(type, listener)
   }
 
-  /**
+  /* *
    * Remove an event listener from this object.
    *
    * @param {string} type The event type for which you wish to remove a
@@ -52,7 +52,7 @@ export default class FakeEventTarget {
     this.listeners_.remove(type, listener)
   }
 
-  /**
+  /* *
    * Dispatch an event from this object.
    *
    * @param {!Event} event The event to be dispatched from this object.
@@ -102,7 +102,7 @@ export default class FakeEventTarget {
   }
 }
 
-/**
+/* *
  * These are the listener types defined in the closure extern for EventTarget.
  * @typedef {EventListener|function(!Event):*}
  * @exportInterface

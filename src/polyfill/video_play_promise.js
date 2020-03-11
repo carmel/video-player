@@ -1,16 +1,16 @@
 import polyfill from './all'
 
-/**
+/* *
  * @summary A polyfill to silence the play() Promise in HTML5 video.
  */
 export default class VideoPlayPromise {
-  /**
+  /* *
    * Install the polyfill if needed.
    */
   static install() {
     console.debug('VideoPlayPromise.install')
 
-    if (window.HTMLMediaElement) {
+    if (HTMLMediaElement) {
       // eslint-disable-next-line no-restricted-syntax
       const originalPlay = HTMLMediaElement.prototype.play
       // eslint-disable-next-line no-restricted-syntax

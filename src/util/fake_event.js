@@ -1,11 +1,11 @@
-/**
+/* *
  * @summary Create an Event work-alike object based on the provided dictionary.
  * The event should contain all of the same properties from the dict.
  *
  * @extends {Event}
  */
 export default class FakeEvent {
-  /**
+  /* *
    * @param {string} type
    * @param {Object=} dict
    */
@@ -22,38 +22,38 @@ export default class FakeEvent {
     // The properties below cannot be set by the dict.  They are all provided
     // for compatibility with native events.
 
-    /** @const {boolean} */
+    /* * @const {boolean} */
     this.bubbles = false
 
-    /** @type {boolean} */
+    /* * @type {boolean} */
     this.cancelable = false
 
-    /** @type {boolean} */
+    /* * @type {boolean} */
     this.defaultPrevented = false
 
-    /**
+    /* *
      * According to MDN, Chrome uses high-res timers instead of epoch time.
      * Follow suit so that timeStamps on FakeEvents use the same base as
      * on native Events.
      * @const {number}
      * @see https://developer.mozilla.org/en-US/docs/Web/API/Event/timeStamp
      */
-    this.timeStamp = window.performance && window.performance.now
-      ? window.performance.now() : Date.now()
+    this.timeStamp = performance && performance.now
+      ? performance.now() : Date.now()
 
-    /** @const {string} */
+    /* * @const {string} */
     this.type = type
 
-    /** @const {boolean} */
+    /* * @const {boolean} */
     this.isTrusted = false
 
-    /** @type {EventTarget} */
+    /* * @type {EventTarget} */
     this.currentTarget = null
 
-    /** @type {EventTarget} */
+    /* * @type {EventTarget} */
     this.target = null
 
-    /**
+    /* *
      * Non-standard property read by FakeEventTarget to stop processing
      * listeners.
      * @type {boolean}
@@ -61,7 +61,7 @@ export default class FakeEvent {
     this.stopped = false
   }
 
-  /**
+  /* *
    * Prevents the default action of the event.  Has no effect if the event isn't
    * cancellable.
    * @override
@@ -72,7 +72,7 @@ export default class FakeEvent {
     }
   }
 
-  /**
+  /* *
    * Stops processing event listeners for this event.  Provided for
    * compatibility with native Events.
    * @override
@@ -81,7 +81,7 @@ export default class FakeEvent {
     this.stopped = true
   }
 
-  /**
+  /* *
    * Does nothing, since FakeEvents do not bubble.  Provided for compatibility
    * with native Events.
    * @override

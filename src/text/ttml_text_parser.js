@@ -5,12 +5,12 @@ import StringUtils from '../util/string_utils'
 import XmlUtils from '../util/xml_utils'
 import TextEngine from './text_engine'
 
-/**
+/* *
  * @implements {shaka.extern.TextParser}
  * @export
  */
 export default class TtmlTextParser {
-  /**
+  /* *
    * @override
    * @export
    */
@@ -18,7 +18,7 @@ export default class TtmlTextParser {
     console.assert(false, 'TTML does not have init segments')
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -130,7 +130,7 @@ export default class TtmlTextParser {
     return ret
   }
 
-  /**
+  /* *
    * Gets the leaf nodes of the xml node tree. Ignores the text, br elements
    * and the spans positioned inside paragraphs
    *
@@ -153,7 +153,7 @@ export default class TtmlTextParser {
         console.assert(node instanceof Element,
           'Node should be Element!')
         const leafChildren = TtmlTextParser.getLeafNodes_(
-          /** @type {Element} */(node))
+          /* * @type {Element} */(node))
         console.assert(leafChildren.length > 0,
           'Only a null Element should return no leaves!')
 
@@ -169,7 +169,7 @@ export default class TtmlTextParser {
     return result
   }
 
-  /**
+  /* *
    * Get the leaf nodes that can act as cues
    * (at least begin attribute)
    *
@@ -184,7 +184,7 @@ export default class TtmlTextParser {
 
     return Array.from(element.querySelectorAll('[begin]'))
   }
-  /**
+  /* *
    * Trims and removes multiple spaces from a string
    *
    * @param {Element} element
@@ -200,7 +200,7 @@ export default class TtmlTextParser {
         payload += '\n'
       } else if (node.childNodes && node.childNodes.length > 0) {
         payload += TtmlTextParser.sanitizeTextContent_(
-          /** @type {!Element} */ (node),
+          /* * @type {!Element} */ (node),
           whitespaceTrim
         )
       } else if (whitespaceTrim) {
@@ -218,7 +218,7 @@ export default class TtmlTextParser {
     return payload
   }
 
-  /**
+  /* *
    * Parses an Element into a TextTrackCue or VTTCue.
    *
    * @param {!Element} cueElement
@@ -251,14 +251,14 @@ export default class TtmlTextParser {
 
     if (
       cueElement.nodeType !== Node.ELEMENT_NODE ||
-      /* Disregards empty elements without time attributes nor content
+      /*  Disregards empty elements without time attributes nor content
        * <p begin='...' smpte:backgroundImage='...' /> will go through,
        *    as some information could be holded by its attributes
        * <p />, <div></div> won't,
        *    as they don't have means to be displayed into a playback sequence
        */
       (hasNoTimeAttributes && isTextContentEmpty) ||
-      /*
+      /* 
        * Let nested cue without time attributes through:
        *    time attributes are holded by its parent
        */
@@ -306,7 +306,7 @@ export default class TtmlTextParser {
     } else {
       for (const childNode of cueElement.childNodes) {
         const nestedCue = TtmlTextParser.parseCue_(
-          /** @type {!Element} */ (childNode),
+          /* * @type {!Element} */ (childNode),
           offset,
           rateInfo,
           metadataElements,
@@ -314,7 +314,7 @@ export default class TtmlTextParser {
           regionElements,
           cueRegions,
           whitespaceTrim,
-          /* isNested= */ true,
+          /*  isNested= */ true,
           cellResolution
         )
 
@@ -333,7 +333,7 @@ export default class TtmlTextParser {
 
     // Get other properties if available.
     const regionElement = TtmlTextParser.getElementsFromCollection_(
-      cueElement, 'region', regionElements, /* prefix= */ '')[0]
+      cueElement, 'region', regionElements, /*  prefix= */ '')[0]
     if (regionElement && regionElement.getAttribute('xml:id')) {
       const regionId = regionElement.getAttribute('xml:id')
       cue.region = cueRegions.filter((region) => region.id === regionId)[0]
@@ -350,7 +350,7 @@ export default class TtmlTextParser {
     return cue
   }
 
-  /**
+  /* *
    * Parses an Element into a TextTrackCue or VTTCue.
    *
    * @param {!Element} regionElement
@@ -432,7 +432,7 @@ export default class TtmlTextParser {
     return region
   }
 
-  /**
+  /* *
    * Adds applicable style properties to a cue.
    *
    * @param {!Cue} cue
@@ -598,7 +598,7 @@ export default class TtmlTextParser {
     }
   }
 
-  /**
+  /* *
    * Parses text decoration values and adds/removes them to/from the cue.
    *
    * @param {!Cue} cue
@@ -646,7 +646,7 @@ export default class TtmlTextParser {
     }
   }
 
-  /**
+  /* *
    * Finds a specified attribute on either the original cue element or its
    * associated region and returns the value if the attribute was found.
    *
@@ -671,7 +671,7 @@ export default class TtmlTextParser {
       region, styles, attribute)
   }
 
-  /**
+  /* *
    * Finds a specified attribute on the element's associated region
    * and returns the value if the attribute was found.
    *
@@ -694,7 +694,7 @@ export default class TtmlTextParser {
     }
 
     const style = TtmlTextParser.getElementsFromCollection_(
-      region, 'style', styles, /* prefix= */ '')[0]
+      region, 'style', styles, /*  prefix= */ '')[0]
 
     if (style) {
       return XmlUtils.getAttributeNS(style, ttsNs, attribute)
@@ -703,7 +703,7 @@ export default class TtmlTextParser {
     return null
   }
 
-  /**
+  /* *
    * Finds a specified attribute on the cue element and returns the value
    * if the attribute was found.
    *
@@ -731,7 +731,7 @@ export default class TtmlTextParser {
 
     const inheritedStyles =
       TtmlTextParser.getElementsFromCollection_(
-        cueElement, 'style', styles, /* prefix= */ ''
+        cueElement, 'style', styles, /*  prefix= */ ''
       )
 
     let styleValue = null
@@ -751,7 +751,7 @@ export default class TtmlTextParser {
 
     return styleValue
   }
-  /**
+  /* *
    * Selects items from |collection| whose id matches |attributeName|
    * from |element|.
    *
@@ -792,7 +792,7 @@ export default class TtmlTextParser {
 
     return items
   }
-  /**
+  /* *
    * Traverses upwards from a given node until a given attribute is found.
    *
    * @param {!Element} element
@@ -820,7 +820,7 @@ export default class TtmlTextParser {
     return ret
   }
 
-  /**
+  /* *
    * Parses a TTML time from the given word.
    *
    * @param {string} text
@@ -852,7 +852,7 @@ export default class TtmlTextParser {
     return ret
   }
 
-  /**
+  /* *
    * Parses a TTML time in frame format.
    *
    * @param {!TtmlTextParser.RateInfo_} rateInfo
@@ -868,7 +868,7 @@ export default class TtmlTextParser {
     return frames / rateInfo.frameRate
   }
 
-  /**
+  /* *
    * Parses a TTML time in tick format.
    *
    * @param {!TtmlTextParser.RateInfo_} rateInfo
@@ -884,7 +884,7 @@ export default class TtmlTextParser {
     return ticks / rateInfo.tickRate
   }
 
-  /**
+  /* *
    * Parses a TTML colon formatted time containing frames.
    *
    * @param {!TtmlTextParser.RateInfo_} rateInfo
@@ -908,7 +908,7 @@ export default class TtmlTextParser {
     return seconds + (minutes * 60) + (hours * 3600)
   }
 
-  /**
+  /* *
    * Parses a TTML time with a given regex. Expects regex to be some
    * sort of a time-matcher to match hours, minutes, seconds and milliseconds
    *
@@ -932,7 +932,7 @@ export default class TtmlTextParser {
     return (milliseconds / 1000) + seconds + (minutes * 60) + (hours * 3600)
   }
 
-  /**
+  /* *
    * If ttp:cellResolution provided returns cell resolution info
    * with number of columns and rows into which the Root Container
    * Region area is divided
@@ -958,7 +958,7 @@ export default class TtmlTextParser {
   }
 }
 
-/**
+/* *
  * @summary
  * Contains information about frame/subframe rate
  * and frame rate multiplier for time in frame format.
@@ -967,24 +967,24 @@ export default class TtmlTextParser {
  * @private
  */
 TtmlTextParser.RateInfo_ = class {
-  /**
+  /* *
    * @param {?string} frameRate
    * @param {?string} subFrameRate
    * @param {?string} frameRateMultiplier
    * @param {?string} tickRate
    */
   constructor(frameRate, subFrameRate, frameRateMultiplier, tickRate) {
-    /**
+    /* *
      * @type {number}
      */
     this.frameRate = Number(frameRate) || 30
 
-    /**
+    /* *
      * @type {number}
      */
     this.subFrameRate = Number(subFrameRate) || 1
 
-    /**
+    /* *
      * @type {number}
      */
     this.tickRate = Number(tickRate)
@@ -1008,7 +1008,7 @@ TtmlTextParser.RateInfo_ = class {
   }
 }
 
-/**
+/* *
  * @const
  * @private {!RegExp}
  * @example 50.17% 10%
@@ -1016,28 +1016,28 @@ TtmlTextParser.RateInfo_ = class {
 TtmlTextParser.percentValues_ =
     /^(\d{1,2}(?:\.\d+)?|100)% (\d{1,2}(?:\.\d+)?|100)%$/
 
-/**
+/* *
  * @const
  * @private {!RegExp}
  * @example 0.6% 90%
  */
 TtmlTextParser.percentValue_ = /^(\d{1,2}(?:\.\d+)?|100)%$/
 
-/**
+/* *
  * @const
  * @private {!RegExp}
  * @example 100px, 8em, 0.80c
  */
 TtmlTextParser.unitValues_ = /^(\d+px|\d+em|\d*\.?\d+c)$/
 
-/**
+/* *
  * @const
  * @private {!RegExp}
  * @example 100px
  */
 TtmlTextParser.pixelValues_ = /^(\d+)px (\d+)px$/
 
-/**
+/* *
  * @const
  * @private {!RegExp}
  * @example 00:00:40:07 (7 frames) or 00:00:40:07.1 (7 frames, 1 subframe)
@@ -1045,14 +1045,14 @@ TtmlTextParser.pixelValues_ = /^(\d+)px (\d+)px$/
 TtmlTextParser.timeColonFormatFrames_ =
     /^(\d{2,}):(\d{2}):(\d{2}):(\d{2})\.?(\d+)?$/
 
-/**
+/* *
  * @const
  * @private {!RegExp}
  * @example 00:00:40 or 00:40
  */
 TtmlTextParser.timeColonFormat_ = /^(?:(\d{2,}):)?(\d{2}):(\d{2})$/
 
-/**
+/* *
  * @const
  * @private {!RegExp}
  * @example 01:02:43.0345555 or 02:43.03
@@ -1060,21 +1060,21 @@ TtmlTextParser.timeColonFormat_ = /^(?:(\d{2,}):)?(\d{2}):(\d{2})$/
 TtmlTextParser.timeColonFormatMilliseconds_ =
     /^(?:(\d{2,}):)?(\d{2}):(\d{2}\.\d{2,})$/
 
-/**
+/* *
  * @const
  * @private {!RegExp}
  * @example 75f or 75.5f
  */
 TtmlTextParser.timeFramesFormat_ = /^(\d*(?:\.\d*)?)f$/
 
-/**
+/* *
  * @const
  * @private {!RegExp}
  * @example 50t or 50.5t
  */
 TtmlTextParser.timeTickFormat_ = /^(\d*(?:\.\d*)?)t$/
 
-/**
+/* *
  * @const
  * @private {!RegExp}
  * @example 3.45h, 3m or 4.20s
@@ -1085,7 +1085,7 @@ TtmlTextParser.timeHMSFormat_ =
       '(?:(\\d*(?:\\.\\d*)?)s)?',
       '(?:(\\d*(?:\\.\\d*)?)ms)?$'].join(''))
 
-/**
+/* *
  * @const
  * @private {!Object.<string, Cue.lineAlign>}
  */
@@ -1097,7 +1097,7 @@ TtmlTextParser.textAlignToLineAlign_ = {
   'end': Cue.lineAlign.END
 }
 
-/**
+/* *
  * @const
  * @private {!Object.<string, Cue.positionAlign>}
  */
@@ -1107,13 +1107,13 @@ TtmlTextParser.textAlignToPositionAlign_ = {
   'right': Cue.positionAlign.RIGHT
 }
 
-/**
+/* *
  * @const {string}
  * @private
  */
 TtmlTextParser.parameterNs_ = 'http://www.w3.org/ns/ttml#parameter'
 
-/**
+/* *
  * @const {string}
  * @private
  */

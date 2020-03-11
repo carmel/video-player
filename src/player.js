@@ -16,7 +16,7 @@ import { PlayheadObserverManager } from './media/playhead_observer'
 import StreamingEngine from './media/streaming_engine'
 import PlayerConfiguration from './util/player_configuration'
 import SimpleTextDisplayer from './text/simple_text_displayer'
-import NetworkingEngine from './net/networking_engine'
+import { NetworkingEngine } from './net/networking_engine'
 import Functional from './util/functional'
 import AbortableOperation from './util/abortable_operation'
 import Stats from './util/stats'
@@ -29,10 +29,11 @@ import MimeUtils from './util/mime_utils'
 import StreamUtils from './util/stream_utils'
 import ArrayUtils from './util/array_utils'
 import TimeRangesUtils from './media/time_ranges_utils'
-import Walker from './routing/walker'
+import { Walker } from './routing/walker'
 import Deprecate from './deprecate/deprecate'
 import ConfigUtils from './util/config_utils'
 import Error from './util/error'
+import conf from './config'
 
 const LoadMode = {
   'DESTROYED': 0,
@@ -41,32 +42,7 @@ const LoadMode = {
   'SRC_EQUALS': 3
 }
 
-const EventName = {
-  AbrStatusChanged: 'abrstatuschanged',
-  Adaptation: 'adaptation',
-  Buffering: 'buffering',
-  Emsg: 'emsg',
-  Error: 'error',
-  ExpirationUpdated: 'expirationupdated',
-  LargeGap: 'largegap',
-  Loaded: 'loaded',
-  Loading: 'loading',
-  ManifestParsed: 'manifestparsed',
-  OnStateChange: 'onstatechange',
-  OnStateIdle: 'onstateidle',
-  RateChange: 'ratechange',
-  Streaming: 'streaming',
-  TextChanged: 'textchanged',
-  TextTrackVisibility: 'texttrackvisibility',
-  TimelineRegionAdded: 'timelineregionadded',
-  TimelineRegionEnter: 'timelineregionenter',
-  TimelineRegionExit: 'timelineregionexit',
-  TracksChanged: 'trackschanged',
-  Unloading: 'unloading',
-  VariantChanged: 'variantchanged'
-}
-
-/**
+/* *
  * The typical buffering threshold.  When we have less than this buffered (in
  * seconds), we enter a buffering state.  This specific value is based on manual
  * testing and evaluation across a variety of platforms.
@@ -82,7 +58,7 @@ const TYPICAL_BUFFERING_THRESHOLD_ = 0.5
 const restrictedStatuses_ = ['output-restricted', 'internal-error']
 
 export default class Player extends FakeEventTarget {
-  /**
+  /* *
    * @param {dom元素} mediaElement
    *    When provided, the player will attach to <code>mediaElement</code>,
    *    similar to calling <code>attach</code>. When not provided, the player
@@ -92,10 +68,10 @@ export default class Player extends FakeEventTarget {
     super()
     this.loadMode_ = LoadMode.NOT_LOADED
 
-    /** @private {HTMLMediaElement} */
+    /* * @private {HTMLMediaElement} */
     this.video_ = null
 
-    /**
+    /* *
      * Since we may not always have a text displayer created (e.g. before |load|
      * is called), we need to track what text visibility SHOULD be so that we
      * can ensure that when we create the text displayer. When we create our
@@ -106,16 +82,16 @@ export default class Player extends FakeEventTarget {
      */
     this.isTextVisible_ = false
 
-    /** @private {EventManager} */
+    /* * @private {EventManager} */
     this.eventManager_ = new EventManager()
 
-    /** @private {media.MediaSourceEngine} */
+    /* * @private {media.MediaSourceEngine} */
     this.mediaSourceEngine_ = null
 
-    /** @private {media.Playhead} */
+    /* * @private {media.Playhead} */
     this.playhead_ = null
 
-    /**
+    /* *
      * The playhead observers are used to monitor the position of the playhead
      * and some other source of data (e.g. buffered content), and raise events.
      * 用于监视播放头和其他数据源（例如，缓冲的内容）的位置，并触发相应事件
@@ -123,7 +99,7 @@ export default class Player extends FakeEventTarget {
      */
     this.playheadObservers_ = null
 
-    /**
+    /* *
      * This is our control over the playback rate of the media element. This
      * provides the missing functionality that we need to provide trick play,
      * for example a negative playback rate.
@@ -136,65 +112,65 @@ export default class Player extends FakeEventTarget {
     // enough buffered content to not enough. They only exist when content has
     // been loaded and are not re-used between loads.
     // 使用缓冲的观察器和计时器来跟踪何时从拥有足够的缓冲内容变为不足
-    /** @private {Timer} */
+    /* * @private {Timer} */
     this.bufferPoller_ = null
 
-    /** @private {media.BufferingObserver} */
+    /* * @private {media.BufferingObserver} */
     this.bufferObserver_ = null
 
-    /** @private {media.RegionTimeline} */
+    /* * @private {media.RegionTimeline} */
     this.regionTimeline_ = null
 
-    /** @private {media.StreamingEngine} */
+    /* * @private {media.StreamingEngine} */
     this.streamingEngine_ = null
 
-    /** @private {shaka.extern.ManifestParser} */
+    /* * @private {shaka.extern.ManifestParser} */
     this.parser_ = null
 
-    /** @private {?shaka.extern.ManifestParser.Factory} */
+    /* * @private {?shaka.extern.ManifestParser.Factory} */
     this.parserFactory_ = null
 
-    /** @private {?shaka.extern.Manifest} */
+    /* * @private {?shaka.extern.Manifest} */
     this.manifest_ = null
 
-    /** @private {?string} */
+    /* * @private {?string} */
     this.assetUri_ = null
 
-    /** @private {shaka.extern.AbrManager} */
+    /* * @private {shaka.extern.AbrManager} */
     this.abrManager_ = null
 
-    /**
+    /* *
      * The factory that was used to create the abrManager_ instance.
      * @private {?shaka.extern.AbrManager.Factory}
      */
     this.abrManagerFactory_ = null
 
-    /**
+    /* *
      * Contains an ID for use with creating streams.  The manifest parser should
      * start with small IDs, so this starts with a large one.
      * @private {number}
      */
     this.nextExternalStreamId_ = 1e9
 
-    /** @private {!Set.<shaka.extern.Stream>} */
+    /* * @private {!Set.<shaka.extern.Stream>} */
     this.loadingTextStreams_ = new Set()
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.switchingPeriods_ = true
 
-    /** @private {?shaka.extern.Variant} */
+    /* * @private {?shaka.extern.Variant} */
     this.deferredVariant_ = null
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.deferredVariantClearBuffer_ = false
 
-    /** @private {number} */
+    /* * @private {number} */
     this.deferredVariantClearBufferSafeMargin_ = 0
 
-    /** @private {?shaka.extern.Stream} */
+    /* * @private {?shaka.extern.Stream} */
     this.deferredTextStream_ = null
 
-    /**
+    /* *
      * A mapping of which streams are/were active in each period. Used when the
      * current period (the one containing playhead) differs from the active
      * period (the one being streamed in by streaming engine).
@@ -205,35 +181,35 @@ export default class Player extends FakeEventTarget {
 
     this.config_ = this.defaultConfig_()
 
-    /**
+    /* *
      * The TextDisplayerFactory that was last used to make a text displayer.
      * Stored so that we can tell if a new type of text displayer is desired.
      * @private {?shaka.extern.TextDisplayer.Factory}
      */
     this.lastTextFactory_
 
-    /** @private {{width: number, height: number}} */
+    /* * @private {{width: number, height: number}} */
     this.maxHwRes_ = { width: Infinity, height: Infinity }
 
-    /** @private {Stats} */
+    /* * @private {Stats} */
     this.stats_ = null
 
-    /** @private {!media.AdaptationSetCriteria} */
+    /* * @private {!media.AdaptationSetCriteria} */
     this.currentAdaptationSetCriteria_ =
         new PreferenceBasedCriteria(
           this.config_.preferredAudioLanguage,
           this.config_.preferredVariantRole,
           this.config_.preferredAudioChannelCount)
 
-    /** @private {string} */
+    /* * @private {string} */
     this.currentTextLanguage_ = this.config_.preferredTextLanguage
 
-    /** @private {string} */
+    /* * @private {string} */
     this.currentTextRole_ = this.config_.preferredTextRole
 
     this.networkingEngine_ = this.createNetworkingEngine()
 
-    /** @private {shaka.extern.IAdManager} */
+    /* * @private {shaka.extern.IAdManager} */
     this.adManager_ = null
 
     if (Player.adManagerFactory_) {
@@ -245,21 +221,21 @@ export default class Player extends FakeEventTarget {
       this.retryStreaming()
     })
 
-    /** @private {shaka.routing.Node} */
+    /* * @private {shaka.routing.Node} */
     this.detachNode_ = { name: 'detach' }
-    /** @private {shaka.routing.Node} */
+    /* * @private {shaka.routing.Node} */
     this.attachNode_ = { name: 'attach' }
-    /** @private {shaka.routing.Node} */
+    /* * @private {shaka.routing.Node} */
     this.unloadNode_ = { name: 'unload' }
-    /** @private {shaka.routing.Node} */
+    /* * @private {shaka.routing.Node} */
     this.parserNode_ = { name: 'manifest-parser' }
-    /** @private {shaka.routing.Node} */
+    /* * @private {shaka.routing.Node} */
     this.manifestNode_ = { name: 'manifest' }
-    /** @private {shaka.routing.Node} */
+    /* * @private {shaka.routing.Node} */
     this.mediaSourceNode_ = { name: 'media-source' }
-    /** @private {shaka.routing.Node} */
+    /* * @private {shaka.routing.Node} */
     this.loadNode_ = { name: 'load' }
-    /** @private {shaka.routing.Node} */
+    /* * @private {shaka.routing.Node} */
     this.srcEqualsNode_ = { name: 'src-equals' }
 
     const actions = new Map()
@@ -292,15 +268,15 @@ export default class Player extends FakeEventTarget {
       return this.onSrcEquals_(has, wants)
     })
 
-    /** @private {routing.Walker.Implementation} */
+    /* * @private {routing.Walker.Implementation} */
     const walkerImplementation = {
       getNext: (at, has, goingTo, wants) => {
         return this.getNextStep_(at, has, goingTo, wants)
       },
       enterNode: (node, has, wants) => {
         this.dispatchEvent(this.makeEvent_(
-          /* name= */ EventName.OnStateChange,
-          /* data= */ { 'state': node.name }))
+          /*  name= */ conf.EventName.OnStateChange,
+          /*  data= */ { 'state': node.name }))
 
         const action = actions.get(node)
         return action(has, wants)
@@ -330,22 +306,22 @@ export default class Player extends FakeEventTarget {
       },
       onIdle: (node) => {
         this.dispatchEvent(this.makeEvent_(
-          /* name= */ EventName.OnStateIdle,
-          /* data= */ { 'state': node.name }))
+          /*  name= */ conf.EventName.OnStateIdle,
+          /*  data= */ { 'state': node.name }))
       }
     }
 
-    /** @private {routing.Walker} */
+    /* * @private {routing.Walker} */
     this.walker_ = new Walker(this.detachNode_, Player.createEmptyPayload_(), walkerImplementation)
 
     // Even though |attach| will start in later interpreter cycles, it should be
     // the LAST thing we do in the constructor because conceptually it relies on
     // player having been initialized.
     if (mediaElement) {
-      this.attach(mediaElement, /* initializeMediaSource= */ true)
+      this.attach(mediaElement, /*  initializeMediaSource= */ true)
     }
   }
-  /**
+  /* *
    * @return {Payload}
    * @private
    */
@@ -358,7 +334,7 @@ export default class Player extends FakeEventTarget {
       uri: null
     }
   }
-  /**
+  /* *
    * Applies playRangeStart and playRangeEnd to the given timeline. This will
    * only affect non-live content.
    *
@@ -392,7 +368,7 @@ export default class Player extends FakeEventTarget {
       }
     }
   }
-  /**
+  /* *
    * @return {shaka.extern.PlayerConfiguration}
    * @private
    */
@@ -403,7 +379,7 @@ export default class Player extends FakeEventTarget {
     }
 
     // Because this.video_ may not be set when the config is built, the default
-    // TextDisplay factory must capture a reference to "this".
+    // TextDisplay factory must capture a reference to `this`.
     config.textDisplayFactory = () => new SimpleTextDisplayer(this.video_)
 
     return config
@@ -423,7 +399,7 @@ export default class Player extends FakeEventTarget {
     }
   }
   createNetworkingEngine() {
-    /** @type {function(number, number)} */
+    /* * @type {function(number, number)} */
     const onProgressUpdated_ = (deltaTimeMs, bytesDownloaded) => {
       // In some situations, such as during offline storage, the abr manager
       // might not yet exist. Therefore, we need to check if abr manager has
@@ -437,7 +413,7 @@ export default class Player extends FakeEventTarget {
   retryStreaming() {
     return this.loadMode_ === LoadMode.MEDIA_SOURCE ? this.streamingEngine_.retry() : false
   }
-  /**
+  /* *
    * This should only be called by the load graph when it is time to attach to
    * a media element. The only times this may be called are when we are being
    * asked to re-attach to the current media element, or attach to a new media
@@ -476,7 +452,7 @@ export default class Player extends FakeEventTarget {
     this.video_ = has.mediaElement
     return Promise.resolve()
   }
-  /**
+  /* *
    * This should only be called by the load graph when it is time to detach from
    * a media element. The only times this may be called are when we are being
    * asked to detach from the current media element, or detach when we are
@@ -505,7 +481,7 @@ export default class Player extends FakeEventTarget {
     this.video_ = null
     return Promise.resolve()
   }
-  /**
+  /* *
    * This should only be called by the load graph when it is time to unload all
    * currently initialized playback components. Unlike the other load actions,
    * this action is built to be more general. We need to do this because we
@@ -529,7 +505,7 @@ export default class Player extends FakeEventTarget {
       this.loadMode_ = LoadMode.NOT_LOADED
     }
 
-    this.dispatchEvent(this.makeEvent_(EventName.Unloading))
+    this.dispatchEvent(this.makeEvent_(conf.EventName.Unloading))
 
     // Remove everything that has to do with loading content from our payload
     // since we are releasing everything that depended on it.
@@ -627,7 +603,7 @@ export default class Player extends FakeEventTarget {
     // Make sure that the app knows of the new buffering state.
     this.updateBufferState_()
   }
-  /**
+  /* *
    * Update the buffering state to be either 'we are buffering' or 'we are not
    * buffering', firing events to the app as needed.
    *
@@ -647,10 +623,10 @@ export default class Player extends FakeEventTarget {
 
     // Surface the buffering event so that the app knows if/when we are
     // buffering.
-    const eventName = EventName.Buffering
+    const eventName = conf.EventName.Buffering
     this.dispatchEvent(this.makeEvent_(eventName, { 'buffering': isBuffering }))
   }
-  /**
+  /* *
    * Try updating the state history. If the player has not finished
    * initializing, this will be a no-op.
    *
@@ -677,8 +653,8 @@ export default class Player extends FakeEventTarget {
       history.update('playing')
     }
   }
-  /**
-   * @param {!EventName} name
+  /* *
+   * @param {!conf.EventName} name
    * @param {Object=} data
    * @return {!FakeEvent}
    * @private
@@ -686,7 +662,7 @@ export default class Player extends FakeEventTarget {
   makeEvent_(name, data) {
     return new FakeEvent(name, data)
   }
-  /**
+  /* *
    * This should only be called by the load graph when it is time to initialize
    * media source engine. The only time this may be called is when we are
    * attached to the same media element as in the request.
@@ -725,7 +701,7 @@ export default class Player extends FakeEventTarget {
     // Wait until it is ready to actually store the reference.
     this.mediaSourceEngine_ = mediaSourceEngine
   }
-  /**
+  /* *
    * Create a new media source engine. This will ONLY be replaced by tests as a
    * way to inject fake media source engine instances.
    *
@@ -738,7 +714,7 @@ export default class Player extends FakeEventTarget {
   createMediaSourceEngine(mediaElement, closedCaptionsParser, textDisplayer) {
     return new MediaSourceEngine(mediaElement, closedCaptionsParser, textDisplayer)
   }
-  /**
+  /* *
    * Create the parser for the asset located at |wants.uri|. This should only be
    * called as part of the load graph.
    *
@@ -783,7 +759,7 @@ export default class Player extends FakeEventTarget {
 
     this.parser_.configure(manifestConfig)
   }
-  /**
+  /* *
    * Parse the manifest at |has.uri| using the parser that should have already
    * been created. This should only be called as part of the load graph.
    *
@@ -812,8 +788,8 @@ export default class Player extends FakeEventTarget {
     // This will be needed by the parser once it starts parsing, so we will
     // initialize it now even through it appears a little out-of-place.
     this.regionTimeline_ = new RegionTimeline()
-    this.regionTimeline_.setListeners(/* onRegionAdded= */ (region) => {
-      this.onRegionEvent_(EventName.TimelineRegionAdded, region)
+    this.regionTimeline_.setListeners(/*  onRegionAdded= */ (region) => {
+      this.onRegionEvent_(conf.EventName.TimelineRegionAdded, region)
     })
 
     const playerInterface = {
@@ -831,12 +807,12 @@ export default class Player extends FakeEventTarget {
     const startTime = Date.now() / 1000
 
     return new AbortableOperation(
-      /* promise= */ (async() => {
+      /*  promise= */ (async() => {
         this.manifest_ = await this.parser_.start(assetUri, playerInterface)
 
         // This event is fired after the manifest is parsed, but before any
         // filtering takes place.
-        const event = this.makeEvent_(EventName.ManifestParsed)
+        const event = this.makeEvent_(conf.EventName.ManifestParsed)
         this.dispatchEvent(event)
 
         // We require all manifests to have already one period.
@@ -855,12 +831,12 @@ export default class Player extends FakeEventTarget {
         const delta = now - startTime
         this.stats_.setManifestTime(delta)
       })(),
-      /* onAbort= */ () => {
+      /*  onAbort= */ () => {
         console.info('Aborting parser step...')
         return this.parser_.stop()
       })
   }
-  /**
+  /* *
    * This should only be called by the load graph when it is time to set-up the
    * media element to play content using src=. The only times this may be called
    * is when we are attached to the same media element as in the request.
@@ -929,7 +905,7 @@ export default class Player extends FakeEventTarget {
     if (this.video_.textTracks) {
       // This is a real EventTarget, but the compiler doesn't know that.
       // TODO: File a bug or send a PR to the compiler externs to fix this.
-      const textTracks = /** @type {EventTarget} */(this.video_.textTracks)
+      const textTracks = /* * @type {EventTarget} */(this.video_.textTracks)
       this.eventManager_.listen(textTracks, 'addtrack', () => this.onTracksChanged_())
       this.eventManager_.listen(textTracks, 'removetrack', () => this.onTracksChanged_())
       this.eventManager_.listen(textTracks, 'change', () => this.onTracksChanged_())
@@ -946,7 +922,7 @@ export default class Player extends FakeEventTarget {
     // The event doesn't mean as much for src= playback, since we don't control
     // streaming.  But we should fire it in this path anyway since some
     // applications may be expecting it as a life-cycle event.
-    this.dispatchEvent(this.makeEvent_(EventName.Streaming))
+    this.dispatchEvent(this.makeEvent_(conf.EventName.Streaming))
 
     // This is fully loaded when we have loaded the first frame.
     const fullyLoaded = new PublicPromise()
@@ -965,7 +941,7 @@ export default class Player extends FakeEventTarget {
         fullyLoaded.reject(this.videoErrorToShakaError_())
       })
     }
-    return new AbortableOperation(fullyLoaded, /* onAbort= */ () => {
+    return new AbortableOperation(fullyLoaded, /*  onAbort= */ () => {
       const abortedError = new Error(
         Error.Severity.CRITICAL,
         Error.Category.PLAYER,
@@ -974,7 +950,7 @@ export default class Player extends FakeEventTarget {
       return Promise.resolve() // Abort complete.
     })
   }
-  /**
+  /* *
    * Initialize and start the buffering system (observer and timer) so that we
    * can monitor our buffer lead during playback.
    *
@@ -999,9 +975,9 @@ export default class Player extends FakeEventTarget {
     //       but we have no documentation about why.
     this.bufferPoller_ = new Timer(() => {
       this.pollBufferState_()
-    }).tickEvery(/* seconds= */ 0.25)
+    }).tickEvery(/*  seconds= */ 0.25)
   }
-  /**
+  /* *
    * Updates the buffering thresholds based on the new rebuffering goal.
    * @param {number} rebufferingGoal
    * @private
@@ -1018,7 +994,7 @@ export default class Player extends FakeEventTarget {
     const satisfiedThreshold = Math.min(TYPICAL_BUFFERING_THRESHOLD_, rebufferingGoal / 2)
     this.bufferObserver_.setThresholds(starvingThreshold, satisfiedThreshold)
   }
-  /**
+  /* *
    * This method is called periodically to check what the buffering observer
    * says so that we can update the rest of the buffering behaviours.
    *
@@ -1049,7 +1025,7 @@ export default class Player extends FakeEventTarget {
       this.updateBufferState_()
     }
   }
-  /**
+  /* *
    * Fire an event, but wait a little bit so that the immediate execution can
    * complete before the event is handled.
    *
@@ -1065,17 +1041,17 @@ export default class Player extends FakeEventTarget {
       this.dispatchEvent(event)
     }
   }
-  /**
+  /* *
    * Dispatches a 'trackschanged' event.
    * @private
    */
   onTracksChanged_() {
     // Delay the 'trackschanged' event so StreamingEngine has time to absorb the
     // changes before the user tries to query it.
-    const event = this.makeEvent_(EventName.TracksChanged)
+    const event = this.makeEvent_(conf.EventName.TracksChanged)
     this.delayDispatchEvent_(event)
   }
-  /**
+  /* *
    * Tell the player to use <code>mediaElement</code> for all <code>load</code>
    * requests until <code>detach</code> or <code>destroy</code> are called.
    *
@@ -1126,7 +1102,7 @@ export default class Player extends FakeEventTarget {
     return this.wrapWalkerListenersWithPromise_(events)
   }
 
-  /**
+  /* *
    * Tell the player to stop using its current media element. If the player is:
    * <ul>
    *  <li>detached, this will do nothing,
@@ -1171,7 +1147,7 @@ export default class Player extends FakeEventTarget {
       Error.Category.PLAYER,
       Error.Code.LOAD_INTERRUPTED)
   }
-  /**
+  /* *
    * This should only be called by the load graph when it is time to load all
    * playback components needed for playback. The only times this may be called
    * is when we are attached to the same media element as in the request.
@@ -1284,7 +1260,7 @@ export default class Player extends FakeEventTarget {
     // The event must be fired after we filter by restrictions but before the
     // active stream is picked to allow those listening for the 'streaming'
     // event to make changes before streaming starts.
-    this.dispatchEvent(this.makeEvent_(EventName.Streaming))
+    this.dispatchEvent(this.makeEvent_(conf.EventName.Streaming))
 
     // Start streaming content. This will start the flow of content down to
     // media source, including picking the initial streams to play.
@@ -1312,7 +1288,7 @@ export default class Player extends FakeEventTarget {
     // Now that we've filtered out variants that aren't compatible with the
     // active one, update abr manager with filtered variants for the current
     // period.
-    /** @type {extern.Period} */
+    /* * @type {extern.Period} */
     const currentPeriod = this.getPresentationPeriod_() || this.manifest_.periods[0]
     const hasPrimary = currentPeriod.variants.some((v) => v.primary)
 
@@ -1329,7 +1305,7 @@ export default class Player extends FakeEventTarget {
       this.stats_.setLoadLatency(delta)
     })
   }
-  /**
+  /* *
    * For CEA closed captions embedded in the video streams, create dummy text
    * stream.
    * @param {!Array.<!extern.Period>} periods
@@ -1378,17 +1354,17 @@ export default class Player extends FakeEventTarget {
       }
     }
   }
-  /**
+  /* *
    * Dispatches an 'adaptation' event.
    * @private
    */
   onAdaptation_() {
     // Delay the 'adaptation' event so that StreamingEngine has time to absorb
     // the changes before the user tries to query it.
-    const event = this.makeEvent_(EventName.Adaptation)
+    const event = this.makeEvent_(conf.EventName.Adaptation)
     this.delayDispatchEvent_(event)
   }
-  /**
+  /* *
    * Get the period that is on the screen. This will return |null| if nothing
    * is loaded.
    *
@@ -1413,21 +1389,21 @@ export default class Player extends FakeEventTarget {
     console.assert(lastPeriod, 'Should have found a period.')
     return lastPeriod
   }
-  /**
+  /* *
    * Filters a new period.
    * @param {extern.Period} period
    * @private
    */
   filterNewPeriod_(period) {
     console.assert(this.video_, 'Must not be destroyed')
-    /** @type {?extern.Stream} */
+    /* * @type {?extern.Stream} */
     const activeAudio = this.streamingEngine_ ? this.streamingEngine_.getBufferingAudio() : null
-    /** @type {?extern.Stream} */
+    /* * @type {?extern.Stream} */
     const activeVideo = this.streamingEngine_ ? this.streamingEngine_.getBufferingVideo() : null
 
     StreamUtils.filterNewPeriod(activeAudio, activeVideo, period)
 
-    /** @type {!Array.<extern.Variant>} */
+    /* * @type {!Array.<extern.Variant>} */
     const variants = period.variants
 
     // Check for playable variants before restrictions, so that we can give a
@@ -1452,7 +1428,7 @@ export default class Player extends FakeEventTarget {
       this.onTracksChanged_()
     }
   }
-  /**
+  /* *
    * Filters a list of periods.
    * @param {!Array.<!extern.Period>} periods
    * @private
@@ -1460,9 +1436,9 @@ export default class Player extends FakeEventTarget {
   filterAllPeriods_(periods) {
     console.assert(this.video_, 'Must not be destroyed')
 
-    /** @type {?extern.Stream} */
+    /* * @type {?extern.Stream} */
     const activeAudio = this.streamingEngine_ ? this.streamingEngine_.getBufferingAudio() : null
-    /** @type {?extern.Stream} */
+    /* * @type {?extern.Stream} */
     const activeVideo = this.streamingEngine_ ? this.streamingEngine_.getBufferingVideo() : null
 
     for (const period of periods) {
@@ -1501,13 +1477,13 @@ export default class Player extends FakeEventTarget {
       this.checkRestrictedVariants_(period.variants)
     }
   }
-  /**
+  /* *
    * When we fire region events, we need to copy the information out of the
    * region to break the connection with the player's internal data. We do the
    * copy here because this is the transition point between the player and the
    * app.
    *
-   * @param {!EventName} eventName
+   * @param {!conf.EventName} eventName
    * @param {extern.TimelineRegionInfo} region
    *
    * @private
@@ -1525,7 +1501,7 @@ export default class Player extends FakeEventTarget {
 
     this.dispatchEvent(this.makeEvent_(eventName, { detail: clone }))
   }
-  /**
+  /* *
    * Chooses a variant from all possible variants while taking into account
    * restrictions, preferences, and ABR.
    *
@@ -1560,7 +1536,7 @@ export default class Player extends FakeEventTarget {
     this.abrManager_.setVariants(Array.from(adaptationSet.values()))
     return this.abrManager_.chooseVariant()
   }
-  /**
+  /* *
    * Checks the given variants and if they are all restricted, throw an
    * appropriate exception.
    *
@@ -1610,7 +1586,7 @@ export default class Player extends FakeEventTarget {
     }
 
     if (!hasPlayable) {
-      /** @type {extern.RestrictionInfo} */
+      /* * @type {extern.RestrictionInfo} */
       const data = {
         hasAppRestrictions: hasAppRestrict,
         missingKeys: missingKeys,
@@ -1623,7 +1599,7 @@ export default class Player extends FakeEventTarget {
         data)
     }
   }
-  /**
+  /* *
    * Creates a new instance of Playhead.  This can be replaced by tests to
    * create fake instances instead.
    *
@@ -1641,7 +1617,7 @@ export default class Player extends FakeEventTarget {
       () => this.onSeek_(),
       (event) => this.dispatchEvent(event))
   }
-  /**
+  /* *
    * Callback from Playhead.
    *
    * @private
@@ -1660,7 +1636,7 @@ export default class Player extends FakeEventTarget {
       this.pollBufferState_()
     }
   }
-  /**
+  /* *
    * @param {!Error} error
    * @private
    */
@@ -1673,24 +1649,24 @@ export default class Player extends FakeEventTarget {
       return
     }
 
-    const eventName = EventName.Error
+    const eventName = conf.EventName.Error
     const event = this.makeEvent_(eventName, { 'detail': error })
     this.dispatchEvent(event)
     if (event.defaultPrevented) {
       error.handled = true
     }
   }
-  /**
+  /* *
    * @param {number} time
    * @return {number}
    * @private
    */
   adjustStartTime_(time) {
-    /** @type {?extern.Stream} */
+    /* * @type {?extern.Stream} */
     const activeAudio = this.streamingEngine_.getBufferingAudio()
-    /** @type {?extern.Stream} */
+    /* * @type {?extern.Stream} */
     const activeVideo = this.streamingEngine_.getBufferingVideo()
-    /** @type {extern.Period} */
+    /* * @type {extern.Period} */
     const period = this.getPresentationPeriod_()
 
     // This method is called after StreamingEngine.init resolves, which means
@@ -1728,7 +1704,7 @@ export default class Player extends FakeEventTarget {
       return time
     }
   }
-  /**
+  /* *
    * Creates a new instance of StreamingEngine.  This can be replaced by tests
    * to create fake instances instead.
    *
@@ -1737,7 +1713,7 @@ export default class Player extends FakeEventTarget {
   createStreamingEngine() {
     console.assert(this.playhead_ && this.abrManager_ && this.mediaSourceEngine_ && this.manifest_, 'Must not be destroyed')
 
-    /** @type {StreamingEngine.PlayerInterface} */
+    /* * @type {StreamingEngine.PlayerInterface} */
     const playerInterface = {
       getPresentationTime: () => this.playhead_.getTime(),
       getBandwidthEstimate: () => this.abrManager_.getBandwidthEstimate(),
@@ -1753,7 +1729,7 @@ export default class Player extends FakeEventTarget {
 
     return new StreamingEngine(this.manifest_, playerInterface)
   }
-  /**
+  /* *
    * Create the observers for MSE playback. These observers are responsible for
    * notifying the app and player of specific events during MSE playback.
    *
@@ -1774,17 +1750,17 @@ export default class Player extends FakeEventTarget {
     // move in and out of timeline regions.
     const regionObserver = new RegionObserver(this.regionTimeline_)
     const onEnterRegion = (region, seeking) => {
-      this.onRegionEvent_(EventName.TimelineRegionEnter, region)
+      this.onRegionEvent_(conf.EventName.TimelineRegionEnter, region)
     }
     const onExitRegion = (region, seeking) => {
-      this.onRegionEvent_(EventName.TimelineRegionExit, region)
+      this.onRegionEvent_(conf.EventName.TimelineRegionExit, region)
     }
     const onSkipRegion = (region, seeking) => {
       // If we are seeking, we don't want to surface the enter/exit events since
       // they didn't play through them.
       if (!seeking) {
-        this.onRegionEvent_(EventName.TimelineRegionEnter, region)
-        this.onRegionEvent_(EventName.TimelineRegionExit, region)
+        this.onRegionEvent_(conf.EventName.TimelineRegionEnter, region)
+        this.onRegionEvent_(conf.EventName.TimelineRegionExit, region)
       }
     }
     regionObserver.setListeners(onEnterRegion, onExitRegion, onSkipRegion)
@@ -1796,7 +1772,7 @@ export default class Player extends FakeEventTarget {
 
     return manager
   }
-  /**
+  /* *
    * Callback from AbrManager.
    *
    * @param {extern.Variant} variant
@@ -1815,7 +1791,7 @@ export default class Player extends FakeEventTarget {
     const period = this.findPeriodWithVariant_(variant)
     console.assert(period, 'A period should contain the variant.')
 
-    this.addVariantToSwitchHistory_(period, variant, /* fromAdaptation= */ true)
+    this.addVariantToSwitchHistory_(period, variant, /*  fromAdaptation= */ true)
 
     if (!this.streamingEngine_) {
       // There's no way to change it.
@@ -1826,7 +1802,7 @@ export default class Player extends FakeEventTarget {
       this.onAdaptation_()
     }
   }
-  /**
+  /* *
    * Using a promise, wrap the listeners returned by |Walker.startNewRoute|.
    * This will work for most usages in |Player| but should not be used for
    * special cases.
@@ -1846,7 +1822,7 @@ export default class Player extends FakeEventTarget {
       listeners.onSkip = () => reject(this.createAbortLoadError_())
     })
   }
-  /**
+  /* *
    * Assuming the player is playing content with media source, check if the
    * player has buffered enough content to make it to the end of the
    * presentation.
@@ -1884,7 +1860,7 @@ export default class Player extends FakeEventTarget {
 
     return false
   }
-  /**
+  /* *
    * Assuming the player is playing content with src=, check if the player has
    * buffered enough content to make it to the end of the presentation.
    *
@@ -1912,7 +1888,7 @@ export default class Player extends FakeEventTarget {
     const fudge = 1 // 1000 ms
     return bufferEnd >= this.video_.duration - fudge
   }
-  /**
+  /* *
    * Turn the media element's error object into a Shaka Player error object.
    *
    * @return {Error}
@@ -1926,7 +1902,7 @@ export default class Player extends FakeEventTarget {
     }
 
     const code = this.video_.error.code
-    if (code === 1 /* MEDIA_ERR_ABORTED */) {
+    if (code === 1 /*  MEDIA_ERR_ABORTED */) {
       // Ignore this error code, which should only occur when navigating away or
       // deliberately stopping playback of HTTP content.
       return null
@@ -1952,7 +1928,7 @@ export default class Player extends FakeEventTarget {
       Error.Code.VIDEO_ERROR,
       code, extended, message)
   }
-  /**
+  /* *
    * Key
    * ----------------------
    * D   : Detach Node
@@ -2018,12 +1994,12 @@ export default class Player extends FakeEventTarget {
 
     if (currentlyAt === this.parserNode_) {
       next = this.getNextMatchingAllDependencies_(
-        /* destination= */ this.loadNode_,
-        /* next= */ this.manifestNode_,
-        /* reset= */ this.unloadNode_,
-        /* goingTo= */ wantsToBeAt,
-        /* has= */ currentlyWith,
-        /* wants= */ wantsToHave)
+        /*  destination= */ this.loadNode_,
+        /*  next= */ this.manifestNode_,
+        /*  reset= */ this.unloadNode_,
+        /*  goingTo= */ wantsToBeAt,
+        /*  has= */ currentlyWith,
+        /*  wants= */ wantsToHave)
     }
 
     // After we load content, always go through unload because we can't safely
@@ -2039,7 +2015,7 @@ export default class Player extends FakeEventTarget {
     console.assert(next, 'Missing next step!')
     return next
   }
-  /**
+  /* *
    * After unload there are only two options, attached or detached. This choice
    * is based on whether or not we have a media element. If we have a media
    * element, then we go to attach. If we don't have a media element, we go to
@@ -2060,7 +2036,7 @@ export default class Player extends FakeEventTarget {
       ? this.detachNode_
       : this.attachNode_
   }
-  /**
+  /* *
    * A general method used to handle routing when we can either than one step
    * toward our destination (while all our dependencies match) or go to a node
    * that will reset us so we can try again.
@@ -2093,7 +2069,7 @@ export default class Player extends FakeEventTarget {
     }
     return resetNode
   }
-  /**
+  /* *
    * @param {!Node} goingTo
    * @param {Payload} has
    * @param {Payload} wants
@@ -2118,7 +2094,7 @@ export default class Player extends FakeEventTarget {
     //       more meaningful terminology around tearing down playback resources.
     return this.unloadNode_
   }
-  /**
+  /* *
    * @param {!Node} goingTo
    * @param {Payload} has
    * @param {Payload} wants
@@ -2155,7 +2131,7 @@ export default class Player extends FakeEventTarget {
     // the routing system.
     return null
   }
-  /**
+  /* *
    * @param {extern.Period} period
    * @param {extern.Variant} variant
    * @param {boolean} fromAdaptation
@@ -2166,7 +2142,7 @@ export default class Player extends FakeEventTarget {
     const switchHistory = this.stats_.getSwitchHistory()
     switchHistory.updateCurrentVariant(variant, fromAdaptation)
   }
-  /**
+  /* *
    * Find the period in |this.manifest_| that contains |variant|. If no period
    * contains |variant| this will return |null|.
    *
@@ -2183,7 +2159,7 @@ export default class Player extends FakeEventTarget {
 
     return null
   }
-  /**
+  /* *
    * Callback from StreamingEngine.
    *
    * @private
@@ -2197,7 +2173,7 @@ export default class Player extends FakeEventTarget {
     }
     this.pollBufferState_()
   }
-  /**
+  /* *
    * Callback from StreamingEngine.
    *
    * @private
@@ -2207,7 +2183,7 @@ export default class Player extends FakeEventTarget {
       this.parser_.update()
     }
   }
-  /**
+  /* *
    * Callback from StreamingEngine, invoked when the period is set up.
    *
    * @private
@@ -2237,7 +2213,7 @@ export default class Player extends FakeEventTarget {
       this.deferredTextStream_ = null
     }
   }
-  /**
+  /* *
    * Callback from StreamingEngine, invoked when a period starts. This method
    * must always 'succeed' so it may not throw an error. Any errors must be
    * routed to |onError|.
@@ -2267,7 +2243,7 @@ export default class Player extends FakeEventTarget {
       return { variant: null, text: null }
     }
   }
-  /**
+  /* *
    * This is the internal logic for |onChooseStreams_|. This separation is done
    * to allow this implementation to throw errors without consequence.
    *
@@ -2311,12 +2287,12 @@ export default class Player extends FakeEventTarget {
 
     if (chosenVariant) {
       this.addVariantToSwitchHistory_(
-        period, chosenVariant, /* fromAdaptation= */ true)
+        period, chosenVariant, /*  fromAdaptation= */ true)
     }
 
     if (chosenText) {
       this.addTextStreamToSwitchHistory_(
-        period, chosenText, /* fromAdaptation= */ true)
+        period, chosenText, /*  fromAdaptation= */ true)
     }
 
     // Check if we should show text (based on difference between audio and text
@@ -2348,46 +2324,46 @@ export default class Player extends FakeEventTarget {
       return { variant: chosenVariant, text: null }
     }
   }
-  /**
+  /* *
    * Dispatches a 'textchanged' event.
    * @private
    */
   onTextChanged_() {
     // Delay the 'textchanged' event so StreamingEngine time to absorb the
     // changes before the user tries to query it.
-    const event = this.makeEvent_(EventName.TextChanged)
+    const event = this.makeEvent_(conf.EventName.TextChanged)
     this.delayDispatchEvent_(event)
   }
-  /**
+  /* *
    * Dispatches a 'variantchanged' event.
    * @private
    */
   onVariantChanged_() {
     // Delay the 'variantchanged' event so StreamingEngine has time to absorb
     // the changes before the user tries to query it.
-    const event = this.makeEvent_(EventName.VariantChanged)
+    const event = this.makeEvent_(conf.EventName.VariantChanged)
     this.delayDispatchEvent_(event)
   }
-  /** @private */
+  /* * @private */
   onAbrStatusChanged_() {
-    const event = this.makeEvent_(EventName.AbrStatusChanged, {
+    const event = this.makeEvent_(conf.EventName.AbrStatusChanged, {
       newStatus: this.config_.abr.enabled
     })
     this.delayDispatchEvent_(event)
   }
-  /** @private */
+  /* * @private */
   onTextTrackVisibility_() {
-    const event = this.makeEvent_(EventName.TextTrackVisibility)
+    const event = this.makeEvent_(conf.EventName.TextTrackVisibility)
     this.delayDispatchEvent_(event)
   }
-  /**
+  /* *
    * @return {boolean} true if we should stream text right now.
    * @private
    */
   shouldStreamText_() {
     return this.config_.streaming.alwaysStreamText || this.isTextTrackVisible()
   }
-  /**
+  /* *
    * Check if we should show text on screen automatically.
    *
    * The text should automatically be shown if the text is language-compatible
@@ -2411,19 +2387,19 @@ export default class Player extends FakeEventTarget {
   shouldShowText_(audioStream, textStream) {
     const LanguageUtils = LanguageUtils
 
-    /** @type {string} */
+    /* * @type {string} */
     const preferredTextLocale =
         LanguageUtils.normalize(this.config_.preferredTextLanguage)
-    /** @type {string} */
+    /* * @type {string} */
     const audioLocale = LanguageUtils.normalize(audioStream.language)
-    /** @type {string} */
+    /* * @type {string} */
     const textLocale = LanguageUtils.normalize(textStream.language)
 
     return (
       LanguageUtils.areLanguageCompatible(textLocale, preferredTextLocale) &&
       !LanguageUtils.areLanguageCompatible(audioLocale, textLocale))
   }
-  /**
+  /* *
    * @param {extern.Period} period
    * @param {extern.Stream} textStream
    * @param {boolean} fromAdaptation
@@ -2434,7 +2410,7 @@ export default class Player extends FakeEventTarget {
     const switchHistory = this.stats_.getSwitchHistory()
     switchHistory.updateCurrentText(textStream, fromAdaptation)
   }
-  /**
+  /* *
    * Choose a text stream from all possible text streams while taking into
    * account user preference.
    *
@@ -2450,7 +2426,7 @@ export default class Player extends FakeEventTarget {
 
     return subset[0] || null
   }
-  /**
+  /* *
    * Changes configuration settings on the Player.  This checks the names of
    * keys and the types of values to avoid coding errors.  If there are errors,
    * this logs them to the console and returns false.  Correct fields are still
@@ -2459,7 +2435,7 @@ export default class Player extends FakeEventTarget {
    * modes of operation:
    *
    * <p>
-   * First, this can be passed a single "plain" object.  This object should
+   * First, this can be passed a single `plain` object.  This object should
    * follow the {@link shaka.extern.PlayerConfiguration} object.  Not all fields
    * need to be set; unset fields retain their old values.
    *
@@ -2493,7 +2469,7 @@ export default class Player extends FakeEventTarget {
     this.applyConfig_()
     return ret
   }
-  /**
+  /* *
    * Tell the player to load the content at <code>assetUri</code> and start
    * playback at <code>startTime</code>. Before calling <code>load</code>,
    * a call to <code>attach</code> must have succeeded.
@@ -2520,7 +2496,7 @@ export default class Player extends FakeEventTarget {
 
     // We dispatch the loading event when someone calls |load| because we want
     // to surface the user intent.
-    this.dispatchEvent(this.makeEvent_(EventName.Loading))
+    this.dispatchEvent(this.makeEvent_(conf.EventName.Loading))
 
     // Right away we know what the asset uri and start-of-load time are. We will
     // fill-in the rest of the information later.
@@ -2548,7 +2524,7 @@ export default class Player extends FakeEventTarget {
     // cancel a load and quickly start a new load.
     const events = this.walker_.startNewRoute((currentPayload) => {
       if (currentPayload.mediaElement == null) {
-        // Because we return null, this "new route" will not be used.
+        // Because we return null, this `new route` will not be used.
         return null
       }
 
@@ -2580,13 +2556,13 @@ export default class Player extends FakeEventTarget {
       events.onEnd = () => {
         resolve()
         // We dispatch the loaded event when the load promise is resolved
-        this.dispatchEvent(this.makeEvent_(EventName.Loaded))
+        this.dispatchEvent(this.makeEvent_(conf.EventName.Loaded))
       }
       events.onCancel = () => reject(this.createAbortLoadError_())
       events.onError = (e) => reject(e)
     })
   }
-  /**
+  /* *
    * Check if src= should be used to load the asset at |uri|. Assume that media
    * source is the default option, and that src= is for special cases.
    *

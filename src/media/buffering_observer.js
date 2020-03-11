@@ -1,27 +1,27 @@
-/**
+/* *
  * The buffering observer watches how much content has been buffered and raises
  * events when the state changes (enough => not enough or vice versa).
  *
  * @final
  */
 export default class BufferingObserver {
-  /**
+  /* *
    * @param {number} thresholdWhenStarving
    * @param {number} thresholdWhenSatisfied
    */
   constructor(thresholdWhenStarving, thresholdWhenSatisfied) {
     const State = BufferingObserver.State
 
-    /** @private {BufferingObserver.State} */
+    /* * @private {BufferingObserver.State} */
     this.previousState_ = State.SATISFIED
 
-    /** @private {!Map.<BufferingObserver.State, number>} */
+    /* * @private {!Map.<BufferingObserver.State, number>} */
     this.thresholds_ = new Map()
       .set(State.SATISFIED, thresholdWhenSatisfied)
       .set(State.STARVING, thresholdWhenStarving)
   }
 
-  /**
+  /* *
    * @param {number} thresholdWhenStarving
    * @param {number} thresholdWhenSatisfied
    */
@@ -32,7 +32,7 @@ export default class BufferingObserver {
       .set(State.STARVING, thresholdWhenStarving)
   }
 
-  /**
+  /* *
    * Update the observer by telling it how much content has been buffered (in
    * seconds) and if we are buffered to the end of the presentation. If the
    * controller believes the state has changed, it will return |true|.
@@ -44,7 +44,7 @@ export default class BufferingObserver {
   update(bufferLead, bufferedToEnd) {
     const State = BufferingObserver.State
 
-    /**
+    /* *
      * Our threshold for how much we need before we declare ourselves as
      * starving is based on whether or not we were just starving. If we
      * were just starving, we are more likely to starve again, so we require
@@ -67,7 +67,7 @@ export default class BufferingObserver {
     return oldState !== newState
   }
 
-  /**
+  /* *
    * Set which state that the observer should think playback was in.
    *
    * @param {BufferingObserver.State} state
@@ -76,7 +76,7 @@ export default class BufferingObserver {
     this.previousState_ = state
   }
 
-  /**
+  /* *
    * Get the state that the observer last thought playback was in.
    *
    * @return {BufferingObserver.State}
@@ -86,7 +86,7 @@ export default class BufferingObserver {
   }
 }
 
-/**
+/* *
  * Rather than using booleans to communicate what state we are in, we have this
  * enum.
  *

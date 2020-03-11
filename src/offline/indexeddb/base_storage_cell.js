@@ -1,64 +1,64 @@
 import DBConnection from './db_connection'
 import Error from '../../util/error'
 
-/**
+/* *
  * StorageCellBase is a base class for all stores that use IndexedDB.
  *
  * @implements {shaka.extern.StorageCell}
  */
 export default class BaseStorageCell {
-  /**
+  /* *
    * @param {IDBDatabase} connection
    * @param {string} segmentStore
    * @param {string} manifestStore
    */
   constructor(connection, segmentStore, manifestStore) {
-    /** @protected {!DBConnection} */
+    /* * @protected {!DBConnection} */
     this.connection_ = new DBConnection(connection)
 
-    /** @protected {string} */
+    /* * @protected {string} */
     this.segmentStore_ = segmentStore
 
-    /** @protected {string} */
+    /* * @protected {string} */
     this.manifestStore_ = manifestStore
   }
 
-  /** @override */
+  /* * @override */
   destroy() {
     return this.connection_.destroy()
   }
 
-  /** @override */
+  /* * @override */
   hasFixedKeySpace() {
     // By default, all IDB stores are read-only.  The latest one will need to
     // override this default to be read-write.
     return true
   }
 
-  /** @override */
+  /* * @override */
   addSegments(segments) {
     // By default, reject all additions.
     return this.rejectAdd(this.segmentStore_)
   }
 
-  /** @override */
+  /* * @override */
   removeSegments(keys, onRemove) {
     return this.remove_(this.segmentStore_, keys, onRemove)
   }
 
-  /** @override */
+  /* * @override */
   async getSegments(keys) {
     const rawSegments = await this.get_(this.segmentStore_, keys)
     return rawSegments.map((s) => this.convertSegmentData(s))
   }
 
-  /** @override */
+  /* * @override */
   addManifests(manifests) {
     // By default, reject all additions.
     return this.rejectAdd(this.manifestStore_)
   }
 
-  /** @override */
+  /* * @override */
   updateManifestExpiration(key, newExpiration) {
     const op = this.connection_.startReadWriteOperation(this.manifestStore_)
     const store = op.store()
@@ -74,26 +74,26 @@ export default class BaseStorageCell {
     return op.promise()
   }
 
-  /** @override */
+  /* * @override */
   removeManifests(keys, onRemove) {
     return this.remove_(this.manifestStore_, keys, onRemove)
   }
 
-  /** @override */
+  /* * @override */
   async getManifests(keys) {
     const rawManifests = await this.get_(this.manifestStore_, keys)
     return rawManifests.map((m) => this.convertManifest(m))
   }
 
-  /** @override */
+  /* * @override */
   async getAllManifests() {
-    /** @type {!DBOperation} */
+    /* * @type {!DBOperation} */
     const op = this.connection_.startReadOnlyOperation(this.manifestStore_)
 
-    /** @type {!Map.<number, shaka.extern.ManifestDB>} */
+    /* * @type {!Map.<number, shaka.extern.ManifestDB>} */
     const values = new Map()
 
-    await op.forEachEntry((/** number */ key, /** ? */ value) => {
+    await op.forEachEntry((/* * number */ key, /* * ? */ value) => {
       values.set(key, this.convertManifest(value))
     })
 
@@ -101,27 +101,27 @@ export default class BaseStorageCell {
     return values
   }
 
-  /**
+  /* *
    * @param {?} old
    * @return {shaka.extern.SegmentDataDB}
    * @protected
    */
   convertSegmentData(old) {
     // Conversion is specific to each subclass.  By default, do nothing.
-    return /** @type {shaka.extern.SegmentDataDB} */(old)
+    return /* * @type {shaka.extern.SegmentDataDB} */(old)
   }
 
-  /**
+  /* *
    * @param {?} old
    * @return {shaka.extern.ManifestDB}
    * @protected
    */
   convertManifest(old) {
     // Conversion is specific to each subclass.  By default, do nothing.
-    return /** @type {shaka.extern.ManifestDB} */(old)
+    return /* * @type {shaka.extern.ManifestDB} */(old)
   }
 
-  /**
+  /* *
    * @param {string} storeName
    * @return {!Promise}
    * @protected
@@ -134,7 +134,7 @@ export default class BaseStorageCell {
       'Cannot add new value to ' + storeName))
   }
 
-  /**
+  /* *
    * @param {string} storeName
    * @param {!Array.<T>} values
    * @return {!Promise.<!Array.<number>>}
@@ -145,7 +145,7 @@ export default class BaseStorageCell {
     const op = this.connection_.startReadWriteOperation(storeName)
     const store = op.store()
 
-    /** @type {!Array.<number>} */
+    /* * @type {!Array.<number>} */
     const keys = []
 
     // Write each segment out. When each request completes, the key will
@@ -165,7 +165,7 @@ export default class BaseStorageCell {
     return keys
   }
 
-  /**
+  /* *
    * @param {string} storeName
    * @param {!Array.<number>} keys
    * @param {function(number)} onRemove
@@ -183,7 +183,7 @@ export default class BaseStorageCell {
     return op.promise()
   }
 
-  /**
+  /* *
    * @param {string} storeName
    * @param {!Array.<number>} keys
    * @return {!Promise.<!Array.<T>>}
@@ -195,7 +195,7 @@ export default class BaseStorageCell {
     const store = op.store()
 
     const values = {}
-    /** @type {!Array.<number>} */
+    /* * @type {!Array.<number>} */
     const missing = []
 
     // Use a map to store the objects so that we can reorder the results to

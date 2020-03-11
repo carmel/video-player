@@ -6,16 +6,16 @@ import StringUtils from '../util/string_utils'
 import TextParser from '../util/text_parser'
 import Iterables from '../util/iterables'
 
-/**
+/* *
  * HlS manifest text parser.
  */
 export default class ManifestTextParser {
   constructor() {
-    /** @private {number} */
+    /* * @private {number} */
     this.globalId_ = 0
   }
 
-  /**
+  /* *
    * @param {BufferSource} data
    * @param {string} absolutePlaylistUri An absolute, final URI after redirects.
    * @return {!Playlist}
@@ -38,7 +38,7 @@ export default class ManifestTextParser {
         Error.Code.HLS_PLAYLIST_HEADER_MISSING)
     }
 
-    /** PlaylistType */
+    /* * PlaylistType */
     let playlistType = PlaylistType.MASTER
 
     // First, look for media playlist tags, so that we know what the playlist
@@ -65,7 +65,7 @@ export default class ManifestTextParser {
       }
     }
 
-    /** {Array.<Tag>} */
+    /* * {Array.<Tag>} */
     const tags = []
     // Initialize to 'true' to skip the first element.
     skip = true
@@ -108,7 +108,7 @@ export default class ManifestTextParser {
     return new Playlist(absolutePlaylistUri, playlistType, tags)
   }
 
-  /**
+  /* *
    * Parses an array of strings into an array of HLS Segment objects.
    *
    * @param {string} absoluteMediaPlaylistUri
@@ -118,13 +118,13 @@ export default class ManifestTextParser {
    * @private
    */
   parseSegments_(absoluteMediaPlaylistUri, lines, playlistTags) {
-    /** @type {!Array.<Segment>} */
+    /* * @type {!Array.<Segment>} */
     const segments = []
-    /** @type {!Array.<Tag>} */
+    /* * @type {!Array.<Tag>} */
     let segmentTags = []
 
     // The last parsed EXT-X-MAP tag.
-    /** @type {?Tag} */
+    /* * @type {?Tag} */
     let currentMapTag = null
 
     for (const line of lines) {
@@ -163,7 +163,7 @@ export default class ManifestTextParser {
     return segments
   }
 
-  /**
+  /* *
    * Parses a string into an HLS Tag object while tracking what id to use next.
    *
    * @param {string} word
@@ -174,7 +174,7 @@ export default class ManifestTextParser {
     return ManifestTextParser.parseTag(this.globalId_++, word)
   }
 
-  /**
+  /* *
    * Parses a string into an HLS Tag object.
    *
    * @param {number} id
@@ -182,7 +182,7 @@ export default class ManifestTextParser {
    * @return {!Tag}
    */
   static parseTag(id, word) {
-    /* HLS tags start with '#EXT'. A tag can have a set of attributes
+    /*  HLS tags start with '#EXT'. A tag can have a set of attributes
       (#EXT-<tagname>:<attribute list>) and/or a value (#EXT-<tagname>:<value>).
       An attribute's format is 'AttributeName=AttributeValue'.
       The parsing logic goes like this:
@@ -242,7 +242,7 @@ export default class ManifestTextParser {
     return new Tag(id, name, attributes, value)
   }
 }
-/**
+/* *
  * HLS tags that only appear on Media Playlists.
  * Used to determine a playlist type.
  *
@@ -256,7 +256,7 @@ ManifestTextParser.MEDIA_PLAYLIST_TAGS = [
   'EXT-X-I-FRAMES-ONLY',
   'EXT-X-ENDLIST'
 ]
-/**
+/* *
  * HLS tags that only appear on Segments in a Media Playlists.
  * Used to determine the start of the segments info.
  *

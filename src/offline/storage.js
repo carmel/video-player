@@ -1,7 +1,7 @@
 import Player from '../main'
 import DrmEngine from '../media/drm_engine'
 import ManifestParser from '../media/manifest_parser'
-import NetworkingEngine from '../net/networking_engine'
+import { NetworkingEngine } from '../net/networking_engine'
 import DownloadManager from './download_manager'
 import OfflineUri from './offline_uri'
 import SessionDeleter from './session_deleter'
@@ -22,7 +22,7 @@ import PlayerConfiguration from '../util/player_configuration'
 import StreamUtils from '../util/stream_utils'
 import ConfigUtils from '../util/config_utils'
 
-/**
+/* *
  * @summary
  * This manages persistent offline data including storage, listing, and deleting
  * stored manifests.  Playback of offline manifests are done through the Player
@@ -37,7 +37,7 @@ import ConfigUtils from '../util/config_utils'
  * @export
  */
 export default class Storage {
-  /**
+  /* *
    * @param {!Player=} player
    *    A player instance to share a networking engine and configuration with.
    *    When initializing with a player, storage is only valid as long as
@@ -59,10 +59,10 @@ export default class Storage {
         Error.Code.LOCAL_PLAYER_INSTANCE_REQUIRED)
     }
 
-    /** @private {?shaka.extern.PlayerConfiguration} */
+    /* * @private {?shaka.extern.PlayerConfiguration} */
     this.config_ = null
 
-    /** @private {NetworkingEngine} */
+    /* * @private {NetworkingEngine} */
     this.networkingEngine_ = null
 
     // Initialize |config_| and |networkingEngine_| based on whether or not
@@ -80,10 +80,10 @@ export default class Storage {
       this.networkingEngine_ = new NetworkingEngine()
     }
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.storeInProgress_ = false
 
-    /**
+    /* *
      * A list of segment ids for all the segments that were added during the
      * current store. If the store fails or is aborted, these need to be
      * removed from storage.
@@ -91,7 +91,7 @@ export default class Storage {
      */
     this.segmentsFromStore_ = []
 
-    /**
+    /* *
      * A list of open operations that are being performed by this instance of
      * |Storage|.
      *
@@ -99,7 +99,7 @@ export default class Storage {
      */
     this.openOperations_ = []
 
-    /**
+    /* *
      * Storage should only destroy the networking engine if it was initialized
      * without a player instance. Store this as a flag here to avoid including
      * the player object in the destoyer's closure.
@@ -108,7 +108,7 @@ export default class Storage {
      */
     const destroyNetworkingEngine = !player
 
-    /** @private {!Destroyer} */
+    /* * @private {!Destroyer} */
     this.destroyer_ = new Destroyer(async() => {
       // Wait for all the open operations to end. Wrap each operations so that a
       // single rejected promise won't cause |Promise.all| to return early or to
@@ -127,7 +127,7 @@ export default class Storage {
       this.networkingEngine_ = null
     })
   }
-  /**
+  /* *
    * Gets whether offline storage is supported.  Returns true if offline storage
    * is supported for clear content.  Support for offline storage of encrypted
    * content will not be determined until storage is attempted.
@@ -146,7 +146,7 @@ export default class Storage {
     return StorageMuxer.support()
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -154,7 +154,7 @@ export default class Storage {
     return this.destroyer_.destroy()
   }
 
-  /**
+  /* *
    * Sets configuration values for Storage.  This is associated with
    * Player.configure and will change the player instance given at
    * initialization.
@@ -181,10 +181,10 @@ export default class Storage {
     console.assert(
       this.config_, 'Cannot reconfigure stroage after calling destroy.')
     return PlayerConfiguration.mergeConfigObjects(
-      /* destination= */ this.config_, /* updates= */ config)
+      /*  destination= */ this.config_, /*  updates= */ config)
   }
 
-  /**
+  /* *
    * Return a copy of the current configuration.  Modifications of the returned
    * value will not affect the Storage instance's active configuration.  You
    * must call storage.configure() to make changes.
@@ -201,7 +201,7 @@ export default class Storage {
     return ret
   }
 
-  /**
+  /* *
    * Return the networking engine that storage is using. If storage was
    * initialized with a player instance, then the networking engine returned
    * will be the same as |player.getNetworkingEngine()|.
@@ -216,7 +216,7 @@ export default class Storage {
     return this.networkingEngine_
   }
 
-  /**
+  /* *
    * Stores the given manifest.  If the content is encrypted, and encrypted
    * content cannot be stored on this platform, the Promise will be rejected
    * with error code 6001, REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE.
@@ -253,7 +253,7 @@ export default class Storage {
     return this.startOperation_(this.store_(uri, appMetadata || {}, getParser))
   }
 
-  /**
+  /* *
    * Returns true if an asset is currently downloading.
    *
    * @return {boolean}
@@ -263,7 +263,7 @@ export default class Storage {
     return this.storeInProgress_
   }
 
-  /**
+  /* *
    * See |Storage.store| for details.
    *
    * @param {string} uri
@@ -306,11 +306,11 @@ export default class Storage {
     // catch/finally blocks, we need to define them out here. Since they may not
     // get initialized when we enter the catch/finally block, we need to assume
     // that they may be null/undefined when we get there.
-    /** @type {?DrmEngine} */
+    /* * @type {?DrmEngine} */
     let drmEngine = null
-    /** @type {StorageMuxer} */
+    /* * @type {StorageMuxer} */
     const muxer = new StorageMuxer()
-    /** @type {?StorageCellHandle} */
+    /* * @type {?StorageCellHandle} */
     let activeHandle = null
 
     // This will be used to store any errors from drm engine. Whenever drm
@@ -381,7 +381,7 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * Filter |manifest| such that it will only contain the variants and text
    * streams that we want to store and can actually play.
    *
@@ -418,7 +418,7 @@ export default class Storage {
       for (const variant of period.variants) {
         console.assert(
           StreamUtils.isPlayable(variant),
-          'We should have already filtered by "is playable"')
+          'We should have already filtered by `is playable`')
 
         allTracks.push(StreamUtils.variantToTrack(variant))
       }
@@ -430,9 +430,9 @@ export default class Storage {
       const chosenTracks =
           await this.config_.offline.trackSelectionCallback(allTracks)
 
-      /** @type {!Set.<number>} */
+      /* * @type {!Set.<number>} */
       const variantIds = new Set()
-      /** @type {!Set.<number>} */
+      /* * @type {!Set.<number>} */
       const textIds = new Set()
 
       for (const track of chosenTracks) {
@@ -455,7 +455,7 @@ export default class Storage {
     Storage.validateManifest_(manifest)
   }
 
-  /**
+  /* *
    * Create a download manager and download the manifest.
    *
    * @param {shaka.extern.StorageCell} storage
@@ -472,7 +472,7 @@ export default class Storage {
       'Cannot call |downloadManifest_| after calling |destroy|.')
 
     const pendingContent = StoredContentUtils.fromManifest(
-      uri, manifest, /* size= */ 0, metadata)
+      uri, manifest, /*  size= */ 0, metadata)
 
     const isEncrypted = manifest.periods.some((period) => {
       return period.variants.some((variant) => {
@@ -495,7 +495,7 @@ export default class Storage {
           Storage.defaultSystemIds_.get(drmInfo.keySystem)
     }
 
-    /** @type {!DownloadManager} */
+    /* * @type {!DownloadManager} */
     const downloader = new DownloadManager(
       this.networkingEngine_,
       (progress, size) => {
@@ -535,7 +535,7 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * Removes the given stored content.  This will also attempt to release the
    * licenses, if any.
    *
@@ -547,7 +547,7 @@ export default class Storage {
     return this.startOperation_(this.remove_(contentUri))
   }
 
-  /**
+  /* *
    * See |Storage.remove| for details.
    *
    * @param {string} contentUri
@@ -566,10 +566,10 @@ export default class Storage {
         contentUri)
     }
 
-    /** @type {!OfflineUri} */
+    /* * @type {!OfflineUri} */
     const uri = nullableUri
 
-    /** @type {!StorageMuxer} */
+    /* * @type {!StorageMuxer} */
     const muxer = new StorageMuxer()
 
     try {
@@ -588,7 +588,7 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * @param {shaka.extern.ManifestDB} manifestDb
    * @param {boolean} isVideo
    * @return {!Array.<MediaKeySystemMediaCapability>}
@@ -616,7 +616,7 @@ export default class Storage {
     return ret
   }
 
-  /**
+  /* *
    * @param {!OfflineUri} uri
    * @param {shaka.extern.ManifestDB} manifestDb
    * @param {!StorageMuxer} muxer
@@ -629,7 +629,7 @@ export default class Storage {
       this.networkingEngine_, this.config_.drm, muxer, manifestDb)
   }
 
-  /**
+  /* *
    * @param {shaka.extern.StorageCell} storage
    * @param {!OfflineUri} uri
    * @param {shaka.extern.ManifestDB} manifest
@@ -637,7 +637,7 @@ export default class Storage {
    * @private
    */
   removeFromStorage_(storage, uri, manifest) {
-    /** @type {!Array.<number>} */
+    /* * @type {!Array.<number>} */
     const segmentIds = Storage.getAllSegmentIds_(manifest)
 
     // Count(segments) + Count(manifests)
@@ -658,7 +658,7 @@ export default class Storage {
     ])
   }
 
-  /**
+  /* *
    * Removes any EME sessions that were not successfully removed before.  This
    * returns whether all the sessions were successfully removed.
    *
@@ -669,7 +669,7 @@ export default class Storage {
     return this.startOperation_(this.removeEmeSessions_())
   }
 
-  /**
+  /* *
    * @return {!Promise.<boolean>}
    * @private
    */
@@ -680,9 +680,9 @@ export default class Storage {
     const net = this.networkingEngine_
     const config = this.config_.drm
 
-    /** @type {!StorageMuxer} */
+    /* * @type {!StorageMuxer} */
     const muxer = new StorageMuxer()
-    /** @type {!SessionDeleter} */
+    /* * @type {!SessionDeleter} */
     const deleter = new SessionDeleter()
 
     let hasRemaining = false
@@ -690,7 +690,7 @@ export default class Storage {
     try {
       await muxer.init()
 
-      /** @type {!Array.<shaka.extern.EmeSessionStorageCell>} */
+      /* * @type {!Array.<shaka.extern.EmeSessionStorageCell>} */
       const cells = []
       muxer.forEachEmeSessionCell((c) => cells.push(c))
 
@@ -698,7 +698,7 @@ export default class Storage {
       // and having multiple CDMs alive at once.  Some embedded platforms may
       // not support that.
       for (const sessionIdCell of cells) {
-        /* eslint-disable no-await-in-loop */
+        /*  eslint-disable no-await-in-loop */
         const sessions = await sessionIdCell.getAll()
         const deletedSessionIds = await deleter.delete(config, net, sessions)
         await sessionIdCell.remove(deletedSessionIds)
@@ -706,7 +706,7 @@ export default class Storage {
         if (deletedSessionIds.length !== sessions.length) {
           hasRemaining = true
         }
-        /* eslint-enable no-await-in-loop */
+        /*  eslint-enable no-await-in-loop */
       }
     } finally {
       await muxer.destroy()
@@ -715,7 +715,7 @@ export default class Storage {
     return !hasRemaining
   }
 
-  /**
+  /* *
    * Lists all the stored content available.
    *
    * @return {!Promise.<!Array.<shaka.extern.StoredContent>>}  A Promise to an
@@ -729,7 +729,7 @@ export default class Storage {
     return this.startOperation_(this.list_())
   }
 
-  /**
+  /* *
    * See |Storage.list| for details.
    *
    * @return {!Promise.<!Array.<shaka.extern.StoredContent>>}
@@ -738,10 +738,10 @@ export default class Storage {
   async list_() {
     this.requireSupport_()
 
-    /** @type {!Array.<shaka.extern.StoredContent>} */
+    /* * @type {!Array.<shaka.extern.StoredContent>} */
     const result = []
 
-    /** @type {!StorageMuxer} */
+    /* * @type {!StorageMuxer} */
     const muxer = new StorageMuxer()
     try {
       await muxer.init()
@@ -773,7 +773,7 @@ export default class Storage {
 
     return result
   }
-  /**
+  /* *
    * This method is public so that it can be overridden in testing.
    *
    * @param {string} uri
@@ -786,7 +786,7 @@ export default class Storage {
     const networkingEngine = this.networkingEngine_
     console.assert(networkingEngine, 'Should be initialized!')
 
-    /** @type {shaka.extern.ManifestParser.PlayerInterface} */
+    /* * @type {shaka.extern.ManifestParser.PlayerInterface} */
     const playerInterface = {
       networkingEngine: networkingEngine,
 
@@ -843,7 +843,7 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * This method is public so that it can be override in testing.
    *
    * @param {shaka.extern.Manifest} manifest
@@ -855,7 +855,7 @@ export default class Storage {
       this.networkingEngine_,
       'Cannot call |createDrmEngine| after |destroy|')
 
-    /** @type {!DrmEngine} */
+    /* * @type {!DrmEngine} */
     const drmEngine = new DrmEngine({
       netEngine: this.networkingEngine_,
       onError: onError,
@@ -876,7 +876,7 @@ export default class Storage {
     return drmEngine
   }
 
-  /**
+  /* *
    * Creates an offline 'manifest' for the real manifest.  This does not store
    * the segments yet, only adds them to the download manager through
    * createPeriod_.
@@ -919,7 +919,7 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * Converts a manifest Period to a database Period.  This will use the current
    * configuration to get the tracks to use, then it will search each segment
    * index and add all the segments to the download manager through
@@ -971,7 +971,7 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * Converts a manifest stream to a database stream.  This will search the
    * segment index and add all the segments to the download manager.
    *
@@ -985,7 +985,7 @@ export default class Storage {
    * @private
    */
   createStream_(downloader, storage, estimator, manifest, period, stream) {
-    /** @type {shaka.extern.StreamDB} */
+    /* * @type {shaka.extern.StreamDB} */
     const streamDb = {
       id: stream.id,
       originalId: stream.originalId,
@@ -1008,7 +1008,7 @@ export default class Storage {
       variantIds: []
     }
 
-    /** @type {number} */
+    /* * @type {number} */
     const startTime =
         manifest.presentationTimeline.getSegmentAvailabilityStart()
 
@@ -1038,7 +1038,7 @@ export default class Storage {
         downloadGroup,
         request,
         estimator.getInitSegmentEstimate(stream.id),
-        /* isInitSegment= */ true,
+        /*  isInitSegment= */ true,
         async(data) => {
           const ids = await storage.addSegments([{ data: data }])
           this.segmentsFromStore_.push(ids[0])
@@ -1057,7 +1057,7 @@ export default class Storage {
         downloadGroup,
         request,
         estimator.getSegmentEstimate(stream.id, segment),
-        /* isInitSegment= */ false,
+        /*  isInitSegment= */ false,
         async(data) => {
           const ids = await storage.addSegments([{ data: data }])
           this.segmentsFromStore_.push(ids[0])
@@ -1075,16 +1075,16 @@ export default class Storage {
     return streamDb
   }
 
-  /**
+  /* *
    * @param {shaka.extern.Stream} stream
    * @param {number} startTime
    * @param {function(!SegmentReference)} callback
    * @private
    */
   static forEachSegment_(stream, startTime, callback) {
-    /** @type {?number} */
+    /* * @type {?number} */
     let i = stream.segmentIndex.find(startTime)
-    /** @type {?SegmentReference} */
+    /* * @type {?SegmentReference} */
     let ref = i == null ? null : stream.segmentIndex.get(i)
 
     while (ref) {
@@ -1093,7 +1093,7 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * Throws an error if the object is destroyed.
    * @private
    */
@@ -1106,7 +1106,7 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * Used by functions that need storage support to ensure that the current
    * platform has storage support before continuing. This should only be
    * needed to be used at the start of public methods.
@@ -1122,7 +1122,7 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * Perform an action. Track the action's progress so that when we destroy
    * we will wait until all the actions have completed before allowing destroy
    * to resolve.
@@ -1144,13 +1144,13 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * @param {shaka.extern.ManifestDB} manifest
    * @return {!Array.<number>}
    * @private
    */
   static getAllSegmentIds_(manifest) {
-    /** @type {!Array.<number>} */
+    /* * @type {!Array.<number>} */
     const ids = []
 
     // Get every segment for every stream in the manifest.
@@ -1169,7 +1169,7 @@ export default class Storage {
     return ids
   }
 
-  /**
+  /* *
    * Delete the on-disk storage and all the content it contains. This should not
    * be done in normal circumstances. Only do it when storage is rendered
    * unusable, such as by a version mismatch. No business logic will be run, and
@@ -1179,7 +1179,7 @@ export default class Storage {
    * @export
    */
   static async deleteAll() {
-    /** @type {!StorageMuxer} */
+    /* * @type {!StorageMuxer} */
     const muxer = new StorageMuxer()
     try {
       // Wipe all content from all storage mechanisms.
@@ -1190,7 +1190,7 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * @param {!NetworkingEngine} net
    * @param {!shaka.extern.DrmConfiguration} drmConfig
    * @param {!StorageMuxer} muxer
@@ -1205,7 +1205,7 @@ export default class Storage {
 
     const sessionIdCell = muxer.getEmeSessionCell()
 
-    /** @type {!Array.<shaka.extern.EmeSessionDB>} */
+    /* * @type {!Array.<shaka.extern.EmeSessionDB>} */
     const sessions = manifestDb.sessionIds.map((sessionId) => {
       return {
         sessionId: sessionId,
@@ -1214,10 +1214,10 @@ export default class Storage {
         serverCertificate: manifestDb.drmInfo.serverCertificate,
         audioCapabilities: Storage.getCapabilities_(
           manifestDb,
-          /* isVideo= */ false),
+          /*  isVideo= */ false),
         videoCapabilities: Storage.getCapabilities_(
           manifestDb,
-          /* isVideo= */ true)
+          /*  isVideo= */ true)
       }
     })
     // Try to delete the sessions; any sessions that weren't deleted get stored
@@ -1231,7 +1231,7 @@ export default class Storage {
       (session) => !deletedSessionIds.includes(session.sessionId)))
   }
 
-  /**
+  /* *
    * Get the set of all streams in |manifest|.
    *
    * @param {shaka.extern.Manifest} manifest
@@ -1239,7 +1239,7 @@ export default class Storage {
    * @private
    */
   static getAllStreamsFromManifest_(manifest) {
-    /** @type {!Set.<shaka.extern.Stream>} */
+    /* * @type {!Set.<shaka.extern.Stream>} */
     const set = new Set()
 
     for (const period of manifest.periods) {
@@ -1260,7 +1260,7 @@ export default class Storage {
     return set
   }
 
-  /**
+  /* *
    * Get the set of all streams in |period|.
    *
    * @param {shaka.extern.Period} period
@@ -1268,7 +1268,7 @@ export default class Storage {
    * @private
    */
   static getAllStreamsFromPeriod_(period) {
-    /** @type {!Set.<shaka.extern.Stream>} */
+    /* * @type {!Set.<shaka.extern.Stream>} */
     const set = new Set()
 
     for (const text of period.textStreams) {
@@ -1287,7 +1287,7 @@ export default class Storage {
     return set
   }
 
-  /**
+  /* *
    * Go over a manifest and issue warnings for any suspicious properties.
    *
    * @param {shaka.extern.Manifest} manifest
@@ -1307,7 +1307,7 @@ export default class Storage {
     }
   }
 
-  /**
+  /* *
    * Go over a period and issue warnings for any suspicious properties.
    *
    * @param {shaka.extern.Period} period

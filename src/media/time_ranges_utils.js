@@ -1,11 +1,11 @@
 import Iterables from '../util/iterables'
 import Platform from '../util/platform'
 
-/**
+/* *
  * @summary A set of utility functions for dealing with TimeRanges objects.
  */
 export default class TimeRangesUtils {
-  /**
+  /* *
    * Gets the first timestamp in the buffer.
    *
    * @param {TimeRanges} b
@@ -26,7 +26,7 @@ export default class TimeRangesUtils {
     }
     return b.length ? b.start(0) : null
   }
-  /**
+  /* *
    * Gets the last timestamp in the buffer.
    *
    * @param {TimeRanges} b
@@ -43,7 +43,7 @@ export default class TimeRangesUtils {
     }
     return b.length ? b.end(b.length - 1) : null
   }
-  /**
+  /* *
    * Determines if the given time is inside a buffered range.  This includes
    * gaps, meaning that if the playhead is in a gap, it is considered buffered.
    * If there is a small gap between the playhead and buffer start, consider it
@@ -70,7 +70,7 @@ export default class TimeRangesUtils {
     // the range.
     return (time + smallGapLimit >= b.start(0))
   }
-  /**
+  /* *
    * Computes how far ahead of the given timestamp is buffered.  To provide
    * smooth playback while jumping gaps, we don't include the gaps when
    * calculating this.
@@ -106,7 +106,7 @@ export default class TimeRangesUtils {
 
     return result
   }
-  /**
+  /* *
    * Determines if the given time is inside a gap between buffered ranges.  If
    * it is, this returns the index of the buffer that is *ahead* of the gap.
    *
@@ -142,7 +142,7 @@ export default class TimeRangesUtils {
     })
     return idx >= 0 ? idx : null
   }
-  /**
+  /* *
    * @param {TimeRanges} b
    * @return {!Array.<shaka.extern.BufferedRange>}
    */

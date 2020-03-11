@@ -1,33 +1,33 @@
 import Error from '../util/error'
-/**
+/* *
  * HLS playlist class.
  */
 export class Playlist {
-  /**
+  /* *
    * @param {string} absoluteUri An absolute, final URI after redirects.
    * @param {!PlaylistType} type
    * @param {!Array.<Tag>} tags
    * @param {!Array.<Segment>=} segments
    */
   constructor(absoluteUri, type, tags, segments) {
-    /**
+    /* *
      * An absolute, final URI after redirects.
      *
      * @const {string}
      */
     this.absoluteUri = absoluteUri
 
-    /** @const {PlaylistType} */
+    /* * @const {PlaylistType} */
     this.type = type
 
-    /** @const {!Array.<!Tag>} */
+    /* * @const {!Array.<!Tag>} */
     this.tags = tags
 
-    /** @const {Array.<!Segment>} */
+    /* * @const {Array.<!Segment>} */
     this.segments = segments || null
   }
 }
-/**
+/* *
  * @enum {number}
  */
 export const PlaylistType = {
@@ -35,31 +35,31 @@ export const PlaylistType = {
   MEDIA: 1
 }
 
-/**
+/* *
  * HLS tag class.
  */
 export class Tag {
-  /**
+  /* *
    * @param {number} id
    * @param {string} name
    * @param {!Array.<Attribute>} attributes
    * @param {?string=} value
    */
   constructor(id, name, attributes, value = null) {
-    /** @const {number} */
+    /* * @const {number} */
     this.id = id
 
-    /** @const {string} */
+    /* * @const {string} */
     this.name = name
 
-    /** @const {Array.<Attribute>} */
+    /* * @const {Array.<Attribute>} */
     this.attributes = attributes
 
-    /** @const {?string} */
+    /* * @const {?string} */
     this.value = value
   }
 
-  /**
+  /* *
    * Create the string representation of the tag.
    *
    * For the DRM system - the full tag needs to be passed down to the CDM.
@@ -72,13 +72,13 @@ export class Tag {
    * @override
    */
   toString() {
-    /**
+    /* *
      * @param {Attribute} attr
      * @return {string}
      */
     const attrToStr = (attr) => {
       const isNumericAttr = !isNaN(Number(attr.value))
-      const value = (isNumericAttr ? attr.value : '"' + attr.value + '"')
+      const value = (isNumericAttr ? attr.value : '' + attr.value)
       return attr.name + '=' + value
     }
     // A valid tag can only follow 1 of 4 patterns.
@@ -101,7 +101,7 @@ export class Tag {
     return tagStr
   }
 
-  /**
+  /* *
    * Adds an attribute to an HLS Tag.
    *
    * @param {!Attribute} attribute
@@ -109,7 +109,7 @@ export class Tag {
   addAttribute(attribute) {
     this.attributes.push(attribute)
   }
-  /**
+  /* *
    * Gets the first attribute of the tag with a specified name.
    *
    * @param {string} name
@@ -131,7 +131,7 @@ export class Tag {
     }
   }
 
-  /**
+  /* *
    * Gets the value of the first attribute of the tag with a specified name.
    * If not found, returns an optional default value.
    *
@@ -143,7 +143,7 @@ export class Tag {
     const attribute = this.getAttribute(name)
     return attribute ? attribute.value : (defaultValue || null)
   }
-  /**
+  /* *
    * Finds the attribute and returns its value.
    * Throws an error if attribute was not found.
    *
@@ -163,21 +163,21 @@ export class Tag {
     return attribute.value
   }
 }
-/**
+/* *
  * HLS segment class.
  */
 export class Segment {
-  /**
+  /* *
    * Creates an HLS segment object.
    *
    * @param {string} absoluteUri An absolute URI.
    * @param {!Array.<Tag>} tags
    */
   constructor(absoluteUri, tags) {
-    /** @const {!Array.<Tag>} */
+    /* * @const {!Array.<Tag>} */
     this.tags = tags
 
-    /**
+    /* *
      * An absolute URI.
      *
      * @const {string}
@@ -185,21 +185,21 @@ export class Segment {
     this.absoluteUri = absoluteUri
   }
 }
-/**
+/* *
  * HLS Attribute class.
  */
 export class Attribute {
-  /**
+  /* *
    * Creates an HLS attribute object.
    *
    * @param {string} name
    * @param {string} value
    */
   constructor(name, value) {
-    /** @const {string} */
+    /* * @const {string} */
     this.name = name
 
-    /** @const {string} */
+    /* * @const {string} */
     this.value = value
   }
 }

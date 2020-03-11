@@ -1,11 +1,11 @@
-/**
+/* *
  * Creates an InitSegmentReference, which provides the location to an
  * initialization segment.
  *
  * @export
  */
 export class InitSegmentReference {
-  /**
+  /* *
    * @param {function():!Array.<string>} uris A function that creates the URIs
    *   of the resource containing the segment.
    * @param {number} startByte The offset from the start of the resource to the
@@ -15,17 +15,17 @@ export class InitSegmentReference {
    *   segment extends to the end of the resource.
    */
   constructor(uris, startByte, endByte) {
-    /** @type {function():!Array.<string>} */
+    /* * @type {function():!Array.<string>} */
     this.getUris = uris
 
-    /** @const {number} */
+    /* * @const {number} */
     this.startByte = startByte
 
-    /** @const {?number} */
+    /* * @const {?number} */
     this.endByte = endByte
   }
 
-  /**
+  /* *
    * Returns the offset from the start of the resource to the
    * start of the segment.
    *
@@ -36,7 +36,7 @@ export class InitSegmentReference {
     return this.startByte
   }
 
-  /**
+  /* *
    * Returns the offset from the start of the resource to the end of the
    * segment, inclusive.  A value of null indicates that the segment extends
    * to the end of the resource.
@@ -48,7 +48,7 @@ export class InitSegmentReference {
     return this.endByte
   }
 
-  /**
+  /* *
    * Returns the size of the init segment.
    * @return {?number}
    */
@@ -60,14 +60,14 @@ export class InitSegmentReference {
     }
   }
 }
-/**
+/* *
  * SegmentReference provides the start time, end time, and location to a media
  * segment.
  *
  * @export
  */
 export class SegmentReference {
-  /**
+  /* *
    * @param {number} position The segment's position.
    *   The following should hold true between any two SegmentReferences r1 and
    *   r2:
@@ -118,38 +118,38 @@ export class SegmentReference {
     console.assert((startByte < endByte) || (endByte == null),
       'startByte must be < endByte')
 
-    /** @const {number} */
+    /* * @const {number} */
     this.position = position
 
-    /** @type {number} */
+    /* * @type {number} */
     this.startTime = startTime
 
-    /** @type {number} */
+    /* * @type {number} */
     this.endTime = endTime
 
-    /** @type {function():!Array.<string>} */
+    /* * @type {function():!Array.<string>} */
     this.getUris = uris
 
-    /** @const {number} */
+    /* * @const {number} */
     this.startByte = startByte
 
-    /** @const {?number} */
+    /* * @const {?number} */
     this.endByte = endByte
 
-    /** @type {InitSegmentReference} */
+    /* * @type {InitSegmentReference} */
     this.initSegmentReference = initSegmentReference
 
-    /** @type {number} */
+    /* * @type {number} */
     this.timestampOffset = timestampOffset
 
-    /** @type {number} */
+    /* * @type {number} */
     this.appendWindowStart = appendWindowStart
 
-    /** @type {number} */
+    /* * @type {number} */
     this.appendWindowEnd = appendWindowEnd
   }
 
-  /**
+  /* *
    * Returns the segment's position.
    *
    * @return {number} The segment's position.
@@ -159,7 +159,7 @@ export class SegmentReference {
     return this.position
   }
 
-  /**
+  /* *
    * Returns the segment's start time in seconds.
    *
    * @return {number}
@@ -169,7 +169,7 @@ export class SegmentReference {
     return this.startTime
   }
 
-  /**
+  /* *
    * Returns the segment's end time in seconds.
    *
    * @return {number}
@@ -179,7 +179,7 @@ export class SegmentReference {
     return this.endTime
   }
 
-  /**
+  /* *
    * Returns the offset from the start of the resource to the
    * start of the segment.
    *
@@ -190,7 +190,7 @@ export class SegmentReference {
     return this.startByte
   }
 
-  /**
+  /* *
    * Returns the offset from the start of the resource to the end of the
    * segment, inclusive.  A value of null indicates that the segment extends to
    * the end of the resource.
@@ -202,7 +202,7 @@ export class SegmentReference {
     return this.endByte
   }
 
-  /**
+  /* *
    * Returns the size of the segment.
    * @return {?number}
    */
@@ -214,7 +214,7 @@ export class SegmentReference {
     }
   }
 }
-/**
+/* *
  * A convenient typedef for when either type of reference is acceptable.
  *
  * @typedef {InitSegmentReference|SegmentReference}

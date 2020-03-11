@@ -68,6 +68,7 @@ export default class StreamUtils {
 
     return true
   }
+
   /**
    * @param {!Array.<shaka.extern.Variant>} variants
    * @param {shaka.extern.Restrictions} restrictions
@@ -89,6 +90,7 @@ export default class StreamUtils {
 
     return tracksChanged
   }
+
   /**
    * Alters the given Period to filter out any unplayable streams.
    *
@@ -97,7 +99,7 @@ export default class StreamUtils {
    * @param {?shaka.extern.Stream} activeVideo
    * @param {shaka.extern.Period} period
    */
-  static filterNewPeriod(activeAudio, activeVideo, period) {
+  static filterNewPeriod(drmEngine, activeAudio, activeVideo, period) {
     const StreamUtils = StreamUtils
 
     if (activeAudio) {
@@ -109,6 +111,16 @@ export default class StreamUtils {
       console.assert(StreamUtils.isVideo(activeVideo),
         'Video streams must have the video type.')
     }
+
+    // Filter variants.
+    period.variants = period.variants.filter((variant) => {
+      if (drmEngine && drmEngine.initialized()) {
+        if (!drmEngine.supportsVariant(variant)) {
+          console.debug('Dropping variant - not compatible with key system',
+            variant)
+          return false
+        }
+      }
 
       const audio = variant.audio
       const video = variant.video
@@ -164,6 +176,7 @@ export default class StreamUtils {
       return keep
     })
   }
+
   /**
    * @param {shaka.extern.Stream} s0
    * @param {shaka.extern.Stream} s1
@@ -186,6 +199,7 @@ export default class StreamUtils {
 
     return true
   }
+
   /**
    * @param {shaka.extern.Variant} variant
    * @return {shaka.extern.Track}
@@ -298,6 +312,7 @@ export default class StreamUtils {
 
     return track
   }
+
   /**
    * @param {shaka.extern.Stream} stream
    * @return {shaka.extern.Track}
@@ -338,6 +353,7 @@ export default class StreamUtils {
 
     return track
   }
+
   /**
    * Generate and return an ID for this track, since the ID field is optional.
    *
@@ -350,6 +366,7 @@ export default class StreamUtils {
     }
     return html5Track['__shaka_id']
   }
+
   /**
    * @param {TextTrack} textTrack
    * @return {shaka.extern.Track}
@@ -370,6 +387,7 @@ export default class StreamUtils {
 
     return track
   }
+
   /**
    * @param {AudioTrack} audioTrack
    * @return {shaka.extern.Track}
@@ -393,6 +411,7 @@ export default class StreamUtils {
 
     return track
   }
+
   /**
    * Creates a Track object with non-type specific fields filled out.  The
    * caller is responsible for completing the Track object with any
@@ -436,6 +455,7 @@ export default class StreamUtils {
 
     return track
   }
+
   /**
    * Determines if the given variant is playable.
    * @param {!shaka.extern.Variant} variant
@@ -444,6 +464,7 @@ export default class StreamUtils {
   static isPlayable(variant) {
     return variant.allowedByApplication && variant.allowedByKeySystem
   }
+
   /**
    * Filters out unplayable variants.
    * @param {!Array.<!shaka.extern.Variant>} variants
@@ -454,6 +475,7 @@ export default class StreamUtils {
       return StreamUtils.isPlayable(variant)
     })
   }
+
   /**
    * Filters variants according to the given audio channel count config.
    *
@@ -526,7 +548,7 @@ export default class StreamUtils {
     }
 
     // Now reduce the set to one language.  This covers both arbitrary language
-    // choice and the reduction of the 'primary' stream set to one language.
+    // choice and the reduction of the "primary" stream set to one language.
     const firstLanguage = chosen.length ? chosen[0].language : ''
     chosen = chosen.filter((stream) => {
       return stream.language === firstLanguage
@@ -581,6 +603,7 @@ export default class StreamUtils {
     }
     return StreamUtils.filterTextStreamsByRole_(chosen, allRoles[0])
   }
+
   /**
    * Filter text Streams by role.
    *
@@ -594,6 +617,7 @@ export default class StreamUtils {
       return stream.roles.includes(preferredRole)
     })
   }
+
   /**
    * Finds a Variant with given audio and video streams.
    * Returns null if no such Variant was found.
@@ -624,6 +648,7 @@ export default class StreamUtils {
 
     return null
   }
+
   /**
    * Checks if the given stream is an audio stream.
    *
@@ -634,6 +659,7 @@ export default class StreamUtils {
     const ContentType = ManifestParserUtils.ContentType
     return stream.type === ContentType.AUDIO
   }
+
   /**
    * Checks if the given stream is a video stream.
    *
@@ -644,6 +670,7 @@ export default class StreamUtils {
     const ContentType = ManifestParserUtils.ContentType
     return stream.type === ContentType.VIDEO
   }
+
   /**
    * Get all non-null streams in the variant as an array.
    *
@@ -662,6 +689,7 @@ export default class StreamUtils {
 
     return streams
   }
+
   /**
    * @param {shaka.extern.Stream} stream
    * @return {string}
@@ -691,5 +719,6 @@ export default class StreamUtils {
     return 'unexpected stream type'
   }
 }
+
 /** @private {number} */
 StreamUtils.nextTrackId_ = 0

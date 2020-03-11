@@ -1,16 +1,16 @@
 import polyfill from './all'
 
-/**
+/* *
  * @summary A polyfill to provide MSE VideoPlaybackQuality metrics.
  * Many browsers do not yet provide this API, and Chrome currently provides
  * similar data through individual prefixed attributes on HTMLVideoElement.
  */
 export default class VideoPlaybackQuality {
-  /**
+  /* *
    * Install the polyfill if needed.
    */
   static install() {
-    if (!window.HTMLVideoElement) {
+    if (!HTMLVideoElement) {
       // Avoid errors on very old browsers.
       return
     }
@@ -28,7 +28,7 @@ export default class VideoPlaybackQuality {
     }
   }
 
-  /**
+  /* *
    * @this {HTMLVideoElement}
    * @return {!VideoPlaybackQuality}
    * @private

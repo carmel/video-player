@@ -1,10 +1,10 @@
 import polyfill from './all'
 import Platform from '../util/platform'
-/**
+/* *
  * @summary A polyfill to patch IndexedDB bugs.
  */
 export default class IndexedDB {
-  /**
+  /* *
    * Install the polyfill if needed.
    */
   static install() {
@@ -31,7 +31,7 @@ export default class IndexedDB {
     if (disableIDB) {
       delete window.indexedDB
       console.assert(
-        !window.indexedDB, 'Failed to override window.indexedDB')
+        !indexedDB, 'Failed to override indexedDB')
     }
   }
 }

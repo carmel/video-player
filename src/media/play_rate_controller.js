@@ -1,7 +1,7 @@
 // import IReleasable from '../util/i_releasable'
 import Timer from '../util/timer'
 
-/**
+/* *
  * The play rate controller controls the playback rate on the media element.
  * This provides some missing functionality (e.g. negative playback rate). If
  * the playback rate on the media element can change outside of the controller,
@@ -13,29 +13,29 @@ import Timer from '../util/timer'
  * @final
  */
 export default class PlayRateController {
-  /**
+  /* *
    * @param {PlayRateController.Harness} harness
    */
   constructor(harness) {
-    /** @private {?PlayRateController.Harness} */
+    /* * @private {?PlayRateController.Harness} */
     this.harness_ = harness
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.isBuffering_ = false
 
-    /** @private {number} */
+    /* * @private {number} */
     this.rate_ = this.harness_.getRate()
 
-    /** @private {number} */
+    /* * @private {number} */
     this.pollRate_ = 0.25
 
-    /** @private {Timer} */
+    /* * @private {Timer} */
     this.timer_ = new Timer(() => {
       this.harness_.movePlayhead(this.rate_ * this.pollRate_)
     })
   }
 
-  /** @override */
+  /* * @override */
   release() {
     if (this.timer_) {
       this.timer_.stop()
@@ -45,7 +45,7 @@ export default class PlayRateController {
     this.harness_ = null
   }
 
-  /**
+  /* *
    * Sets the buffering flag, which controls the effective playback rate.
    *
    * @param {boolean} isBuffering If true, forces playback rate to 0 internally.
@@ -55,7 +55,7 @@ export default class PlayRateController {
     this.apply_()
   }
 
-  /**
+  /* *
    * Set the playback rate. This rate will only be used as provided when the
    * player is not buffering. You should never set the rate to 0.
    *
@@ -67,7 +67,7 @@ export default class PlayRateController {
     this.apply_()
   }
 
-  /**
+  /* *
    * Get the rate that the user will experience. This means that if we are using
    * trick play, this will report the trick play rate. If we are buffering, this
    * will report zero. If playback is occurring as normal, this will report 1.
@@ -77,7 +77,7 @@ export default class PlayRateController {
   getActiveRate() {
     return this.calculateCurrentRate_()
   }
-  /**
+  /* *
    * Get the real rate of the playback. This means that if we are using trick
    * play, this will report the trick play rate. If playback is occurring as
    * normal, this will report 1.
@@ -88,7 +88,7 @@ export default class PlayRateController {
     return this.rate_
   }
 
-  /**
+  /* *
    * Reapply the effects of |this.rate_| and |this.active_| to the media
    * element. This will only update the rate via the harness if the desired rate
    * has changed.
@@ -99,7 +99,7 @@ export default class PlayRateController {
     // Always stop the timer. We may not start it again.
     this.timer_.stop()
 
-    /** @type {number} */
+    /* * @type {number} */
     const rate = this.calculateCurrentRate_()
 
     console.info('Changing effective playback rate to', rate)
@@ -126,7 +126,7 @@ export default class PlayRateController {
     this.applyRate_(0)
   }
 
-  /**
+  /* *
    * Calculate the rate that the controller wants the media element to have
    * based on the current state of the controller.
    *
@@ -137,7 +137,7 @@ export default class PlayRateController {
     return this.isBuffering_ ? 0 : this.rate_
   }
 
-  /**
+  /* *
    * If the new rate is different than the media element's playback rate, this
    * will change the playback rate. If the rate does not need to change, it will
    * not be set. This will avoid unnecessary ratechange events.
@@ -156,7 +156,7 @@ export default class PlayRateController {
     return oldRate !== newRate
   }
 }
-/**
+/* *
  * @typedef {{
  *   getRate: function():number,
  *   setRate: function(number),

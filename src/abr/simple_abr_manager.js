@@ -1,7 +1,7 @@
 import Iterables from '../util/iterables'
 import StreamUtils from '../util/stream_utils'
 import EwmaBandwidthEstimator from './ewma_bandwidth_estimator'
-/**
+/* *
  * @summary
  * <p>
  * This defines the default ABR manager for the Player.  An instance of this
@@ -24,40 +24,40 @@ import EwmaBandwidthEstimator from './ewma_bandwidth_estimator'
  */
 export default class SimpleAbrManager {
   constructor() {
-    /** @private {?shaka.extern.AbrManager.SwitchCallback} */
+    /* * @private {?shaka.extern.AbrManager.SwitchCallback} */
     this.switch_ = null
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.enabled_ = false
 
-    /** @private {EwmaBandwidthEstimator} */
+    /* * @private {EwmaBandwidthEstimator} */
     this.bandwidthEstimator_ = new EwmaBandwidthEstimator()
     // TODO: Consider using NetworkInformation's change event to throw out an
     // old estimate based on changing network types, such as wifi => 3g.
 
-    /**
+    /* *
      * A filtered list of Variants to choose from.
      * @private {!Array.<!shaka.extern.Variant>}
      */
     this.variants_ = []
 
-    /** @private {number} */
+    /* * @private {number} */
     this.playbackRate_ = 1
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.startupComplete_ = false
 
-    /**
+    /* *
      * The last wall-clock time, in milliseconds, when streams were chosen.
      *
      * @private {?number}
      */
     this.lastTimeChosenMs_ = null
 
-    /** @private {?shaka.extern.AbrConfiguration} */
+    /* * @private {?shaka.extern.AbrConfiguration} */
     this.config_ = null
   }
-  /**
+  /* *
    * @override
    * @export
    */
@@ -71,14 +71,14 @@ export default class SimpleAbrManager {
     // Don't reset |startupComplete_|: if we've left the startup interval, we
     // can start using bandwidth estimates right away after init() is called.
   }
-  /**
+  /* *
    * @override
    * @export
    */
   init(switchCallback) {
     this.switch_ = switchCallback
   }
-  /**
+  /* *
    * @override
    * @export
    */
@@ -100,7 +100,7 @@ export default class SimpleAbrManager {
       console.warning('No variants met the ABR restrictions. ' +
                         'Choosing a variant by lowest bandwidth.')
       sortedVariants = SimpleAbrManager.filterAndSortVariants_(
-        /* restrictions= */ null, this.variants_)
+        /*  restrictions= */ null, this.variants_)
       sortedVariants = [sortedVariants[0]]
     }
 
@@ -132,21 +132,21 @@ export default class SimpleAbrManager {
     return chosen
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
   enable() {
     this.enabled_ = true
   }
-  /**
+  /* *
    * @override
    * @export
    */
   disable() {
     this.enabled_ = false
   }
-  /**
+  /* *
    * @override
    * @export
    */
@@ -163,7 +163,7 @@ export default class SimpleAbrManager {
       this.suggestStreams_()
     }
   }
-  /**
+  /* *
    * @override
    * @export
    */
@@ -171,28 +171,28 @@ export default class SimpleAbrManager {
     return this.bandwidthEstimator_.getBandwidthEstimate(
       this.config_.defaultBandwidthEstimate)
   }
-  /**
+  /* *
    * @override
    * @export
    */
   setVariants(variants) {
     this.variants_ = variants
   }
-  /**
+  /* *
    * @override
    * @export
    */
   playbackRateChanged(rate) {
     this.playbackRate_ = rate
   }
-  /**
+  /* *
    * @override
    * @export
    */
   configure(config) {
     this.config_ = config
   }
-  /**
+  /* *
    * Calls switch_() with the variant chosen by chooseVariant().
    *
    * @private
@@ -230,7 +230,7 @@ export default class SimpleAbrManager {
     // them out before passing the choices on to StreamingEngine.
     this.switch_(chosenVariant)
   }
-  /**
+  /* *
    * @param {?shaka.extern.Restrictions} restrictions
    * @param {!Array.<shaka.extern.Variant>} variants
    * @return {!Array.<shaka.extern.Variant>} variants filtered according to
@@ -246,7 +246,7 @@ export default class SimpleAbrManager {
 
         return StreamUtils.meetsRestrictions(
           variant, restrictions,
-          /* maxHwRes= */ { width: Infinity, height: Infinity })
+          /*  maxHwRes= */ { width: Infinity, height: Infinity })
       })
     }
 

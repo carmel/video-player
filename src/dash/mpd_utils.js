@@ -1,5 +1,5 @@
 
-import NetworkingEngine from '../net/networking_engine'
+import { NetworkingEngine } from '../net/networking_engine'
 import AbortableOperation from '../util/abortable_operation'
 import Error from '../util/error'
 import Functional from '../util/functional'
@@ -7,11 +7,11 @@ import Iterables from '../util/iterables'
 import ManifestParserUtils from '../util/manifest_parser_utils'
 import XmlUtils from '../util/xml_utils'
 
-/**
+/* *
  * @summary MPD processing utility functions.
  */
 export default class MpdUtils {
-  /**
+  /* *
    * Fills a SegmentTemplate URI template.  This function does not validate the
    * resulting URI.
    *
@@ -25,7 +25,7 @@ export default class MpdUtils {
    */
   static fillUriTemplate(
     uriTemplate, representationId, number, bandwidth, time) {
-    /** @type {!Object.<string, ?number|?string>} */
+    /* * @type {!Object.<string, ?number|?string>} */
     const valueTable = {
       'RepresentationID': representationId,
       'Number': number,
@@ -44,18 +44,12 @@ export default class MpdUtils {
 
       // Note that |value| may be 0 or ''.
       if (value === null) {
-        console.warning(
-          'URL template does not have an available substitution for ',
-          'identifier "' + name + '":',
-          uriTemplate)
+        console.warning(`URL template does not have an available substitution for identifier ${name}: ${uriTemplate}`)
         return match
       }
 
       if (name === 'RepresentationID' && widthStr) {
-        console.warning(
-          'URL template should not contain a width specifier for identifier',
-          '"RepresentationID":',
-          uriTemplate)
+        console.warning(`URL template should not contain a width specifier for identifier RepresentationID: ${uriTemplate}`)
         widthStr = undefined
       }
 
@@ -65,7 +59,7 @@ export default class MpdUtils {
         value = Math.round(value)
       }
 
-      /** @type {string} */
+      /* * @type {string} */
       let valueString
       switch (format) {
         case undefined: // Happens if there is no format specifier.
@@ -90,7 +84,7 @@ export default class MpdUtils {
       }
 
       // Create a padding string.
-      const width = window.parseInt(widthStr, 10) || 1
+      const width = parseInt(widthStr, 10) || 1
       const paddingSize = Math.max(0, width - valueString.length)
       const padding = (new Array(paddingSize + 1)).join('0')
 
@@ -100,7 +94,7 @@ export default class MpdUtils {
     return uri
   }
 
-  /**
+  /* *
    * Expands a SegmentTimeline into an array-based timeline.  The results are in
    * seconds.
    *
@@ -122,7 +116,7 @@ export default class MpdUtils {
 
     const timePoints = XmlUtils.findChildren(segmentTimeline, 'S')
 
-    /** @type {!Array.<MpdUtils.TimeRange>} */
+    /* * @type {!Array.<MpdUtils.TimeRange>} */
     const timeline = []
     let lastEndTime = 0
 
@@ -139,9 +133,7 @@ export default class MpdUtils {
       }
 
       if (!d) {
-        console.warning(
-          '"S" element must have a duration:',
-          'ignoring the remaining "S" elements.', timePoint)
+        console.warning(`'S' element must have a duration: ${timePoint} ignoring the remaining 'S' elements.`)
         return timeline
       }
 
@@ -153,35 +145,23 @@ export default class MpdUtils {
           const nextStartTime =
               XmlUtils.parseAttr(next, 't', XmlUtils.parseNonNegativeInt)
           if (nextStartTime === null) {
-            console.warning(
-              'An "S" element cannot have a negative repeat',
-              'if the next "S" element does not have a valid start time:',
-              'ignoring the remaining "S" elements.', timePoint)
+            console.warning(`An 'S' element cannot have a negative repeat if the next 'S' element does not have a valid start time: ${timePoint} ignoring the remaining 'S elements.`)
             return timeline
           } else if (startTime >= nextStartTime) {
-            console.warning(
-              'An "S" element cannot have a negative repeatif its start ',
-              'time exceeds the next "S" element\'s start time:',
-              'ignoring the remaining "S" elements.', timePoint)
+            console.warning(`An 'S' element cannot have a negative repeatif its start 'time exceeds the next 'S' element's start time: ${timePoint} ignoring the remaining 'S' elements.`)
             return timeline
           }
           repeat = Math.ceil((nextStartTime - startTime) / d) - 1
         } else {
           if (periodDuration === Infinity) {
-            // The DASH spec. actually allows the last "S" element to have a
+            // The DASH spec. actually allows the last 'S' element to have a
             // negative repeat value even when the Period has an infinite
             // duration.  No one uses this feature and no one ever should,
             // ever.
-            console.warning(
-              'The last "S" element cannot have a negative repeat',
-              'if the Period has an infinite duration:',
-              'ignoring the last "S" element.', timePoint)
+            console.warning(`The last 'S' element cannot have a negative repeat if the Period has an infinite duration: ${timePoint} ignoring the last 'S' element.`)
             return timeline
           } else if (startTime / timescale >= periodDuration) {
-            console.warning(
-              'The last "S" element cannot have a negative repeat',
-              'if its start time exceeds the Period\'s duration:',
-              'igoring the last "S" element.', timePoint)
+            console.warning(`The last 'S' element cannot have a negative repeat if its start time exceeds the Period's duration: ${timePoint} igoring the last 'S' element.`)
             return timeline
           }
           repeat = Math.ceil((periodDuration * timescale - startTime) / d) - 1
@@ -201,9 +181,7 @@ export default class MpdUtils {
 
         if (Math.abs(delta / timescale) >=
             ManifestParserUtils.GAP_OVERLAP_TOLERANCE_SECONDS) {
-          console.warning(
-            'SegmentTimeline contains a large gap/overlap:',
-            'the content may have errors in it.', timePoint)
+          console.warning(`SegmentTimeline contains a large gap/overlap: ${timePoint} the content may have errors in it.`)
         }
 
         timeline[timeline.length - 1].end = startTime / timescale
@@ -227,7 +205,7 @@ export default class MpdUtils {
     return timeline
   }
 
-  /**
+  /* *
    * Parses common segment info for SegmentList and SegmentTemplate.
    *
    * @param {DashParser.Context} context
@@ -268,7 +246,7 @@ export default class MpdUtils {
 
     const timelineNode =
         MpdUtils.inheritChild(context, callback, 'SegmentTimeline')
-    /** @type {Array.<MpdUtils.TimeRange>} */
+    /* * @type {Array.<MpdUtils.TimeRange>} */
     let timeline = null
     if (timelineNode) {
       timeline = MpdUtils.createTimeline(
@@ -288,7 +266,7 @@ export default class MpdUtils {
     }
   }
 
-  /**
+  /* *
    * Searches the inheritance for a Segment* with the given attribute.
    *
    * @param {DashParser.Context} context
@@ -303,7 +281,7 @@ export default class MpdUtils {
       callback(context.representation),
       'There must be at least one element of the given type')
 
-    /** @type {!Array.<!Element>} */
+    /* * @type {!Array.<!Element>} */
     const nodes = [
       callback(context.representation),
       callback(context.adaptationSet),
@@ -315,7 +293,7 @@ export default class MpdUtils {
       .reduce((all, part) => { return all || part })
   }
 
-  /**
+  /* *
    * Searches the inheritance for a Segment* with the given child.
    *
    * @param {DashParser.Context} context
@@ -330,7 +308,7 @@ export default class MpdUtils {
       callback(context.representation),
       'There must be at least one element of the given type')
 
-    /** @type {!Array.<!Element>} */
+    /* * @type {!Array.<!Element>} */
     const nodes = [
       callback(context.representation),
       callback(context.adaptationSet),
@@ -343,7 +321,7 @@ export default class MpdUtils {
       .reduce((all, part) => { return all || part })
   }
 
-  /**
+  /* *
    * Follow the xlink link contained in the given element.
    * It also strips the xlink properties off of the element,
    * even if the process fails.
@@ -407,7 +385,7 @@ export default class MpdUtils {
       'Unexpected implementation of IAbortableOperation!')
     // Satisfy the compiler with a cast.
     const networkOperation =
-    /** @type {!AbortableOperation.<shaka.extern.Response>} */ (
+    /* * @type {!AbortableOperation.<shaka.extern.Response>} */ (
         requestOperation)
 
     // Chain onto that operation.
@@ -442,7 +420,7 @@ export default class MpdUtils {
 
         // Move the attributes of the loaded xml into the current element.
         for (const attribute of Array.from(rootElem.attributes)) {
-          element.setAttributeNode(attribute.cloneNode(/* deep= */ false))
+          element.setAttributeNode(attribute.cloneNode(/*  deep= */ false))
         }
 
         return MpdUtils.processXlinks(
@@ -451,7 +429,7 @@ export default class MpdUtils {
       })
   }
 
-  /**
+  /* *
    * Filter the contents of a node recursively, replacing xlink links
    * with their associated online data.
    *
@@ -504,7 +482,7 @@ export default class MpdUtils {
 
           // Replace the child with its processed form.
           childOperations.push(MpdUtils.processXlinks(
-            /** @type {!Element} */ (child), retryParameters, failGracefully,
+            /* * @type {!Element} */ (child), retryParameters, failGracefully,
             baseUri, networkingEngine, linkDepth))
         }
       }
@@ -515,7 +493,7 @@ export default class MpdUtils {
     })
   }
 }
-/**
+/* *
  * @typedef {{
  *   start: number,
  *   unscaledStart: number,
@@ -533,7 +511,7 @@ export default class MpdUtils {
  *   The end time (exclusive) of the range.
  */
 MpdUtils.TimeRange
-/**
+/* *
  * @typedef {{
  *   timescale: number,
  *   segmentDuration: ?number,
@@ -560,7 +538,7 @@ MpdUtils.TimeRange
  *   The timeline of the representation, if given.  Times in seconds.
  */
 MpdUtils.SegmentInfo
-/**
+/* *
  * @const {string}
  * @private
  */

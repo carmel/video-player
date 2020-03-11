@@ -1,6 +1,6 @@
 import BaseStorageCell from './base_storage_cell'
 
-/**
+/* *
  * The V2StorageCell is for all stores that follow the shaka.externs V2 and V3
  * offline types.  V2 was introduced in Shaka Player v2.3.0 and quickly
  * replaced with V3 in Shaka Player v2.3.2.
@@ -14,7 +14,7 @@ import BaseStorageCell from './base_storage_cell'
  * @implements {shaka.extern.StorageCell}
  */
 export default class V2StorageCell extends BaseStorageCell {
-  /**
+  /* *
    * @param {IDBDatabase} connection
    * @param {string} segmentStore
    * @param {string} manifestStore
@@ -23,16 +23,16 @@ export default class V2StorageCell extends BaseStorageCell {
   constructor(connection, segmentStore, manifestStore, isFixedKey) {
     super(connection, segmentStore, manifestStore)
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.isFixedKey_ = isFixedKey
   }
 
-  /** @override */
+  /* * @override */
   hasFixedKeySpace() {
     return this.isFixedKey_
   }
 
-  /** @override */
+  /* * @override */
   addSegments(segments) {
     if (this.isFixedKey_) {
       return this.rejectAdd(this.segmentStore_)
@@ -40,7 +40,7 @@ export default class V2StorageCell extends BaseStorageCell {
     return this.add(this.segmentStore_, segments)
   }
 
-  /** @override */
+  /* * @override */
   addManifests(manifests) {
     if (this.isFixedKey_) {
       return this.rejectAdd(this.manifestStore_)
@@ -48,7 +48,7 @@ export default class V2StorageCell extends BaseStorageCell {
     return this.add(this.manifestStore_, manifests)
   }
 
-  /**
+  /* *
    * @override
    * @param {shaka.extern.ManifestDB} old
    * @return {shaka.extern.ManifestDB}

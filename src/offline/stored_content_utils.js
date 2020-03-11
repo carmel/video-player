@@ -3,12 +3,12 @@ import ManifestConverter from './manifest_converter'
 // import OfflineUri from './offline_uri'
 import StreamUtils from '../util/stream_utils'
 
-/**
+/* *
  * A utility class used to create |shaka.extern.StoredContent| from different
  * types of input.
  */
 export default class StoredContentUtils {
-  /**
+  /* *
    * @param {string} originalUri
    * @param {shaka.extern.Manifest} manifest
    * @param {number} size
@@ -20,21 +20,21 @@ export default class StoredContentUtils {
       manifest.periods.length,
       'Cannot create stored content from manifest with no periods.')
 
-    /** @type {number} */
+    /* * @type {number} */
     const expiration = manifest.expiration === undefined
       ? Infinity
       : manifest.expiration
 
-    /** @type {number} */
+    /* * @type {number} */
     const duration = manifest.presentationTimeline.getDuration()
 
-    /** @type {shaka.extern.Period} */
+    /* * @type {shaka.extern.Period} */
     const firstPeriod = manifest.periods[0]
 
-    /** @type {!Array.<shaka.extern.Track>} */
+    /* * @type {!Array.<shaka.extern.Track>} */
     const tracks = StoredContentUtils.getTracks_(firstPeriod)
 
-    /** @type {shaka.extern.StoredContent} */
+    /* * @type {shaka.extern.StoredContent} */
     const content = {
       offlineUri: null,
       originalManifestUri: originalUri,
@@ -47,7 +47,7 @@ export default class StoredContentUtils {
 
     return content
   }
-  /**
+  /* *
    * @param {!OfflineUri} offlineUri
    * @param {shaka.extern.ManifestDB} manifestDB
    * @return {shaka.extern.StoredContent}
@@ -60,9 +60,9 @@ export default class StoredContentUtils {
     const converter = new ManifestConverter(
       offlineUri.mechanism(), offlineUri.cell())
 
-    /** @type {shaka.extern.PeriodDB} */
+    /* * @type {shaka.extern.PeriodDB} */
     const firstPeriodDB = manifestDB.periods[0]
-    /** @type {!PresentationTimeline} */
+    /* * @type {!PresentationTimeline} */
     const timeline = new PresentationTimeline(null, 0)
 
     // Getting the period duration would be a bit of a pain, and for the
@@ -70,17 +70,17 @@ export default class StoredContentUtils {
     // duration.
     const fakePeriodDuration = 1
 
-    /** @type {shaka.extern.Period} */
+    /* * @type {shaka.extern.Period} */
     const firstPeriod = converter.fromPeriodDB(
       firstPeriodDB, fakePeriodDuration, timeline)
 
-    /** @type {!Object} */
+    /* * @type {!Object} */
     const metadata = manifestDB.appMetadata || {}
 
-    /** @type {!Array.<shaka.extern.Track>} */
+    /* * @type {!Array.<shaka.extern.Track>} */
     const tracks = StoredContentUtils.getTracks_(firstPeriod)
 
-    /** @type {shaka.extern.StoredContent} */
+    /* * @type {shaka.extern.StoredContent} */
     const content = {
       offlineUri: offlineUri.toString(),
       originalManifestUri: manifestDB.originalManifestUri,
@@ -93,7 +93,7 @@ export default class StoredContentUtils {
 
     return content
   }
-  /**
+  /* *
    * Gets track representations of all playable variants and all text streams.
    *
    * @param {shaka.extern.Period} period

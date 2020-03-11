@@ -1,10 +1,10 @@
 import ArrayUtils from '../util/array_utils'
 import DrmEngine from '../media/drm_engine'
-/**
+/* *
  * Contains a utility method to delete persistent EME sessions.
  */
 export default class SessionDeleter {
-  /**
+  /* *
    * Deletes the given sessions.  This never fails and instead logs the error.
    *
    * @param {shaka.extern.DrmConfiguration} config
@@ -25,7 +25,7 @@ export default class SessionDeleter {
     }
     return deleted
   }
-  /**
+  /* *
    * Performs the deletion of the given session IDs.
    *
    * @param {shaka.extern.DrmConfiguration} config
@@ -35,7 +35,7 @@ export default class SessionDeleter {
    * @private
    */
   async doDelete_(config, netEngine, bucket) {
-    /** @type {!DrmEngine} */
+    /* * @type {!DrmEngine} */
     const drmEngine = new DrmEngine({
       netEngine: netEngine,
       onError: () => {},
@@ -64,7 +64,7 @@ export default class SessionDeleter {
       return []
     }
 
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     const sessionIds = []
     await Promise.all(bucket.sessionIds.map(async(sessionId) => {
       // This method is in a .map(), so this starts multiple removes at once,
@@ -79,7 +79,7 @@ export default class SessionDeleter {
     await drmEngine.destroy()
     return sessionIds
   }
-  /**
+  /* *
    * Collects the given sessions into buckets that can be done at the same time.
    * Since querying with different parameters can give us back different CDMs,
    * we can't just use one CDM instance to delete everything.
@@ -91,7 +91,7 @@ export default class SessionDeleter {
   static createBuckets_(sessions) {
     const SessionDeleter = SessionDeleter
 
-    /** @type {!Array.<SessionDeleter.Bucket_>} */
+    /* * @type {!Array.<SessionDeleter.Bucket_>} */
     const ret = []
     for (const session of sessions) {
       let found = false
@@ -109,7 +109,7 @@ export default class SessionDeleter {
 
     return ret
   }
-  /**
+  /* *
    * Returns whether the given session infos are compatible with each other.
    * @param {shaka.extern.EmeSessionDB} a
    * @param {shaka.extern.EmeSessionDB} b
@@ -128,7 +128,7 @@ export default class SessionDeleter {
           a.videoCapabilities, b.videoCapabilities, comp)
   }
 }
-/**
+/* *
  * @typedef {{
  *   info: shaka.extern.EmeSessionDB,
  *   sessionIds: !Array.<string>

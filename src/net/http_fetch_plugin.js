@@ -5,12 +5,12 @@ import Error from '../util/error'
 import MapUtils from '../util/map_utils'
 import Timer from '../util/timer'
 
-/**
+/* *
  * @summary A networking plugin to handle http and https URIs via the Fetch API.
  * @export
  */
 export default class HttpFetchPlugin {
-  /**
+  /* *
    * @param {string} uri
    * @param {shaka.extern.Request} request
    * @param {NetworkingEngine.RequestType} requestType
@@ -27,7 +27,7 @@ export default class HttpFetchPlugin {
 
     const controller = new HttpFetchPlugin.AbortController_()
 
-    /** @type {!RequestInit} */
+    /* * @type {!RequestInit} */
     const init = {
       // Edge does not treat null as undefined for body; https://bit.ly/2luyE6x
       body: request.body || undefined,
@@ -37,7 +37,7 @@ export default class HttpFetchPlugin {
       credentials: request.allowCrossSiteCredentials ? 'include' : undefined
     }
 
-    /** @type {HttpFetchPlugin.AbortStatus} */
+    /* * @type {HttpFetchPlugin.AbortStatus} */
     const abortStatus = {
       canceled: false,
       timedOut: false
@@ -46,7 +46,7 @@ export default class HttpFetchPlugin {
     const pendingRequest = HttpFetchPlugin.request_(
       uri, requestType, init, abortStatus, progressUpdated)
 
-    /** @type {!AbortableOperation} */
+    /* * @type {!AbortableOperation} */
     const op = new AbortableOperation(pendingRequest, () => {
       abortStatus.canceled = true
       controller.abort()
@@ -74,7 +74,7 @@ export default class HttpFetchPlugin {
     return op
   }
 
-  /**
+  /* *
    * @param {string} uri
    * @param {NetworkingEngine.RequestType} requestType
    * @param {!RequestInit} init
@@ -139,8 +139,7 @@ export default class HttpFetchPlugin {
           }
 
           if (readObj.done) {
-            console.assert(!readObj.value,
-              'readObj should be unset when "done" is true.')
+            console.assert(!readObj.value, 'readObj should be unset when `done` is true.')
             controller.close()
           } else {
             controller.enqueue(readObj.value)
@@ -178,7 +177,7 @@ export default class HttpFetchPlugin {
     }
 
     const headers = {}
-    /** @type {Headers} */
+    /* * @type {Headers} */
     const responseHeaders = response.headers
     responseHeaders.forEach((value, key) => {
       // Since IE/Edge incorrectly return the header with a leading new line
@@ -190,7 +189,7 @@ export default class HttpFetchPlugin {
       headers, arrayBuffer, response.status, uri, response.url, requestType)
   }
 
-  /**
+  /* *
    * Determine if the Fetch API is supported in the browser. Note: this is
    * deliberately exposed as a method to allow the client app to use the same
    * logic as Shaka when determining support.
@@ -201,7 +200,7 @@ export default class HttpFetchPlugin {
     // On Edge, ReadableStream exists, but attempting to construct it results in
     // an error. See https://bit.ly/2zwaFLL
     // So this has to check that ReadableStream is present AND usable.
-    if (window.ReadableStream) {
+    if (ReadableStream) {
       try {
         new ReadableStream({}) // eslint-disable-line no-new
       } catch (e) {
@@ -210,10 +209,10 @@ export default class HttpFetchPlugin {
     } else {
       return false
     }
-    return !!(window.fetch && window.AbortController)
+    return !!(fetch && AbortController)
   }
 }
-/**
+/* *
  * @typedef {{
  *   canceled: boolean,
  *   timedOut: boolean
@@ -224,34 +223,34 @@ export default class HttpFetchPlugin {
  *   Indicates if the request timed out.
  */
 HttpFetchPlugin.AbortStatus
-/**
+/* *
  * Overridden in unit tests, but compiled out in production.
  *
  * @const {function(string, !RequestInit)}
  * @private
  */
-HttpFetchPlugin.fetch_ = window.fetch
-/**
+HttpFetchPlugin.fetch_ = fetch
+/* *
  * Overridden in unit tests, but compiled out in production.
  *
  * @const {function(new: AbortController)}
  * @private
  */
-HttpFetchPlugin.AbortController_ = window.AbortController
-/**
+HttpFetchPlugin.AbortController_ = AbortController
+/* *
  * Overridden in unit tests, but compiled out in production.
  *
  * @const {function(new: ReadableStream, !Object)}
  * @private
  */
-HttpFetchPlugin.ReadableStream_ = window.ReadableStream
-/**
+HttpFetchPlugin.ReadableStream_ = ReadableStream
+/* *
  * Overridden in unit tests, but compiled out in production.
  *
  * @const {function(new: Headers)}
  * @private
  */
-HttpFetchPlugin.Headers_ = window.Headers
+HttpFetchPlugin.Headers_ = Headers
 if (HttpFetchPlugin.isSupported()) {
   NetworkingEngine.registerScheme(
     'http', HttpFetchPlugin.parse,

@@ -1,4 +1,4 @@
-import Uri from '../util/uri'
+import Uri from './uri'
 import ManifestTextParser from './manifest_text_parser'
 import { PlaylistType } from './hls_classes'
 import Utils from './hls_utils'
@@ -7,7 +7,7 @@ import ManifestParser from '../media/manifest_parser'
 import PresentationTimeline from '../media/presentation_timeline'
 import SegmentIndex from '../media/segment_index'
 import DataUriPlugin from '../net/data_uri_plugin'
-import NetworkingEngine from '../net/networking_engine'
+import { NetworkingEngine } from '../net/networking_engine'
 import ArrayUtils from '../util/array_utils'
 import DataViewReader from '../util/data_view_reader'
 import Error from '../util/error'
@@ -22,33 +22,33 @@ import OperationManager from '../util/operation_manager'
 import Timer from '../util/timer'
 import BufferUtils from '../util/buffer_utils'
 
-/**
+/* *
  * HLS parser.
  *
  * @implements {shaka.extern.ManifestParser}
  * @export
  */
 export default class HlsParser {
-  /**
+  /* *
    * Creates an Hls Parser object.
    */
   constructor() {
-    /** @private {?shaka.extern.ManifestParser.PlayerInterface} */
+    /* * @private {?shaka.extern.ManifestParser.PlayerInterface} */
     this.playerInterface_ = null
 
-    /** @private {?shaka.extern.ManifestConfiguration} */
+    /* * @private {?shaka.extern.ManifestConfiguration} */
     this.config_ = null
 
-    /** @private {number} */
+    /* * @private {number} */
     this.globalId_ = 1
 
-    /**
+    /* *
      * A map from group id to stream infos created from the media tags.
      * @private {!Map.<string, !Array.<HlsParser.StreamInfo>>}
      */
     this.groupIdToStreamInfosMap_ = new Map()
 
-    /**
+    /* *
      * The values are strings of the form '<VIDEO URI> - <AUDIO URI>',
      * where the URIs are the verbatim media playlist URIs as they appeared in
      * the master playlist.
@@ -59,7 +59,7 @@ export default class HlsParser {
      */
     this.variantUriSet_ = new Set()
 
-    /**
+    /* *
      * A map from (verbatim) media playlist URI to stream infos representing the
      * playlists.
      *
@@ -78,20 +78,20 @@ export default class HlsParser {
      */
     this.uriToStreamInfosMap_ = new Map()
 
-    /** @private {?PresentationTimeline} */
+    /* * @private {?PresentationTimeline} */
     this.presentationTimeline_ = null
 
-    /**
+    /* *
      * The master playlist URI, after redirects.
      *
      * @private {string}
      */
     this.masterPlaylistUri_ = ''
 
-    /** @private {ManifestTextParser} */
+    /* * @private {ManifestTextParser} */
     this.manifestTextParser_ = new ManifestTextParser()
 
-    /**
+    /* *
      * This is the number of seconds we want to wait between finishing a
      * manifest update and starting the next one. This will be set when we parse
      * the manifest.
@@ -100,7 +100,7 @@ export default class HlsParser {
      */
     this.updatePlaylistDelay_ = 0
 
-    /**
+    /* *
      * This timer is used to trigger the start of a manifest update. A manifest
      * update is async. Once the update is finished, the timer will be restarted
      * to trigger the next update. The timer will only be started if the content
@@ -112,48 +112,48 @@ export default class HlsParser {
       this.onUpdate_()
     })
 
-    /** @private {HlsParser.PresentationType_} */
+    /* * @private {HlsParser.PresentationType_} */
     this.presentationType_ = HlsParser.PresentationType_.VOD
 
-    /** @private {?shaka.extern.Manifest} */
+    /* * @private {?shaka.extern.Manifest} */
     this.manifest_ = null
 
-    /** @private {number} */
+    /* * @private {number} */
     this.maxTargetDuration_ = 0
 
-    /** @private {number} */
+    /* * @private {number} */
     this.minTargetDuration_ = Infinity
 
-    /** @private {OperationManager} */
+    /* * @private {OperationManager} */
     this.operationManager_ = new OperationManager()
 
-    /** @private {!Array.<!Array.<!SegmentReference>>} */
+    /* * @private {!Array.<!Array.<!SegmentReference>>} */
     this.segmentsToNotifyByStream_ = []
 
-    /** A map from closed captions' group id, to a map of closed captions info.
+    /* * A map from closed captions' group id, to a map of closed captions info.
      * {group id -> {closed captions channel id -> language}}
      * @private {Map.<string, Map.<string, string>>}
      */
     this.groupIdToClosedCaptionsMap_ = new Map()
 
-    /** True if some of the variants in  the playlist is encrypted with AES-128.
+    /* * True if some of the variants in  the playlist is encrypted with AES-128.
      * @private {boolean} */
     this.aesEncrypted_ = false
 
-    /** @private {Map.<string, string>} */
+    /* * @private {Map.<string, string>} */
     this.groupIdToCodecsMap_ = new Map()
 
-    /** @private {?number} */
+    /* * @private {?number} */
     this.playlistStartTime_ = null
 
-    /** A cache mapping EXT-X-MAP tag info to the InitSegmentReference created
+    /* * A cache mapping EXT-X-MAP tag info to the InitSegmentReference created
      * from the tag.
      * The key is a string combining the EXT-X-MAP tag's absolute uri, and
      * its BYTERANGE if available.
      * {!Map.<string, !InitSegmentReference>} */
     this.mapTagToInitSegmentRefMap_ = new Map()
   }
-  /**
+  /* *
    * @override
    * @exportInterface
    */
@@ -161,7 +161,7 @@ export default class HlsParser {
     this.config_ = config
   }
 
-  /**
+  /* *
    * @override
    * @exportInterface
    */
@@ -180,14 +180,14 @@ export default class HlsParser {
     // Start the update timer if we want updates.
     const delay = this.updatePlaylistDelay_
     if (delay > 0) {
-      this.updatePlaylistTimer_.tickAfter(/* seconds= */ delay)
+      this.updatePlaylistTimer_.tickAfter(/*  seconds= */ delay)
     }
 
     console.assert(this.manifest_, 'Manifest should be non-null')
     return this.manifest_
   }
 
-  /**
+  /* *
    * @override
    * @exportInterface
    */
@@ -199,7 +199,7 @@ export default class HlsParser {
       this.updatePlaylistTimer_ = null
     }
 
-    /** @type {!Array.<!Promise>} */
+    /* * @type {!Array.<!Promise>} */
     const pending = []
 
     if (this.operationManager_) {
@@ -218,7 +218,7 @@ export default class HlsParser {
     return Promise.all(pending)
   }
 
-  /**
+  /* *
    * @override
    * @exportInterface
    */
@@ -227,7 +227,7 @@ export default class HlsParser {
       return
     }
 
-    /** @type {!Array.<!Promise>} */
+    /* * @type {!Array.<!Promise>} */
     const updates = []
     // Reset the start time for the new media playlist.
     this.playlistStartTime_ = null
@@ -244,7 +244,7 @@ export default class HlsParser {
     await Promise.all(updates)
   }
 
-  /**
+  /* *
    * Updates a stream.
    *
    * @param {!HlsParser.StreamInfo} streamInfo
@@ -257,7 +257,7 @@ export default class HlsParser {
     const manifestUri = streamInfo.absoluteMediaPlaylistUri
     const response = await this.requestManifest_(manifestUri)
 
-    /** @type {Playlist} */
+    /* * @type {Playlist} */
     const playlist = this.manifestTextParser_.parsePlaylist(
       response.data, response.uri)
 
@@ -292,7 +292,7 @@ export default class HlsParser {
       this.presentationTimeline_.setDuration(newestSegment.endTime)
     }
   }
-  /**
+  /* *
    * @override
    * @exportInterface
    */
@@ -300,7 +300,7 @@ export default class HlsParser {
     // No-op
   }
 
-  /**
+  /* *
    * Parses the manifest.
    *
    * @param {BufferSource} data
@@ -412,7 +412,7 @@ export default class HlsParser {
         // period-aligned times, so offset them all now.
         streamInfo.stream.segmentIndex.offset(-minFirstTimestamp)
         // Finally, fit the segments to the playlist duration.
-        streamInfo.stream.segmentIndex.fit(/* periodStart= */ 0, minDuration)
+        streamInfo.stream.segmentIndex.fit(/*  periodStart= */ 0, minDuration)
       }
     }
 
@@ -424,7 +424,7 @@ export default class HlsParser {
     }
   }
 
-  /**
+  /* *
    * Parses the playlist tags and creates a Period object.
    *
    * @param {!Array.<!Tag>} tags All tags from the playlist.
@@ -433,9 +433,9 @@ export default class HlsParser {
    */
   async createPeriod_(tags) {
     const Utils = Utils
-    /** @type {!Array.<!Tag>} */
+    /* * @type {!Array.<!Tag>} */
     const mediaTags = Utils.filterTagsByName(tags, 'EXT-X-MEDIA')
-    /** @type {!Array.<!Tag>} */
+    /* * @type {!Array.<!Tag>} */
     const variantTags = Utils.filterTagsByName(tags, 'EXT-X-STREAM-INF')
 
     this.parseCodecs_(variantTags)
@@ -454,7 +454,7 @@ export default class HlsParser {
     }
   }
 
-  /**
+  /* *
    * Get the codecs of each variant tag, and store in a map from
    * audio/video/subtitle group id to the codecs arraylist.
    * @param {!Array.<!Tag>} tags Variant tags from the playlist.
@@ -486,7 +486,7 @@ export default class HlsParser {
     }
   }
 
-  /**
+  /* *
    * Parse Subtitles and Closed Captions from 'EXT-X-MEDIA' tags.
    * Create text streams for Subtitles, but not Closed Captions.
    *
@@ -535,7 +535,7 @@ export default class HlsParser {
     return textStreams.filter((s) => s)
   }
 
-  /**
+  /* *
    * @param {!Array.<!Tag>} mediaTags Media tags from the playlist.
    * @private
    */
@@ -559,7 +559,7 @@ export default class HlsParser {
     await Promise.all(promises)
   }
 
-  /**
+  /* *
    * @param {!Array.<!Tag>} tags Variant tags from the playlist.
    * @return {!Promise.<!Array.<!shaka.extern.Variant>>}
    * @private
@@ -600,7 +600,7 @@ export default class HlsParser {
     return variants
   }
 
-  /**
+  /* *
    * Create audio and video streamInfos from an 'EXT-X-STREAM-INF' tag and its
    * related media tags.
    *
@@ -612,7 +612,7 @@ export default class HlsParser {
    */
   async createStreamInfosForVariantTag_(tag, resolution, frameRate) {
     const ContentType = ManifestParserUtils.ContentType
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     let allCodecs = this.getCodecsForVariantTag_(tag)
     const audioGroupId = tag.getAttributeValue('AUDIO')
     const videoGroupId = tag.getAttributeValue('VIDEO')
@@ -624,7 +624,7 @@ export default class HlsParser {
         (groupId && this.groupIdToStreamInfosMap_.has(groupId))
           ? this.groupIdToStreamInfosMap_.get(groupId) : []
 
-    /** @type {HlsParser.StreamInfos} */
+    /* * @type {HlsParser.StreamInfos} */
     const res = {
       audio: audioGroupId ? streamInfos : [],
       video: videoGroupId ? streamInfos : []
@@ -690,7 +690,7 @@ export default class HlsParser {
     this.filterLegacyCodecs_(res)
     return res
   }
-  /**
+  /* *
    * Get the codecs from the 'EXT-X-STREAM-INF' tag.
    *
    * @param {!Tag} tag
@@ -706,7 +706,7 @@ export default class HlsParser {
 
     const codecsString = tag.getAttributeValue('CODECS', defaultCodecs)
     // Strip out internal whitespace while splitting on commas:
-    /** @type {!Array.<string>} */
+    /* * @type {!Array.<string>} */
     const codecs = codecsString.split(/\s*,\s*/)
 
     // Filter out duplicate codecs.
@@ -729,7 +729,7 @@ export default class HlsParser {
     return ret
   }
 
-  /**
+  /* *
    * Get the channel count information for an HLS audio track.
    * CHANNELS specifies an ordered, '/' separated list of parameters.
    * If the type is audio, the first parameter will be a decimal integer
@@ -750,7 +750,7 @@ export default class HlsParser {
     return count
   }
 
-  /**
+  /* *
    * Get the closed captions map information for the EXT-X-STREAM-INF tag, to
    * create the stream info.
    * @param {!Tag} tag
@@ -776,7 +776,7 @@ export default class HlsParser {
     return null
   }
 
-  /**
+  /* *
    * Get the language value.
    *
    * @param {!Tag} tag
@@ -788,7 +788,7 @@ export default class HlsParser {
     return LanguageUtils.normalize(languageValue)
   }
 
-  /**
+  /* *
    * Get the type value.
    * Shaka recognizes the content types 'audio', 'video' and 'text'.
    * The HLS 'subtitles' type needs to be mapped to 'text'.
@@ -804,7 +804,7 @@ export default class HlsParser {
     return type
   }
 
-  /**
+  /* *
    * Filters out unsupported codec strings from an array of stream infos.
    * @param {HlsParser.StreamInfos} streamInfos
    * @private
@@ -826,7 +826,7 @@ export default class HlsParser {
     }
   }
 
-  /**
+  /* *
    * @param {!Array.<HlsParser.StreamInfo>} audioInfos
    * @param {!Array.<HlsParser.StreamInfo>} videoInfos
    * @param {number} bandwidth
@@ -910,7 +910,7 @@ export default class HlsParser {
     return variants
   }
 
-  /**
+  /* *
    * Parses an array of EXT-X-MEDIA tags, then stores the values of all tags
    * with TYPE='CLOSED-CAPTIONS' into a map of group id to closed captions.
    *
@@ -940,7 +940,7 @@ export default class HlsParser {
     }
   }
 
-  /**
+  /* *
    * Parse EXT-X-MEDIA media tag into a Stream object.
    *
    * @param {Tag} tag
@@ -952,7 +952,7 @@ export default class HlsParser {
       'Should only be called on media tags!')
     const groupId = tag.getRequiredAttrValue('GROUP-ID')
     let codecs = ''
-    /** @type {string} */
+    /* * @type {string} */
     const type = this.getType_(tag)
     // Text does not require a codec.
     if (type !== ManifestParserUtils.ContentType.TEXT && groupId &&
@@ -979,7 +979,7 @@ export default class HlsParser {
     // descriptions: https://bit.ly/2lpjOhj
     const streamInfo = await this.createStreamInfo_(
       verbatimMediaPlaylistUri, codecs, type, language, primary, name,
-      channelsCount, /* closedCaptions= */ null)
+      channelsCount, /*  closedCaptions= */ null)
     if (this.groupIdToStreamInfosMap_.has(groupId)) {
       this.groupIdToStreamInfosMap_.get(groupId).push(streamInfo)
     } else {
@@ -998,7 +998,7 @@ export default class HlsParser {
     return streamInfo
   }
 
-  /**
+  /* *
    * Parse an EXT-X-STREAM-INF media tag into a Stream object.
    *
    * @param {!Tag} tag
@@ -1019,8 +1019,8 @@ export default class HlsParser {
     const closedCaptions = this.getClosedCaptions_(tag, type)
     const codecs = this.guessCodecs_(type, allCodecs)
     const streamInfo = await this.createStreamInfo_(verbatimMediaPlaylistUri,
-      codecs, type, /* language= */ 'und', /* primary= */ false,
-      /* name= */ null, /* channelcount= */ null, closedCaptions)
+      codecs, type, /*  language= */ 'und', /*  primary= */ false,
+      /*  name= */ null, /*  channelcount= */ null, closedCaptions)
     if (streamInfo === null) {
       return null
     }
@@ -1033,7 +1033,7 @@ export default class HlsParser {
     this.uriToStreamInfosMap_.set(verbatimMediaPlaylistUri, streamInfo)
     return streamInfo
   }
-  /**
+  /* *
    * @param {string} verbatimMediaPlaylistUri
    * @param {string} codecs
    * @param {string} type
@@ -1056,7 +1056,7 @@ export default class HlsParser {
     absoluteMediaPlaylistUri = response.uri
 
     // Record the redirected, final URI of this media playlist when we parse it.
-    /** @type {!Playlist} */
+    /* * @type {!Playlist} */
     const playlist = this.manifestTextParser_.parsePlaylist(
       response.data, absoluteMediaPlaylistUri)
 
@@ -1068,7 +1068,7 @@ export default class HlsParser {
         Error.Code.HLS_INVALID_PLAYLIST_HIERARCHY)
     }
 
-    /** @type {!Array.<!Tag>} */
+    /* * @type {!Array.<!Tag>} */
     const drmTags = []
     if (playlist.segments) {
       for (const segment of playlist.segments) {
@@ -1079,7 +1079,7 @@ export default class HlsParser {
     }
 
     let encrypted = false
-    /** @type {!Array.<shaka.extern.DrmInfo>}*/
+    /** @type {!Array.<shaka.extern.DrmInfo>} */
     const drmInfos = []
     let keyId = null
 
@@ -1125,7 +1125,7 @@ export default class HlsParser {
 
     this.determinePresentationType_(playlist)
 
-    /** @type {string} */
+    /* * @type {string} */
     const mimeType = await this.guessMimeType_(type, codecs, playlist)
 
     // MediaSource expects no codec strings combined with raw formats.
@@ -1134,7 +1134,7 @@ export default class HlsParser {
       codecs = ''
     }
 
-    /** @type {!Map.<number, number>} */
+    /* * @type {!Map.<number, number>} */
     const mediaSequenceToStartTime = new Map()
 
     let segments
@@ -1153,13 +1153,13 @@ export default class HlsParser {
 
     const minTimestamp = segments[0].startTime
     const lastEndTime = segments[segments.length - 1].endTime
-    /** @type {!SegmentIndex} */
+    /* * @type {!SegmentIndex} */
     const segmentIndex = new SegmentIndex(segments)
 
     const kind = (type === ManifestParserUtils.ContentType.TEXT)
       ? ManifestParserUtils.TextStreamKind.SUBTITLE : undefined
 
-    /** @type {shaka.extern.Stream} */
+    /* * @type {shaka.extern.Stream} */
     const stream = {
       id: this.globalId_++,
       originalId: name,
@@ -1198,7 +1198,7 @@ export default class HlsParser {
       mediaSequenceToStartTime
     }
   }
-  /**
+  /* *
    * @param {!Playlist} playlist
    * @private
    */
@@ -1247,7 +1247,7 @@ export default class HlsParser {
     }
   }
 
-  /**
+  /* *
    * @private
    */
   createPresentationTimeline_() {
@@ -1267,11 +1267,11 @@ export default class HlsParser {
       // delay of 3 segments.  This will be the 'live edge' of the
       // presentation.
       this.presentationTimeline_ = new PresentationTimeline(
-      /* presentationStartTime= */ 0, /* delay= */ this.maxTargetDuration_ * 3)
+      /*  presentationStartTime= */ 0, /*  delay= */ this.maxTargetDuration_ * 3)
       this.presentationTimeline_.setStatic(false)
     } else {
       this.presentationTimeline_ = new PresentationTimeline(
-      /* presentationStartTime= */ null, /* delay= */ 0)
+      /*  presentationStartTime= */ null, /*  delay= */ 0)
       this.presentationTimeline_.setStatic(true)
     }
 
@@ -1284,7 +1284,7 @@ export default class HlsParser {
       'We should not be using the presentation start time in HLS!')
   }
 
-  /**
+  /* *
    * Get the InitSegmentReference for the given EXT-X-MAP tag.
    * @param {string} playlistUri The absolute uri of the media playlist.
    * @param {Tag} mapTag EXT-X-MAP tag
@@ -1309,7 +1309,7 @@ export default class HlsParser {
     return this.mapTagToInitSegmentRefMap_.get(mapTagKey)
   }
 
-  /**
+  /* *
    * Create an InitSegmentReference object for the EXT-X-MAP tag in the media
    * playlist.
    * @param {string} absoluteInitSegmentUri
@@ -1337,7 +1337,7 @@ export default class HlsParser {
     return initSegmentRef
   }
 
-  /**
+  /* *
    * Parses one Segment object into a SegmentReference.
    *
    * @param {InitSegmentReference} initSegmentReference
@@ -1391,11 +1391,11 @@ export default class HlsParser {
       endByte,
       initSegmentReference,
       timestampOffset,
-      /* appendWindowStart= */ 0,
-      /* appendWindowEnd= */ Infinity)
+      /*  appendWindowStart= */ 0,
+      /*  appendWindowEnd= */ Infinity)
   }
 
-  /** @private */
+  /* * @private */
   notifySegments_() {
     // The presentation timeline may or may not be set yet.
     // If it does not yet exist, hold onto the segments until it does.
@@ -1408,7 +1408,7 @@ export default class HlsParser {
     this.segmentsToNotifyByStream_ = []
   }
 
-  /**
+  /* *
    * Parses Segment objects into SegmentReferences.
    *
    * @param {string} verbatimMediaPlaylistUri
@@ -1422,9 +1422,9 @@ export default class HlsParser {
   async createSegments_(
     verbatimMediaPlaylistUri, playlist, type, mimeType,
     mediaSequenceToStartTime) {
-    /** @type {Array.<!Segment>} */
+    /* * @type {Array.<!Segment>} */
     const hlsSegments = playlist.segments
-    /** @type {!Array.<!SegmentReference>} */
+    /* * @type {!Array.<!SegmentReference>} */
     const references = []
 
     console.assert(hlsSegments.length, 'Playlist should have segments!')
@@ -1437,20 +1437,20 @@ export default class HlsParser {
     const mediaSequenceNumber =
         mediaSequenceTag ? Number(mediaSequenceTag.value) : 0
 
-    /** @type {?Tag} */
+    /* * @type {?Tag} */
     let mapTag = Utils.getFirstTagWithName(hlsSegments[0].tags,
       'EXT-X-MAP')
-    /** @type {InitSegmentReference} */
+    /* * @type {InitSegmentReference} */
     let initSegmentRef = mapTag
       ? this.getInitSegmentReference_(playlist.absoluteUri, mapTag) : null
 
     const firstSegmentRef = this.createSegmentReference_(
       initSegmentRef,
-      /* previousReference= */ null,
+      /*  previousReference= */ null,
       hlsSegments[0],
       mediaSequenceNumber,
-      /* startTime= */ 0,
-      /* timestampOffset= */ 0)
+      /*  startTime= */ 0,
+      /*  timestampOffset= */ 0)
 
     const firstStartTime = await this.getPlaylistStartTime_(
       verbatimMediaPlaylistUri, initSegmentRef, firstSegmentRef, type,
@@ -1475,7 +1475,7 @@ export default class HlsParser {
         item,
         position,
         startTime,
-        /* timestampOffset= */ 0)
+        /*  timestampOffset= */ 0)
       references.push(reference)
     }
 
@@ -1485,7 +1485,7 @@ export default class HlsParser {
     return references
   }
 
-  /**
+  /* *
    * Try to fetch a partial segment, and fall back to a full segment if we have
    * to.
    *
@@ -1555,7 +1555,7 @@ export default class HlsParser {
     }
   }
 
-  /**
+  /* *
    * Gets the start time of the first segment of the playlist from existing
    * value (if possible) or by downloading it and parsing it otherwise.
    *
@@ -1590,7 +1590,7 @@ export default class HlsParser {
     return this.playlistStartTime_
   }
 
-  /**
+  /* *
    * Gets the start time of a segment from the existing manifest (if possible)
    * or by downloading it and parsing it otherwise.
    *
@@ -1693,7 +1693,7 @@ export default class HlsParser {
       verbatimMediaPlaylistUri)
   }
 
-  /**
+  /* *
    * Parses an mp4 segment to get its start time.
    *
    * @param {string} playlistUri
@@ -1721,7 +1721,7 @@ export default class HlsParser {
 
         timescale = box.reader.readUint32()
         box.parser.stop()
-      }).parse(initData, /* partialOkay= */ true)
+      }).parse(initData, /*  partialOkay= */ true)
 
     if (!timescale) {
       console.error('Unable to find timescale in init segment!')
@@ -1747,7 +1747,7 @@ export default class HlsParser {
         startTime = baseTime / timescale
         parsedMedia = true
         box.parser.stop()
-      }).parse(mediaData, /* partialOkay= */ true)
+      }).parse(mediaData, /*  partialOkay= */ true)
 
     if (!parsedMedia) {
       throw new Error(
@@ -1759,7 +1759,7 @@ export default class HlsParser {
     return startTime
   }
 
-  /**
+  /* *
    * Parses a TS segment to get its start time.
    *
    * @param {string} playlistUri
@@ -1825,8 +1825,8 @@ export default class HlsParser {
 
       const flags = reader.readUint8()
       const adaptationFieldControl = (flags & 0x30) >> 4
-      if (adaptationFieldControl === 0 /* reserved */ ||
-          adaptationFieldControl === 2 /* adaptation field, no payload */) {
+      if (adaptationFieldControl === 0 /*  reserved */ ||
+          adaptationFieldControl === 2 /*  adaptation field, no payload */) {
         fail()
       }
 
@@ -1850,8 +1850,8 @@ export default class HlsParser {
       reader.skip(3)
       // The next 8 bits contain flags about DTS & PTS.
       const ptsDtsIndicator = reader.readUint8() >> 6
-      if (ptsDtsIndicator === 0 /* no timestamp */ ||
-          ptsDtsIndicator === 1 /* forbidden */) {
+      if (ptsDtsIndicator === 0 /*  no timestamp */ ||
+          ptsDtsIndicator === 1 /*  forbidden */) {
         fail()
       }
 
@@ -1860,9 +1860,9 @@ export default class HlsParser {
         fail()
       }
 
-      if (ptsDtsIndicator === 2 /* PTS only */) {
+      if (ptsDtsIndicator === 2 /*  PTS only */) {
         console.assert(pesHeaderLengthRemaining === 5, 'Bad PES header?')
-      } else if (ptsDtsIndicator === 3 /* PTS and DTS */) {
+      } else if (ptsDtsIndicator === 3 /*  PTS and DTS */) {
         console.assert(pesHeaderLengthRemaining === 10, 'Bad PES header?')
       }
 
@@ -1879,7 +1879,7 @@ export default class HlsParser {
     }
   }
 
-  /**
+  /* *
    * Attempts to guess which codecs from the codecs list belong to a given
    * content type.
    * Assumes that at least one codec is correct, and throws if none are.
@@ -1909,7 +1909,7 @@ export default class HlsParser {
       codecs)
   }
 
-  /**
+  /* *
    * Attempts to guess which codecs from the codecs list belong to a given
    * content type. Does not assume a single codec is anything special, and does
    * not throw if it fails to match.
@@ -1938,7 +1938,7 @@ export default class HlsParser {
     return null
   }
 
-  /**
+  /* *
    * Attempts to guess stream's mime type based on content type and URI.
    *
    * @param {string} contentType
@@ -2001,7 +2001,7 @@ export default class HlsParser {
     return contentMimeType.split(';')[0]
   }
 
-  /**
+  /* *
    * Returns a tag with a given name.
    * Throws an error if tag was not found.
    *
@@ -2022,7 +2022,7 @@ export default class HlsParser {
     return tag
   }
 
-  /**
+  /* *
    * @param {shaka.extern.Stream} stream
    * @param {?string} width
    * @param {?string} height
@@ -2037,7 +2037,7 @@ export default class HlsParser {
     }
   }
 
-  /**
+  /* *
    * Makes a network request for the manifest and returns a Promise
    * with the resulting data.
    *
@@ -2054,7 +2054,7 @@ export default class HlsParser {
     return this.makeNetworkRequest_(request, requestType)
   }
 
-  /**
+  /* *
    * Called when the update timer ticks. Because parsing a manifest is async,
    * this method is async. To work with this, this method will schedule the next
    * update when it finished instead of using a repeating-start.
@@ -2078,7 +2078,7 @@ export default class HlsParser {
       await this.update()
 
       const delay = this.updatePlaylistDelay_
-      this.updatePlaylistTimer_.tickAfter(/* seconds= */ delay)
+      this.updatePlaylistTimer_.tickAfter(/*  seconds= */ delay)
     } catch (error) {
       // Detect a call to stop() during this.update()
       if (!this.playerInterface_) {
@@ -2093,10 +2093,10 @@ export default class HlsParser {
       this.playerInterface_.onError(error)
 
       // Try again very soon.
-      this.updatePlaylistTimer_.tickAfter(/* seconds= */ 0.1)
+      this.updatePlaylistTimer_.tickAfter(/*  seconds= */ 0.1)
     }
   }
-  /**
+  /* *
    * @return {boolean}
    * @private
    */
@@ -2104,7 +2104,7 @@ export default class HlsParser {
     const PresentationType = HlsParser.PresentationType_
     return this.presentationType_ !== PresentationType.VOD
   }
-  /**
+  /* *
    * @param {HlsParser.PresentationType_} type
    * @private
    */
@@ -2121,7 +2121,7 @@ export default class HlsParser {
       this.updatePlaylistTimer_.stop()
     }
   }
-  /**
+  /* *
    * Create a networking request. This will manage the request using the
    * parser's operation manager. If the parser has already been stopped, the
    * request will not be made.
@@ -2145,7 +2145,7 @@ export default class HlsParser {
     return op.promise
   }
 
-  /**
+  /* *
    * @param {!Tag} drmTag
    * @return {?shaka.extern.DrmInfo}
    * @private
@@ -2179,7 +2179,7 @@ export default class HlsParser {
     return drmInfo
   }
 }
-/**
+/* *
  * @typedef {{
  *   stream: !shaka.extern.Stream,
  *   drmInfos: !Array.<shaka.extern.DrmInfo>,
@@ -2213,7 +2213,7 @@ export default class HlsParser {
  *   A map of media sequence numbers to media start times.
  */
 HlsParser.StreamInfo
-/**
+/* *
  * @typedef {{
  *   audio: !Array.<HlsParser.StreamInfo>,
  *   video: !Array.<HlsParser.StreamInfo>
@@ -2224,7 +2224,7 @@ HlsParser.StreamInfo
  * @property {!Array.<HlsParser.StreamInfo>} video
  */
 HlsParser.StreamInfos
-/**
+/* *
  * A list of regexps to detect well-known video codecs.
  *
  * @const {!Array.<!RegExp>}
@@ -2237,7 +2237,7 @@ HlsParser.VIDEO_CODEC_REGEXPS_ = [
   /^vp0?[89]/,
   /^av1$/
 ]
-/**
+/* *
  * A list of regexps to detect well-known audio codecs.
  *
  * @const {!Array.<!RegExp>}
@@ -2250,7 +2250,7 @@ HlsParser.AUDIO_CODEC_REGEXPS_ = [
   /^mp4a/,
   /^[ae]c-3$/
 ]
-/**
+/* *
  * A list of regexps to detect well-known text codecs.
  *
  * @const {!Array.<!RegExp>}
@@ -2261,7 +2261,7 @@ HlsParser.TEXT_CODEC_REGEXPS_ = [
   /^wvtt/,
   /^stpp/
 ]
-/**
+/* *
  * @const {!Object.<string, !Array.<!RegExp>>}
  * @private
  */
@@ -2270,7 +2270,7 @@ HlsParser.CODEC_REGEXPS_BY_CONTENT_TYPE_ = {
   'video': HlsParser.VIDEO_CODEC_REGEXPS_,
   'text': HlsParser.TEXT_CODEC_REGEXPS_
 }
-/**
+/* *
  * @const {!Object.<string, string>}
  * @private
  */
@@ -2288,7 +2288,7 @@ HlsParser.AUDIO_EXTENSIONS_TO_MIME_TYPES_ = {
   'ec3': 'audio/ec3',
   'mp3': 'audio/mpeg'
 }
-/**
+/* *
  * MIME types of raw formats.
  * TODO(#2337): Support raw formats and share this list among parsers.
  *
@@ -2301,7 +2301,7 @@ HlsParser.RAW_FORMATS_ = [
   'audio/ec3',
   'audio/mpeg'
 ]
-/**
+/* *
  * @const {!Object.<string, string>}
  * @private
  */
@@ -2312,7 +2312,7 @@ HlsParser.VIDEO_EXTENSIONS_TO_MIME_TYPES_ = {
   'm4v': 'video/mp4',
   'ts': 'video/mp2t'
 }
-/**
+/* *
  * @const {!Object.<string, string>}
  * @private
  */
@@ -2323,7 +2323,7 @@ HlsParser.TEXT_EXTENSIONS_TO_MIME_TYPES_ = {
   'vtt': 'text/vtt',
   'ttml': 'application/ttml+xml'
 }
-/**
+/* *
  * @const {!Object.<string, !Object.<string, string>>}
  * @private
  */
@@ -2332,24 +2332,24 @@ HlsParser.EXTENSION_MAP_BY_CONTENT_TYPE_ = {
   'video': HlsParser.VIDEO_EXTENSIONS_TO_MIME_TYPES_,
   'text': HlsParser.TEXT_EXTENSIONS_TO_MIME_TYPES_
 }
-/**
+/* *
  * @typedef {function(!Tag):?shaka.extern.DrmInfo}
  * @private
  */
 HlsParser.DrmParser_
-/**
+/* *
  * @const {!Object.<string, HlsParser.DrmParser_>}
  * @private
  */
 HlsParser.KEYFORMATS_TO_DRM_PARSERS_ = {
-  /* TODO: https://github.com/google/shaka-player/issues/382
+  /*  TODO: https://github.com/google/shaka-player/issues/382
   'com.apple.streamingkeydelivery':
       HlsParser.fairplayDrmParser_,
   */
   'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed':
       HlsParser.widevineDrmParser_
 }
-/**
+/* *
  * @enum {string}
  * @private
  */
@@ -2358,12 +2358,12 @@ HlsParser.PresentationType_ = {
   EVENT: 'EVENT',
   LIVE: 'LIVE'
 }
-/**
+/* *
  * @const {number}
  * @private
  */
 HlsParser.TS_TIMESCALE_ = 90000
-/**
+/* *
  * The amount of data from the start of a segment we will try to fetch when we
  * need to know the segment start time.  This allows us to avoid fetching the
  * entire segment in many cases.

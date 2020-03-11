@@ -1,4 +1,4 @@
-/**
+/* *
  * The OfflineUri class contains all the components that make up the offline
  * uri. The components are:
  *    TYPE: Used to know what type of data the uri points to. It can either
@@ -9,35 +9,35 @@
  *    KEY: The key that the data is stored under in the cell.
  */
 export default class OfflineUri {
-  /**
+  /* *
    * @param {string} type
    * @param {string} mechanism
    * @param {string} cell
    * @param {number} key
    */
   constructor(type, mechanism, cell, key) {
-    /**
+    /* *
      * @private {string}
      * @const
      */
     this.type_ = type
-    /**
+    /* *
      * @private {string}
      * @const
      */
     this.mechanism_ = mechanism
-    /**
+    /* *
      * @private {string}
      * @const
      */
     this.cell_ = cell
-    /**
+    /* *
      * @private {number}
      * @const
      */
     this.key_ = key
 
-    /**
+    /* *
      * @private {string}
      * @const
      */
@@ -46,25 +46,25 @@ export default class OfflineUri {
     ].join('')
   }
 
-  /** @return {boolean} */
+  /* * @return {boolean} */
   isManifest() { return this.type_ === 'manifest' }
 
-  /** @return {boolean} */
+  /* * @return {boolean} */
   isSegment() { return this.type_ === 'segment' }
 
-  /** @return {string} */
+  /* * @return {string} */
   mechanism() { return this.mechanism_ }
 
-  /** @return {string} */
+  /* * @return {string} */
   cell() { return this.cell_ }
 
-  /** @return {number} */
+  /* * @return {number} */
   key() { return this.key_ }
 
-  /** @override */
+  /* * @override */
   toString() { return this.asString_ }
 
-  /**
+  /* *
    * @param {string} uri
    * @return {?OfflineUri}
    */
@@ -97,7 +97,7 @@ export default class OfflineUri {
     return new OfflineUri(type, mechanism, cell, key)
   }
 
-  /**
+  /* *
    * @param {string} mechanism
    * @param {string} cell
    * @param {number} key
@@ -107,7 +107,7 @@ export default class OfflineUri {
     return new OfflineUri('manifest', mechanism, cell, key)
   }
 
-  /**
+  /* *
    * @param {string} mechanism
    * @param {string} cell
    * @param {number} key

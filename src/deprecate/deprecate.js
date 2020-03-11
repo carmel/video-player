@@ -1,7 +1,7 @@
 import Enforcer from './enforcer'
 import Version from './version'
 
-/**
+/* *
  * |shaka.Deprecate| is the front-end of the deprecation system, allowing for
  * any part of the code to say that 'this block of code should be removed by
  * version X'.
@@ -9,7 +9,7 @@ import Version from './version'
  * @final
  */
 export default class Deprecate {
-  /**
+  /* *
    * Initialize the system. This must happen before any calls to |enforce|. In
    * our code base, |shaka.Player| will be the only one to call this (it has the
    * version string).
@@ -37,7 +37,7 @@ export default class Deprecate {
       Deprecate.onExpired_)
   }
 
-  /**
+  /* *
    * Ask the deprecation system to require this feature to be removed by the
    * given version.
    *
@@ -56,7 +56,7 @@ export default class Deprecate {
     enforcer.enforce(expiresAt, name, description)
   }
 
-  /**
+  /* *
    * @param {!Version} libraryVersion
    * @param {!Version} featureVersion
    * @param {string} name
@@ -78,7 +78,7 @@ export default class Deprecate {
     ].join(' '))
   }
 
-  /**
+  /* *
    * @param {!Version} libraryVersion
    * @param {!Version} featureVersion
    * @param {string} name
@@ -104,7 +104,7 @@ export default class Deprecate {
   }
 }
 
-/**
+/* *
  * The global deprecation enforcer that will be set by the player (because the
  * player knows the version) when it calls |init|. This may appear a little
  * round-about to you, because it is. Since player uses |Deprecate|, it means

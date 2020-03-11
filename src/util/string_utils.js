@@ -2,13 +2,13 @@ import BufferUtils from './buffer_utils'
 import Error from './error'
 import Lazy from './lazy'
 import Iterables from './iterables'
-/**
+/* *
  * @namespace StringUtils
  * @summary A set of string utility functions.
  * @export
  */
 export default class StringUtils {
-  /**
+  /* *
    * Creates a string from the given buffer as UTF-8 encoding.
    *
    * @param {?BufferSource} data
@@ -44,7 +44,7 @@ export default class StringUtils {
         Error.Code.BAD_ENCODING)
     }
   }
-  /**
+  /* *
    * Creates a string from the given buffer as UTF-16 encoding.
    *
    * @param {?BufferSource} data
@@ -77,7 +77,7 @@ export default class StringUtils {
     }
     return StringUtils.fromCharCode(arr)
   }
-  /**
+  /* *
    * Creates a string from the given buffer, auto-detecting the encoding that is
    * being used.  If it cannot detect the encoding, it will throw an exception.
    *
@@ -96,9 +96,9 @@ export default class StringUtils {
       return StringUtils.fromUTF8(uint8)
     } else if (uint8[0] === 0xfe && uint8[1] === 0xff) {
       return StringUtils.fromUTF16(
-        uint8.subarray(2), /* littleEndian= */ false)
+        uint8.subarray(2), /*  littleEndian= */ false)
     } else if (uint8[0] === 0xff && uint8[1] === 0xfe) {
-      return StringUtils.fromUTF16(uint8.subarray(2), /* littleEndian= */ true)
+      return StringUtils.fromUTF16(uint8.subarray(2), /*  littleEndian= */ true)
     }
 
     const isAscii = (i) => {
@@ -109,9 +109,9 @@ export default class StringUtils {
     console.debug(
       'Unable to find byte-order-mark, making an educated guess.')
     if (uint8[0] === 0 && uint8[2] === 0) {
-      return StringUtils.fromUTF16(data, /* littleEndian= */ false)
+      return StringUtils.fromUTF16(data, /*  littleEndian= */ false)
     } else if (uint8[1] === 0 && uint8[3] === 0) {
-      return StringUtils.fromUTF16(data, /* littleEndian= */ true)
+      return StringUtils.fromUTF16(data, /*  littleEndian= */ true)
     } else if (isAscii(0) && isAscii(1) && isAscii(2) && isAscii(3)) {
       return StringUtils.fromUTF8(data)
     }
@@ -121,7 +121,7 @@ export default class StringUtils {
       Error.Category.TEXT,
       Error.Code.UNABLE_TO_DETECT_ENCODING)
   }
-  /**
+  /* *
    * Creates a ArrayBuffer from the given string, converting to UTF-8 encoding.
    *
    * @param {string} str
@@ -149,7 +149,7 @@ export default class StringUtils {
     }
     return BufferUtils.toArrayBuffer(result)
   }
-  /**
+  /* *
    * Creates a ArrayBuffer from the given string, converting to UTF-16 encoding.
    *
    * @param {string} str
@@ -163,11 +163,11 @@ export default class StringUtils {
     const enumerate = (it) => Iterables.enumerate(it)
     for (const { i, item } of enumerate(str)) {
       const value = item.charCodeAt(0)
-      view.setUint16(/* position= */ i * 2, value, littleEndian)
+      view.setUint16(/*  position= */ i * 2, value, littleEndian)
     }
     return result
   }
-  /**
+  /* *
    * Creates a new string from the given array of char codes.
    *
    * Using String.fromCharCode.apply is risky because you can trigger stack
@@ -181,9 +181,9 @@ export default class StringUtils {
     return StringUtils.fromCharCodeImpl_.value()(array)
   }
 }
-/** @private {!Lazy.<function(!TypedArray):string>} */
+/* * @private {!Lazy.<function(!TypedArray):string>} */
 StringUtils.fromCharCodeImpl_ = new Lazy(() => {
-  /** @param {number} size @return {boolean} */
+  /* * @param {number} size @return {boolean} */
   const supportsChunkSize = (size) => {
     try {
       // The compiler will complain about suspicious value if this isn't

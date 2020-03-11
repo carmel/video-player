@@ -1,29 +1,29 @@
-/**
+/* *
  * @summary
  * This class computes an exponentionally-weighted moving average.
  */
 export default class Ewma {
-  /**
+  /* *
    * @param {number} halfLife The quantity of prior samples (by weight) used
    *   when creating a new estimate.  Those prior samples make up half of the
    *   new estimate.
    */
   constructor(halfLife) {
     console.assert(halfLife > 0, 'expected halfLife to be positive')
-    /**
+    /* *
      * Larger values of alpha expire historical data more slowly.
      * @private {number}
      */
     this.alpha_ = Math.exp(Math.log(0.5) / halfLife)
 
-    /** @private {number} */
+    /* * @private {number} */
     this.estimate_ = 0
 
-    /** @private {number} */
+    /* * @private {number} */
     this.totalWeight_ = 0
   }
 
-  /**
+  /* *
    * Takes a sample.
    *
    * @param {number} weight
@@ -39,7 +39,7 @@ export default class Ewma {
     }
   }
 
-  /**
+  /* *
    * @return {number}
    */
   getEstimate() {

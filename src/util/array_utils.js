@@ -1,10 +1,10 @@
-/**
+/* *
  * @namespace ArrayUtils
  * @summary Array utility functions.
  */
 
 export default class ArrayUtils {
-  /**
+  /* *
    * Returns whether the two values contain the same value.  This correctly
    * handles comparisons involving NaN.
    * @param {T} a
@@ -20,7 +20,7 @@ export default class ArrayUtils {
     }
     return a === b
   }
-  /**
+  /* *
    * Remove given element from array (assumes no duplicates).
    * @param {!Array.<T>} array
    * @param {T} element
@@ -32,7 +32,7 @@ export default class ArrayUtils {
       array.splice(index, 1)
     }
   }
-  /**
+  /* *
    * Count the number of items in the list that pass the check function.
    * @param {!Array.<T>} array
    * @param {function(T):boolean} check
@@ -48,7 +48,7 @@ export default class ArrayUtils {
 
     return count
   }
-  /**
+  /* *
    * Determines if the given arrays contain the same elements.
    *
    * @param {!Array.<T>} a

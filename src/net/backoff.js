@@ -1,13 +1,13 @@
 import Timer from '../util/timer'
 
-/**
+/* *
  * Backoff represents delay and backoff state.  This is used by NetworkingEngine
  * for individual requests and by StreamingEngine to retry streaming failures.
  *
  * @final
  */
 export default class Backoff {
-  /**
+  /* *
    * @param {shaka.extern.RetryParameters} parameters
    * @param {boolean=} autoReset  If true, start at a 'first retry' state and
    *   and auto-reset that state when we reach maxAttempts.
@@ -19,7 +19,7 @@ export default class Backoff {
 
     const defaults = Backoff.defaultRetryParameters()
 
-    /**
+    /* *
      * @const
      * @private {number}
      */
@@ -28,7 +28,7 @@ export default class Backoff {
 
     console.assert(this.maxAttempts_ >= 1, 'maxAttempts should be >= 1')
 
-    /**
+    /* *
      * @const
      * @private {number}
      */
@@ -37,7 +37,7 @@ export default class Backoff {
 
     console.assert(this.baseDelay_ >= 0, 'baseDelay should be >= 0')
 
-    /**
+    /* *
      * @const
      * @private {number}
      */
@@ -46,7 +46,7 @@ export default class Backoff {
 
     console.assert(this.fuzzFactor_ >= 0, 'fuzzFactor should be >= 0')
 
-    /**
+    /* *
      * @const
      * @private {number}
      */
@@ -56,13 +56,13 @@ export default class Backoff {
     console.assert(
       this.backoffFactor_ >= 0, 'backoffFactor should be >= 0')
 
-    /** @private {number} */
+    /* * @private {number} */
     this.numAttempts_ = 0
 
-    /** @private {number} */
+    /* * @private {number} */
     this.nextUnfuzzedDelay_ = this.baseDelay_
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.autoReset_ = autoReset
 
     if (this.autoReset_) {
@@ -76,7 +76,7 @@ export default class Backoff {
     }
   }
 
-  /**
+  /* *
    * @return {!Promise} Resolves when the caller may make an attempt, possibly
    *   after a delay.  Rejects if no more attempts are allowed.
    */
@@ -115,7 +115,7 @@ export default class Backoff {
     this.nextUnfuzzedDelay_ *= this.backoffFactor_
   }
 
-  /**
+  /* *
    * Gets a copy of the default retry parameters.
    *
    * @return {shaka.extern.RetryParameters}
@@ -132,7 +132,7 @@ export default class Backoff {
     }
   }
 
-  /**
+  /* *
    * Fuzz the input value by +/- fuzzFactor.  For example, a fuzzFactor of 0.5
    * will create a random value that is between 50% and 150% of the input value.
    *
@@ -152,7 +152,7 @@ export default class Backoff {
     return value * (1.0 + negToPosFuzzFactor)
   }
 
-  /**
+  /* *
    * Reset state in autoReset mode.
    * @private
    */
@@ -162,7 +162,7 @@ export default class Backoff {
     this.nextUnfuzzedDelay_ = this.baseDelay_
   }
 
-  /**
+  /* *
    * This method is only public for testing. It allows us to intercept the
    * time-delay call.
    *

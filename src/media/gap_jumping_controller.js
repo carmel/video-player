@@ -5,15 +5,15 @@ import FakeEvent from '../util/fake_event'
 // import IReleasable from '../util/i_releasable'
 import Timer from '../util/timer'
 
-/**
+/* *
  * GapJumpingController handles jumping gaps that appear within the content.
  * This will only jump gaps between two buffered ranges, so we should not have
- * to worry about the availability window.
+ * to worry about the availability
  *
  * @implements {IReleasable}
  */
 export default class GapJumpingController {
-  /**
+  /* *
    * @param {!HTMLMediaElement} video
    * @param {!PresentationTimeline} timeline
    * @param {shaka.extern.StreamingConfiguration} config
@@ -26,31 +26,31 @@ export default class GapJumpingController {
    *   to the application.
    */
   constructor(video, timeline, config, stallDetector, onEvent) {
-    /** @private {HTMLMediaElement} */
+    /* * @private {HTMLMediaElement} */
     this.video_ = video
 
-    /** @private {?PresentationTimeline} */
+    /* * @private {?PresentationTimeline} */
     this.timeline_ = timeline
 
-    /** @private {?shaka.extern.StreamingConfiguration} */
+    /* * @private {?shaka.extern.StreamingConfiguration} */
     this.config_ = config
 
-    /** @private {?function(!Event)} */
+    /* * @private {?function(!Event)} */
     this.onEvent_ = onEvent
 
-    /** @private {EventManager} */
+    /* * @private {EventManager} */
     this.eventManager_ = new EventManager()
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.seekingEventReceived_ = false
 
-    /** @private {number} */
+    /* * @private {number} */
     this.prevReadyState_ = video.readyState
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.didFireLargeGap_ = false
 
-    /**
+    /* *
      * The stall detector tries to keep the playhead moving forward. It is
      * managed by the gap-jumping controller to avoid conflicts. On some
      * platforms, the stall detector is not wanted, so it may be null.
@@ -59,12 +59,12 @@ export default class GapJumpingController {
      */
     this.stallDetector_ = stallDetector
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.hadSegmentAppended_ = false
 
     this.eventManager_.listen(video, 'waiting', () => this.onPollGapJump_())
 
-    /**
+    /* *
      * We can't trust |readyState| or 'waiting' events on all platforms. To make
      * up for this, we poll the current time. If we think we are in a gap, jump
      * out of it.
@@ -75,9 +75,9 @@ export default class GapJumpingController {
      */
     this.gapJumpTimer_ = new Timer(() => {
       this.onPollGapJump_()
-    }).tickEvery(/* seconds= */ 0.25)
+    }).tickEvery(/*  seconds= */ 0.25)
   }
-  /** @override */
+  /* * @override */
   release() {
     if (this.eventManager_) {
       this.eventManager_.release()
@@ -98,7 +98,7 @@ export default class GapJumpingController {
     this.timeline_ = null
     this.video_ = null
   }
-  /**
+  /* *
    * Called when a segment is appended by StreamingEngine, but not when a clear
    * is pending. This means StreamingEngine will continue buffering forward from
    * what is buffered.  So we know about any gaps before the start.
@@ -107,13 +107,13 @@ export default class GapJumpingController {
     this.hadSegmentAppended_ = true
     this.onPollGapJump_()
   }
-  /** Called when a seek has started. */
+  /* * Called when a seek has started. */
   onSeeking() {
     this.seekingEventReceived_ = true
     this.hadSegmentAppended_ = false
     this.didFireLargeGap_ = false
   }
-  /**
+  /* *
    * Called on a recurring timer to check for gaps in the media.  This is also
    * called in a 'waiting' event.
    *
@@ -217,7 +217,7 @@ export default class GapJumpingController {
     }
   }
 }
-/**
+/* *
  * The limit, in seconds, for the gap size that we will assume the browser will
  * handle for us.
  * @const

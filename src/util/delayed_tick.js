@@ -1,4 +1,4 @@
-/**
+/* *
  * @summary
  * This class wraps a function so that we can defer executing the function by X
  * seconds.
@@ -6,18 +6,18 @@
  * @final
  */
 export default class DelayedTick {
-  /**
+  /* *
    * @param {function()} onTick
    */
   constructor(onTick) {
-    /** @private {function()} */
+    /* * @private {function()} */
     this.onTick_ = onTick
 
-    /** @private {?function()} */
+    /* * @private {?function()} */
     this.cancelPending_ = null
   }
 
-  /**
+  /* *
    * Call |onTick| after |delayInSeconds| has elapsed. If there is already a
    * pending call to |onTick|, the pending call will be canceled.
    *
@@ -35,7 +35,7 @@ export default class DelayedTick {
     let timeoutId = null
 
     this.cancelPending_ = () => {
-      window.clearTimeout(timeoutId)
+      clearTimeout(timeoutId)
       alive = false
     }
 
@@ -48,12 +48,12 @@ export default class DelayedTick {
       }
     }
 
-    timeoutId = window.setTimeout(onTick, delayInSeconds * 1000)
+    timeoutId = setTimeout(onTick, delayInSeconds * 1000)
 
     return this
   }
 
-  /**
+  /* *
    * Cancel any pending calls to |onTick|. If there are no pending calls to
    * |onTick|, this will be a no-op.
    */

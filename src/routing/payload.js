@@ -1,4 +1,4 @@
-/**
+/* *
  * @typedef {{
  *   mediaElement: HTMLMediaElement,
  *   mimeType: ?string,

@@ -1,7 +1,7 @@
 
 import { Cue } from './cue'
 
-/**
+/* *
  * @summary
  * This defines the default text displayer plugin. An instance of this
  * class is used when no custom displayer is given.
@@ -13,9 +13,9 @@ import { Cue } from './cue'
  * @export
  */
 export default class SimpleTextDisplayer {
-  /** @param {HTMLMediaElement} video */
+  /* * @param {HTMLMediaElement} video */
   constructor(video) {
-    /** @private {TextTrack} */
+    /* * @private {TextTrack} */
     this.textTrack_ = null
 
     // TODO: Test that in all cases, the built-in CC controls in the video
@@ -42,7 +42,7 @@ export default class SimpleTextDisplayer {
     this.textTrack_.mode = 'hidden'
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -62,7 +62,7 @@ export default class SimpleTextDisplayer {
     return true
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -101,7 +101,7 @@ export default class SimpleTextDisplayer {
     }
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -115,7 +115,7 @@ export default class SimpleTextDisplayer {
     return Promise.resolve()
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -123,7 +123,7 @@ export default class SimpleTextDisplayer {
     return this.textTrack_.mode === 'showing'
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -131,7 +131,7 @@ export default class SimpleTextDisplayer {
     this.textTrack_.mode = on ? 'showing' : 'hidden'
   }
 
-  /**
+  /* *
    * @param {!shaka.extern.Cue} shakaCue
    * @return {TextTrackCue}
    * @private
@@ -145,7 +145,7 @@ export default class SimpleTextDisplayer {
       return null
     }
 
-    /** @type {VTTCue} */
+    /* * @type {VTTCue} */
     const vttCue = new VTTCue(shakaCue.startTime,
       shakaCue.endTime,
       shakaCue.payload)
@@ -161,7 +161,9 @@ export default class SimpleTextDisplayer {
     try {
       // Safari 10 seems to throw on align='center'.
       vttCue.align = shakaCue.textAlign
-    } catch (exception) {}
+    } catch (exception) {
+      console.log(exception)
+    }
 
     if (shakaCue.textAlign === 'center' && vttCue.align !== 'center') {
       // We want vttCue.position = 'auto'. By default, |position| is set to
@@ -194,7 +196,7 @@ export default class SimpleTextDisplayer {
     return vttCue
   }
 
-  /**
+  /* *
    * Iterate over all the cues in a text track and remove all those for which
    * |predicate(cue)| returns true.
    *
@@ -216,7 +218,7 @@ export default class SimpleTextDisplayer {
 
     console.assert(
       track.cues,
-      'Cues should be accessible when mode is set to "' + tempState + '".')
+      'Cues should be accessible when mode is set to `' + tempState + '`.')
 
     // Create a copy of the list to avoid errors while iterating.
     for (const cue of Array.from(track.cues)) {
@@ -229,7 +231,7 @@ export default class SimpleTextDisplayer {
   }
 }
 
-/**
+/* *
  * @const {string}
  * @private
  */

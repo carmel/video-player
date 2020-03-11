@@ -1,12 +1,12 @@
 import Timer from './timer'
 
-/**
+/* *
  * A wrapper for platform-specific functions.
  *
  * @final
  */
 export default class Platform {
-  /**
+  /* *
    * Check if the current platform supports media source. We assume that if
    * the current platform supports media source, then we can use media source
    * as per its design.
@@ -15,9 +15,9 @@ export default class Platform {
    */
   static supportsMediaSource() {
     // Browsers that lack a media source implementation will have no reference
-    // to |window.MediaSource|. Platforms that we see having problematic media
+    // to |MediaSource|. Platforms that we see having problematic media
     // source implementations will have this reference removed via a polyfill.
-    if (!window.MediaSource) {
+    if (!MediaSource) {
       return false
     }
 
@@ -29,7 +29,7 @@ export default class Platform {
     return true
   }
 
-  /**
+  /* *
    * Returns true if the media type is supported natively by the platform.
    *
    * @param {string} mimeType
@@ -40,7 +40,7 @@ export default class Platform {
     return video.canPlayType(mimeType) !== ''
   }
 
-  /**
+  /* *
    * Check if the current platform is MS Edge.
    *
    * @return {boolean}
@@ -49,7 +49,7 @@ export default class Platform {
     return Platform.userAgentContains_('Edge/')
   }
 
-  /**
+  /* *
    * Check if the current platform is MS IE.
    *
    * @return {boolean}
@@ -58,7 +58,7 @@ export default class Platform {
     return Platform.userAgentContains_('Trident/')
   }
 
-  /**
+  /* *
    * Check if the current platform is a Tizen TV.
    *
    * @return {boolean}
@@ -67,7 +67,7 @@ export default class Platform {
     return Platform.userAgentContains_('Tizen')
   }
 
-  /**
+  /* *
    * Check if the current platform is a Tizen 3 TV.
    *
    * @return {boolean}
@@ -76,7 +76,7 @@ export default class Platform {
     return Platform.userAgentContains_('Tizen 3')
   }
 
-  /**
+  /* *
    * Check if the current platform is a Video Futur.
    *
    * @return {boolean}
@@ -85,7 +85,7 @@ export default class Platform {
     return Platform.userAgentContains_('VITIS')
   }
 
-  /**
+  /* *
    * Check if the current platform is a WebOS.
    *
    * @return {boolean}
@@ -94,7 +94,7 @@ export default class Platform {
     return Platform.userAgentContains_('Web0S')
   }
 
-  /**
+  /* *
    * Check if the current platform is a Google Chromecast.
    *
    * @return {boolean}
@@ -103,7 +103,7 @@ export default class Platform {
     return Platform.userAgentContains_('CrKey')
   }
 
-  /**
+  /* *
    * Check if the current platform is Google Chrome.
    *
    * @return {boolean}
@@ -114,7 +114,7 @@ export default class Platform {
     return Platform.userAgentContains_('Chrome') &&
            !Platform.isEdge()
   }
-  /**
+  /* *
    * Check if the current platform is from Apple.
    *
    * Returns true on all iOS browsers and on desktop Safari.
@@ -128,7 +128,7 @@ export default class Platform {
     return !!navigator.vendor && navigator.vendor.includes('Apple')
   }
 
-  /**
+  /* *
    * Returns a major version number for Safari, or Safari-based iOS browsers.
    *
    * For example:
@@ -152,20 +152,20 @@ export default class Platform {
     // like 'Version/13.0' indicating the major Safari or iOS version.
     let match = navigator.userAgent.match(/Version\/(\d+)/)
     if (match) {
-      return parseInt(match[1], /* base= */ 10)
+      return parseInt(match[1], /*  base= */ 10)
     }
 
     // This works for all other browsers on iOS, which contain something like
     // 'OS 13_3' indicating the major & minor iOS version.
     match = navigator.userAgent.match(/OS (\d+)(?:_\d+)?/)
     if (match) {
-      return parseInt(match[1], /* base= */ 10)
+      return parseInt(match[1], /*  base= */ 10)
     }
 
     return null
   }
 
-  /**
+  /* *
    * Guesses if the platform is a mobile one (iOS or Android).
    *
    * @return {boolean}
@@ -192,7 +192,7 @@ export default class Platform {
     return Platform.isApple() && navigator.maxTouchPoints > 1
   }
 
-  /**
+  /* *
    * Check if the user agent contains a key. This is the best way we know of
    * right now to detect platforms. If there is a better way, please send a
    * PR.
@@ -206,7 +206,7 @@ export default class Platform {
     return userAgent.includes(key)
   }
 
-  /**
+  /* *
    * For canPlayType queries, we just need any instance.
    *
    * First, use a cached element from a previous query.
@@ -229,21 +229,21 @@ export default class Platform {
       })
     }
 
-    Platform.cachedMediaElement_ = /** @type {HTMLMediaElement} */(
+    Platform.cachedMediaElement_ = /* * @type {HTMLMediaElement} */(
       document.querySelector('video') || document.querySelector('audio'))
 
     if (!Platform.cachedMediaElement_) {
-      Platform.cachedMediaElement_ = /** @type {!HTMLMediaElement} */(
+      Platform.cachedMediaElement_ = /* * @type {!HTMLMediaElement} */(
         document.createElement('video'))
     }
 
-    Platform.cacheExpirationTimer_.tickAfter(/* seconds= */ 1)
+    Platform.cacheExpirationTimer_.tickAfter(/*  seconds= */ 1)
     return Platform.cachedMediaElement_
   }
 }
 
-/** @private {Timer} */
+/* * @private {Timer} */
 Platform.cacheExpirationTimer_ = null
 
-/** @private {HTMLMediaElement} */
+/* * @private {HTMLMediaElement} */
 Platform.cachedMediaElement_ = null

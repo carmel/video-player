@@ -1,13 +1,13 @@
-/**
+/* *
  * @summary A simple multimap template.
  * @template T
  */
 export default class MultiMap {
   constructor() {
-    /** @private {!Object.<string, !Array.<T>>} */
+    /* * @private {!Object.<string, !Array.<T>>} */
     this.map_ = {}
   }
-  /**
+  /* *
    * Add a key, value pair to the map.
    * @param {string} key
    * @param {T} value
@@ -19,7 +19,7 @@ export default class MultiMap {
       this.map_[key] = [value]
     }
   }
-  /**
+  /* *
    * Get a list of values by key.
    * @param {string} key
    * @return {Array.<T>} or null if no such key exists.
@@ -30,7 +30,7 @@ export default class MultiMap {
     // without affecting the other.
     return list ? list.slice() : null
   }
-  /**
+  /* *
    * Get a list of all values.
    * @return {!Array.<T>}
    */
@@ -41,7 +41,7 @@ export default class MultiMap {
     }
     return list
   }
-  /**
+  /* *
    * Remove a specific value, if it exists.
    * @param {string} key
    * @param {T} value
@@ -52,13 +52,13 @@ export default class MultiMap {
     }
     this.map_[key] = this.map_[key].filter((i) => i !== value)
   }
-  /**
+  /* *
    * Clear all keys and values from the multimap.
    */
   clear() {
     this.map_ = {}
   }
-  /**
+  /* *
    * @param {function(string, !Array.<T>)} callback
    */
   forEach(callback) {

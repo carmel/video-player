@@ -1,11 +1,11 @@
 import polyfill from './all'
 
-/**
+/* *
  * @summary A polyfill to provide navigator.languages on all browsers.
  * This is necessary for IE and possibly others we have yet to discover.
  */
 export default class Languages {
-  /**
+  /* *
    * Install the polyfill if needed.
    */
   static install() {

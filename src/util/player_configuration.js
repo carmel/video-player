@@ -1,8 +1,7 @@
 import SimpleAbrManager from '../abr/simple_abr_manager'
 import ConfigUtils from './config_utils'
 import Platform from './platform'
-import NetworkingEngine from '../net/networking_engine'
-import DrmEngine from '../media/drm_engine'
+import { NetworkingEngine } from '../net/networking_engine'
 import ManifestParserUtils from './manifest_parser_utils'
 // TODO(vaage): Many times in our configs, we need to create an empty
 //  implementation of a method, but to avoid closure from removing unused
@@ -12,12 +11,12 @@ import ManifestParserUtils from './manifest_parser_utils'
 //
 //  NOTE: Chrome App Content Security Policy prohibits usage of new Function()
 
-/**
+/* *
  * @final
  * @export
  */
 export default class PlayerConfiguration {
-  /** @return {shaka.extern.PlayerConfiguration} */
+  /* * @return {shaka.extern.PlayerConfiguration} */
   static createDefault() {
     // This is a relatively safe default in the absence of clues from the
     // browser.  For slower connections, the default estimate may be too high.
@@ -58,17 +57,6 @@ export default class PlayerConfiguration {
       }
     }
 
-    const drm = {
-      retryParameters: NetworkingEngine.defaultRetryParameters(),
-      // These will all be verified by special cases in mergeConfigObjects_():
-      servers: {}, // key is arbitrary key system ID, value must be string
-      clearKeys: {}, // key is arbitrary key system ID, value must be string
-      advanced: {}, // key is arbitrary key system ID, value is a record type
-      delayLicenseRequestUntilPlayed: false,
-      initDataTransform: DrmEngine.defaultInitDataTransform,
-      logLicenseExchange: false
-    }
-
     const manifest = {
       retryParameters: NetworkingEngine.defaultRetryParameters(),
       availabilityWindowOverride: NaN,
@@ -83,7 +71,6 @@ export default class PlayerConfiguration {
           return node && null
         },
         clockSyncUri: '',
-        ignoreDrmInfo: false,
         xlinkFailGracefully: false,
         defaultPresentationDelay: 10,
         ignoreMinBufferTime: false,
@@ -120,8 +107,8 @@ export default class PlayerConfiguration {
       // playing after a seek, even when buffered.
       safeSeekOffset: 5,
       stallEnabled: true,
-      stallThreshold: 1 /* seconds */,
-      stallSkip: 0.1 /* seconds */,
+      stallThreshold: 1 /*  seconds */,
+      stallSkip: 0.1 /*  seconds */,
       useNativeHlsOnSafari: true,
       // If we are within 2 seconds of the start of a live segment, fetch the
       // previous one.  This allows for segment drift, but won't download an
@@ -178,9 +165,8 @@ export default class PlayerConfiguration {
       }
     }
 
-    /** @type {shaka.extern.PlayerConfiguration} */
+    /* * @type {shaka.extern.PlayerConfiguration} */
     const config = {
-      drm: drm,
       manifest: manifest,
       streaming: streaming,
       offline: offline,
@@ -220,7 +206,7 @@ export default class PlayerConfiguration {
     return config
   }
 
-  /**
+  /* *
    * Merges the given configuration changes into the given destination.  This
    * uses the default Player configurations as the template.
    *
@@ -231,25 +217,13 @@ export default class PlayerConfiguration {
    * @export
    */
   static mergeConfigObjects(destination, updates, template) {
-    const overrides = {
-      '.drm.servers': '',
-      '.drm.clearKeys': '',
-      '.drm.advanced': {
-        distinctiveIdentifierRequired: false,
-        persistentStateRequired: false,
-        videoRobustness: '',
-        audioRobustness: '',
-        serverCertificate: new Uint8Array(0),
-        individualizationServer: ''
-      }
-    }
     return ConfigUtils.mergeConfigObjects(
       destination, updates,
-      template || PlayerConfiguration.createDefault(), overrides,
+      template || PlayerConfiguration.createDefault(), null,
       '')
   }
 
-  /**
+  /* *
    * @param {!Array.<shaka.extern.Track>} tracks
    * @param {string} preferredAudioLanguage
    * @return {!Array.<shaka.extern.Track>}
@@ -258,10 +232,10 @@ export default class PlayerConfiguration {
     const ContentType = ManifestParserUtils.ContentType
     const LanguageUtils = LanguageUtils
 
-    /** @type {!Array.<shaka.extern.Track>} */
+    /* * @type {!Array.<shaka.extern.Track>} */
     const allVariants = tracks.filter((track) => track.type === 'variant')
 
-    /** @type {!Array.<shaka.extern.Track>} */
+    /* * @type {!Array.<shaka.extern.Track>} */
     let selectedVariants = []
 
     // Find the locale that best matches our preferred audio locale.
@@ -320,7 +294,7 @@ export default class PlayerConfiguration {
       })
     }
 
-    /** @type {!Array.<shaka.extern.Track>} */
+    /* * @type {!Array.<shaka.extern.Track>} */
     const selectedTracks = []
 
     // If there are multiple matches at different audio bitrates, select the

@@ -1,4 +1,4 @@
-/**
+/* *
  * A utility class to help estimate the size of streams based on stream and
  * variant bandwidths. This class's main purpose is to isolate the logic in
  * creating non-zero bandwidth estimates for all streams so that each stream
@@ -6,11 +6,11 @@
  */
 export default class StreamBandwidthEstimator {
   constructor() {
-    /** @private {!Object.<number, number>} */
+    /* * @private {!Object.<number, number>} */
     this.estimateByStreamId_ = {}
   }
 
-  /**
+  /* *
    * Add a new variant to the estimator. This will update the estimates for all
    * streams in the variant.
    *
@@ -61,7 +61,7 @@ export default class StreamBandwidthEstimator {
     }
   }
 
-  /**
+  /* *
    * @param {number} stream
    * @param {number} bitRate
    * @private
@@ -70,7 +70,7 @@ export default class StreamBandwidthEstimator {
     this.estimateByStreamId_[stream] = bitRate
   }
 
-  /**
+  /* *
    * Create an estimate for the text stream.
    *
    * @param {shaka.extern.Stream} text
@@ -80,7 +80,7 @@ export default class StreamBandwidthEstimator {
         StreamBandwidthEstimator.DEFAULT_TEXT_BITRATE_
   }
 
-  /**
+  /* *
    * Get the estimate for a segment that is part of a stream that has already
    * added to the estimator.
    *
@@ -93,7 +93,7 @@ export default class StreamBandwidthEstimator {
     return this.getEstimate_(id) * duration
   }
 
-  /**
+  /* *
    * Get the estimate for an init segment for a stream that has already
    * added to the estimator.
    *
@@ -107,7 +107,7 @@ export default class StreamBandwidthEstimator {
     return this.getEstimate_(id) * duration
   }
 
-  /**
+  /* *
    * @param {number} id
    * @return {number}
    * @private
@@ -129,7 +129,7 @@ export default class StreamBandwidthEstimator {
     return bitRate
   }
 }
-/**
+/* *
  * Since audio bandwidth does not vary much, we are going to use a constant
  * approximation for audio bit rate allowing use to more accurately guess at
  * the video bitrate.
@@ -141,7 +141,7 @@ export default class StreamBandwidthEstimator {
  * @private
  */
 StreamBandwidthEstimator.DEFAULT_AUDIO_BITRATE_ = 393216
-/**
+/* *
  * Since we don't normally get the bitrate for text, we still want to create
  * some approximation so that it can influence progress. This will use the
  * bitrate from 'Tears of Steal' to give some kind of data-driven result.

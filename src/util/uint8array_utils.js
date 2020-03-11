@@ -2,12 +2,12 @@ import BufferUtils from './buffer_utils'
 import Iterables from './iterables'
 import StringUtils from './string_utils'
 
-/**
+/* *
  * @summary A set of Uint8Array utility functions.
  * @exportDoc
  */
 export default class Uint8ArrayUtils {
-  /**
+  /* *
    * Convert a buffer to a base64 string. The output will be standard
    * alphabet as opposed to base64url safe alphabet.
    * @param {BufferSource} data
@@ -20,7 +20,7 @@ export default class Uint8ArrayUtils {
     return btoa(bytes)
   }
 
-  /**
+  /* *
    * Convert a buffer to a base64 string.  The output will always use the
    * alternate encoding/alphabet also known as 'base64url'.
    * @param {BufferSource} data
@@ -36,7 +36,7 @@ export default class Uint8ArrayUtils {
     return padding ? base64 : base64.replace(/[=]*$/, '')
   }
 
-  /**
+  /* *
    * Convert a base64 string to a Uint8Array.  Accepts either the standard
    * alphabet or the alternate 'base64url' alphabet.
    * @param {string} str
@@ -46,7 +46,7 @@ export default class Uint8ArrayUtils {
   static fromBase64(str) {
     // atob creates a 'raw string' where each character is interpreted as a
     // byte.
-    const bytes = window.atob(str.replace(/-/g, '+').replace(/_/g, '/'))
+    const bytes = atob(str.replace(/-/g, '+').replace(/_/g, '/'))
     const result = new Uint8Array(bytes.length)
     const enumerate = (it) => Iterables.enumerate(it)
     for (const { i, item } of enumerate(bytes)) {
@@ -54,7 +54,7 @@ export default class Uint8ArrayUtils {
     }
     return result
   }
-  /**
+  /* *
    * Convert a hex string to a Uint8Array.
    * @param {string} str
    * @return {!Uint8Array}
@@ -64,11 +64,11 @@ export default class Uint8ArrayUtils {
     const size = str.length / 2
     const arr = new Uint8Array(size)
     for (const i of Iterables.range(size)) {
-      arr[i] = window.parseInt(str.substr(i * 2, 2), 16)
+      arr[i] = parseInt(str.substr(i * 2, 2), 16)
     }
     return arr
   }
-  /**
+  /* *
    * Convert a buffer to a hex string.
    * @param {BufferSource} data
    * @return {string}
@@ -86,7 +86,7 @@ export default class Uint8ArrayUtils {
     }
     return hex
   }
-  /**
+  /* *
    * Concatenate buffers.
    * @param {...BufferSource} varArgs
    * @return {!Uint8Array}

@@ -1,11 +1,11 @@
-/**
+/* *
  * A structure used to track which streams were last used in any given period.
  *
  * @final
  */
 export default class ActiveStreamMap {
   constructor() {
-    /**
+    /* *
      * A mapping between a period and the content last streamed in that period.
      *
      * @private {!Map.<shaka.extern.Period, !ActiveStreamMap.Frame>}
@@ -13,7 +13,7 @@ export default class ActiveStreamMap {
     this.history_ = new Map()
   }
 
-  /**
+  /* *
    * Clear the history.
    */
   clear() {
@@ -22,7 +22,7 @@ export default class ActiveStreamMap {
     this.history_.clear()
   }
 
-  /**
+  /* *
    * Set the variant that was last playing in |period|. Setting it to |null| is
    * the same as saying 'we were playing no variant in this period'.
    *
@@ -33,7 +33,7 @@ export default class ActiveStreamMap {
     this.getFrameFor_(period).variant = variant
   }
 
-  /**
+  /* *
    * Set the text stream that was last displayed in |period|. Setting it to
    * |null| is the same as saying 'we were displaying no text in this period'.
    *
@@ -44,7 +44,7 @@ export default class ActiveStreamMap {
     this.getFrameFor_(period).text = stream
   }
 
-  /**
+  /* *
    * Get the variant that was playing in the given period. If no variant  was
    * playing this period or the period had not started playing, then |null| will
    * be returned.
@@ -56,7 +56,7 @@ export default class ActiveStreamMap {
     return this.getFrameFor_(period).variant
   }
 
-  /**
+  /* *
    * Get the text stream that was playing in the given period. If no text
    * stream was playing this period or the period had not started playing, then
    * |null| will be returned.
@@ -68,7 +68,7 @@ export default class ActiveStreamMap {
     return this.getFrameFor_(period).text
   }
 
-  /**
+  /* *
    * Get the frame for a period. This will ensure that a frame exists for the
    * given period.
    *
@@ -85,7 +85,7 @@ export default class ActiveStreamMap {
     return this.history_.get(period)
   }
 }
-/**
+/* *
  * A structure used to track which streams were played during a specific
  * time frame.
  *
@@ -93,9 +93,9 @@ export default class ActiveStreamMap {
  */
 ActiveStreamMap.Frame = class {
   constructor() {
-    /** @type {?shaka.extern.Variant} */
+    /* * @type {?shaka.extern.Variant} */
     this.variant = null
-    /** @type {?shaka.extern.Stream} */
+    /* * @type {?shaka.extern.Stream} */
     this.text = null
   }
 }

@@ -1,15 +1,15 @@
-import NetworkingEngine from '../net/networking_engine'
+import { NetworkingEngine } from '../net/networking_engine'
 import OfflineUri from './offline_uri'
 import StorageMuxer from './storage_muxer'
 import AbortableOperation from '../util/abortable_operation'
 import Error from '../util/error'
 
-/**
+/* *
  * @summary A plugin that handles requests for offline content.
  * @export
  */
 export default class OfflineScheme {
-  /**
+  /* *
    * @param {string} uri
    * @param {shaka.extern.Request} request
    * @param {NetworkingEngine.RequestType} requestType
@@ -38,13 +38,13 @@ export default class OfflineScheme {
         uri))
   }
 
-  /**
+  /* *
    * @param {string} uri
    * @return {!shaka.extern.IAbortableOperation.<shaka.extern.Response>}
    * @private
    */
   static getManifest_(uri) {
-    /** @type {shaka.extern.Response} */
+    /* * @type {shaka.extern.Response} */
     const response = {
       uri: uri,
       originalUri: uri,
@@ -55,7 +55,7 @@ export default class OfflineScheme {
     return AbortableOperation.completed(response)
   }
 
-  /**
+  /* *
    * @param {number} id
    * @param {!OfflineUri} uri
    * @return {!shaka.extern.IAbortableOperation.<shaka.extern.Response>}
@@ -66,7 +66,7 @@ export default class OfflineScheme {
       uri.isSegment(),
       'Only segment uri\'s should be given to getSegment')
 
-    /** @type {!StorageMuxer} */
+    /* * @type {!StorageMuxer} */
     const muxer = new StorageMuxer()
 
     return AbortableOperation.completed(undefined)

@@ -2,30 +2,30 @@ import BufferUtils from '../util/buffer_utils'
 import DataViewReader from '../util/data_view_reader'
 import Error from '../util/error'
 import Iterables from '../util/iterables'
-/**
+/* *
  * @summary
  * Extensible Binary Markup Language (EBML) parser.
  */
 export class EbmlParser {
-  /**
+  /* *
    * @param {BufferSource} data
    */
   constructor(data) {
-    /** @private {!DataView} */
+    /* * @private {!DataView} */
     this.dataView_ = BufferUtils.toDataView(data)
 
-    /** @private {!DataViewReader} */
+    /* * @private {!DataViewReader} */
     this.reader_ = new DataViewReader(
       this.dataView_, DataViewReader.Endianness.BIG_ENDIAN)
   }
-  /**
+  /* *
    * @return {boolean} True if the parser has more data, false otherwise.
    */
   hasMoreData() {
     return this.reader_.hasMoreData()
   }
 
-  /**
+  /* *
    * Parses an EBML element from the parser's current position, and advances
    * the parser.
    * @return {!EbmlElement} The EBML element.
@@ -61,7 +61,7 @@ export class EbmlParser {
 
     return new EbmlElement(id, dataView)
   }
-  /**
+  /* *
    * Parses an EBML ID from the parser's current position, and advances the
    * parser.
    * @return {number} The EBML ID.
@@ -78,14 +78,14 @@ export class EbmlParser {
     }
 
     let id = 0
-    for (const /* byte */ b of vint) {
+    for (const /*  byte */ b of vint) {
       // Note that we cannot use << since |value| may exceed 32 bits.
       id = (256 * id) + b
     }
 
     return id
   }
-  /**
+  /* *
    * Parses a variable sized integer from the parser's current position, and
    * advances the parser.
    * For example:
@@ -112,7 +112,7 @@ export class EbmlParser {
     this.reader_.skip(numBytes - 1)
     return BufferUtils.toUint8(this.dataView_, position, numBytes)
   }
-  /**
+  /* *
    * Gets the value of a variable sized integer.
    * For example, the x's below are part of the vint's value.
    *    7-bit value: 1xxx xxxx
@@ -151,7 +151,7 @@ export class EbmlParser {
 
     return value
   }
-  /**
+  /* *
    * Checks if the given variable sized integer represents a dynamic size value.
    * @param {!Uint8Array} vint The variable sized integer.
    * @return {boolean} true if |vint| represents a dynamic size value,
@@ -168,7 +168,7 @@ export class EbmlParser {
     return false
   }
 }
-/**
+/* *
  * A list of EBML dynamic size constants.
  * @const {!Array.<!Array.<number>>}
  */
@@ -184,32 +184,32 @@ EbmlParser.DYNAMIC_SIZES = [
 ]
 
 export class EbmlElement {
-  /**
+  /* *
    * @param {number} id The ID.
    * @param {!DataView} dataView The DataView.
    */
   constructor(id, dataView) {
-    /** @type {number} */
+    /* * @type {number} */
     this.id = id
 
-    /** @private {!DataView} */
+    /* * @private {!DataView} */
     this.dataView_ = dataView
   }
-  /**
+  /* *
    * Gets the element's offset from the beginning of the buffer.
    * @return {number}
    */
   getOffset() {
     return this.dataView_.byteOffset
   }
-  /**
+  /* *
    * Interpret the element's data as a list of sub-elements.
    * @return {!EbmlParser} A parser over the sub-elements.
    */
   createParser() {
     return new EbmlParser(this.dataView_)
   }
-  /**
+  /* *
    * Interpret the element's data as an unsigned integer.
    * @return {number}
    */
@@ -239,7 +239,7 @@ export class EbmlElement {
 
     return value
   }
-  /**
+  /* *
    * Interpret the element's data as a floating point number
    * (32 bits or 64 bits). 80-bit floating point numbers are not supported.
    * @return {number}

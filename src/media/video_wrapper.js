@@ -2,40 +2,40 @@ import EventManager from '../util/event_manager'
 // import IReleasable from '../util/i_releasable'
 import Timer from '../util/timer'
 
-/**
+/* *
  * Creates a new VideoWrapper that manages setting current time and playback
  * rate.  This handles seeks before content is loaded and ensuring the video
  * time is set properly.  This doesn't handle repositioning within the
- * presentation window.
+ * presentation
  *
  * @implements {IReleasable}
  */
 export class VideoWrapper {
-  /**
+  /* *
    * @param {!HTMLMediaElement} video
    * @param {function()} onSeek Called when the video seeks.
    * @param {number} startTime The time to start at.
    */
   constructor(video, onSeek, startTime) {
-    /** @private {HTMLMediaElement} */
+    /* * @private {HTMLMediaElement} */
     this.video_ = video
 
-    /** @private {function()} */
+    /* * @private {function()} */
     this.onSeek_ = onSeek
 
-    /** @private {number} */
+    /* * @private {number} */
     this.startTime_ = startTime
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.started_ = false
 
-    /** @private {EventManager} */
+    /* * @private {EventManager} */
     this.eventManager_ = new EventManager()
 
-    /** @private {PlayheadMover} */
+    /* * @private {PlayheadMover} */
     this.mover_ = new PlayheadMover(
-      /* mediaElement= */ video,
-      /* maxAttempts= */ 10)
+      /*  mediaElement= */ video,
+      /*  maxAttempts= */ 10)
 
     // Before we can set the start time, we must check if the video element is
     // ready. If the video element is not ready, we cannot set the time. To work
@@ -47,7 +47,7 @@ export class VideoWrapper {
       this.delaySetStartTime_(startTime)
     }
   }
-  /** @override */
+  /* * @override */
   release() {
     if (this.eventManager_) {
       this.eventManager_.release()
@@ -62,7 +62,7 @@ export class VideoWrapper {
     this.onSeek_ = () => {}
     this.video_ = null
   }
-  /**
+  /* *
    * Gets the video's current (logical) position.
    *
    * @return {number}
@@ -70,7 +70,7 @@ export class VideoWrapper {
   getTime() {
     return this.started_ ? this.video_.currentTime : this.startTime_
   }
-  /**
+  /* *
    * Sets the current time of the video.
    *
    * @param {number} time
@@ -83,7 +83,7 @@ export class VideoWrapper {
     }
   }
 
-  /**
+  /* *
    * If the media element is not ready, we can't set |currentTime|. To work
    * around this we will listen for the 'loadedmetadata' event so that we can
    * set the start time once the element is ready.
@@ -107,7 +107,7 @@ export class VideoWrapper {
       this.setStartTime_(startTime)
     })
   }
-  /**
+  /* *
    * Set the start time for the content. The given start time will be ignored if
    * the content does not start at 0.
    *
@@ -145,7 +145,7 @@ export class VideoWrapper {
         ? startTime
         : this.video_.currentTime)
   }
-  /**
+  /* *
    * Add the listener for seek-events. This will call the externally-provided
    * |onSeek| callback whenever the media element seeks.
    *
@@ -164,7 +164,7 @@ export class VideoWrapper {
   }
 }
 
-/**
+/* *
  * A class used to move the playhead away from its current time.  Sometimes, IE
  * and Edge ignore re-seeks. After changing the current time, check every 100ms,
  * retrying if the change was not accepted.
@@ -185,7 +185,7 @@ export class VideoWrapper {
  * @final
  */
 export class PlayheadMover {
-  /**
+  /* *
    * @param {!HTMLMediaElement} mediaElement
    *    The media element that the mover can manipulate.
    *
@@ -196,26 +196,26 @@ export class PlayheadMover {
    *    attempts will be made.
    */
   constructor(mediaElement, maxAttempts) {
-    /** @private {HTMLMediaElement} */
+    /* * @private {HTMLMediaElement} */
     this.mediaElement_ = mediaElement
 
-    /** @private {number} */
+    /* * @private {number} */
     this.maxAttempts_ = maxAttempts
 
-    /** @private {number} */
+    /* * @private {number} */
     this.remainingAttempts_ = 0
 
-    /** @private {number} */
+    /* * @private {number} */
     this.originTime_ = 0
 
-    /** @private {number} */
+    /* * @private {number} */
     this.targetTime_ = 0
 
-    /** @private {Timer} */
+    /* * @private {Timer} */
     this.timer_ = new Timer(() => this.onTick_())
   }
 
-  /** @override */
+  /* * @override */
   release() {
     if (this.timer_) {
       this.timer_.stop()
@@ -225,7 +225,7 @@ export class PlayheadMover {
     this.mediaElement_ = null
   }
 
-  /**
+  /* *
    * Try forcing the media element to move to |timeInSeconds|. If a previous
    * call to |moveTo| is still in progress, this will override it.
    *
@@ -240,10 +240,10 @@ export class PlayheadMover {
     // Set the time and then start the timer. The timer will check if the set
     // was successful, and retry if not.
     this.mediaElement_.currentTime = timeInSeconds
-    this.timer_.tickEvery(/* seconds= */ 0.1)
+    this.timer_.tickEvery(/*  seconds= */ 0.1)
   }
 
-  /**
+  /* *
    * @private
    */
   onTick_() {

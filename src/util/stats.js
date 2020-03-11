@@ -1,7 +1,7 @@
 import StateHistory from './state_history'
 import SwitchHistory from './switch_history'
 
-/**
+/* *
  * This class tracks all the various components (some optional) that are used to
  * populate |shaka.extern.Stats| which is passed to the app.
  *
@@ -9,43 +9,43 @@ import SwitchHistory from './switch_history'
  */
 export default class Stats {
   constructor() {
-    /** @private {number} */
+    /* * @private {number} */
     this.width_ = NaN
-    /** @private {number} */
+    /* * @private {number} */
     this.height_ = NaN
 
-    /** @private {number} */
+    /* * @private {number} */
     this.totalDroppedFrames_ = NaN
-    /** @private {number} */
+    /* * @private {number} */
     this.totalDecodedFrames_ = NaN
-    /** @private {number} */
+    /* * @private {number} */
     this.totalCorruptedFrames_ = NaN
 
-    /** @private {number} */
+    /* * @private {number} */
     this.loadLatencySeconds_ = NaN
 
-    /** @private {number} */
+    /* * @private {number} */
     this.manifestTimeSeconds_ = NaN
 
-    /** @private {number} */
+    /* * @private {number} */
     this.drmTimeSeconds_ = NaN
 
-    /** @private {number} */
+    /* * @private {number} */
     this.licenseTimeSeconds_ = NaN
 
-    /** @private {number} */
+    /* * @private {number} */
     this.currentStreamBandwidth_ = NaN
-    /** @private {number} */
+    /* * @private {number} */
     this.bandwidthEstimate_ = NaN
 
-    /** @private {!StateHistory} */
+    /* * @private {!StateHistory} */
     this.stateHistory_ = new StateHistory()
 
-    /** @private {!SwitchHistory} */
+    /* * @private {!SwitchHistory} */
     this.switchHistory_ = new SwitchHistory()
   }
 
-  /**
+  /* *
    * Update the ratio of dropped frames to total frames. This will replace the
    * previous values.
    *
@@ -56,7 +56,7 @@ export default class Stats {
     this.totalDroppedFrames_ = dropped
     this.totalDecodedFrames_ = decoded
   }
-  /**
+  /* *
    * Update corrupted frames. This will replace the previous values.
    *
    * @param {number} corrupted
@@ -65,7 +65,7 @@ export default class Stats {
     this.totalCorruptedFrames_ = corrupted
   }
 
-  /**
+  /* *
    * Set the width and height of the video we are currently playing.
    *
    * @param {number} width
@@ -76,7 +76,7 @@ export default class Stats {
     this.height_ = height
   }
 
-  /**
+  /* *
    * Record the time it took between the user signalling 'I want to play this'
    * to 'I am now seeing this'.
    *
@@ -86,7 +86,7 @@ export default class Stats {
     this.loadLatencySeconds_ = seconds
   }
 
-  /**
+  /* *
    * Record the time it took to download and parse the manifest.
    *
    * @param {number} seconds
@@ -95,7 +95,7 @@ export default class Stats {
     this.manifestTimeSeconds_ = seconds
   }
 
-  /**
+  /* *
    * Record the time it took to download the first drm key.
    *
    * @param {number} seconds
@@ -104,7 +104,7 @@ export default class Stats {
     this.drmTimeSeconds_ = seconds
   }
 
-  /**
+  /* *
    * Record the cumulative time spent on license requests during this session.
    *
    * @param {number} seconds
@@ -113,35 +113,35 @@ export default class Stats {
     this.licenseTimeSeconds_ = seconds
   }
 
-  /**
+  /* *
    * @param {number} bandwidth
    */
   setCurrentStreamBandwidth(bandwidth) {
     this.currentStreamBandwidth_ = bandwidth
   }
 
-  /**
+  /* *
    * @param {number} bandwidth
    */
   setBandwidthEstimate(bandwidth) {
     this.bandwidthEstimate_ = bandwidth
   }
 
-  /**
+  /* *
    * @return {!StateHistory}
    */
   getStateHistory() {
     return this.stateHistory_
   }
 
-  /**
+  /* *
    * @return {!SwitchHistory}
    */
   getSwitchHistory() {
     return this.switchHistory_
   }
 
-  /**
+  /* *
    * Create a stats blob that we can pass up to the app. This blob will not
    * reference any internal data.
    *
@@ -168,7 +168,7 @@ export default class Stats {
     }
   }
 
-  /**
+  /* *
    * Create an empty stats blob. This resembles the stats when we are not
    * playing any content.
    *

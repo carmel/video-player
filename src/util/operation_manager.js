@@ -1,6 +1,6 @@
 import ArrayUtils from './array_utils'
 // import IDestroyable from './i_destroyable'
-/**
+/* *
  * A utility for cleaning up AbortableOperations, to help simplify common
  * patterns and reduce code duplication.
  *
@@ -8,11 +8,11 @@ import ArrayUtils from './array_utils'
  */
 export default class OperationManager {
   constructor() {
-    /** @private {!Array.<!shaka.extern.IAbortableOperation>} */
+    /* * @private {!Array.<!shaka.extern.IAbortableOperation>} */
     this.operations_ = []
   }
 
-  /**
+  /* *
    * Manage an operation.  This means aborting it on destroy() and removing it
    * from the management set when it complete.
    *
@@ -24,7 +24,7 @@ export default class OperationManager {
     }))
   }
 
-  /** @override */
+  /* * @override */
   destroy() {
     const cleanup = []
     for (const op of this.operations_) {

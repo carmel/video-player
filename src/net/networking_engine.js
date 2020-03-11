@@ -9,7 +9,7 @@ import FakeEventTarget from '../util/fake_event_target'
 import ObjectUtils from '../util/object_utils'
 import OperationManager from '../util/operation_manager'
 
-/**
+/* *
  * @event NetworkingEngine.RetryEvent
  * @description Fired when the networking engine receives a recoverable error
  *   and retries.
@@ -21,7 +21,7 @@ import OperationManager from '../util/operation_manager'
  * @exportDoc
  */
 
-/**
+/* *
  * NetworkingEngine wraps all networking operations.  This accepts plugins that
  * handle the actual request.  A plugin is registered using registerScheme.
  * Each scheme has at most one plugin to handle the request.
@@ -30,7 +30,7 @@ import OperationManager from '../util/operation_manager'
  * @export
  */
 export class NetworkingEngine extends FakeEventTarget {
-  /**
+  /* *
    * @param {function(number, number)=} onProgressUpdated Called when a progress
    *   event is triggered. Passed the duration, in milliseconds, that the
    *   request took, and the number of bytes transferred.
@@ -38,23 +38,23 @@ export class NetworkingEngine extends FakeEventTarget {
   constructor(onProgressUpdated) {
     super()
 
-    /** @private {boolean} */
+    /* * @private {boolean} */
     this.destroyed_ = false
 
-    /** @private {!OperationManager} */
+    /* * @private {!OperationManager} */
     this.operationManager_ = new OperationManager()
 
-    /** @private {!Set.<shaka.extern.RequestFilter>} */
+    /* * @private {!Set.<shaka.extern.RequestFilter>} */
     this.requestFilters_ = new Set()
 
-    /** @private {!Set.<shaka.extern.ResponseFilter>} */
+    /* * @private {!Set.<shaka.extern.ResponseFilter>} */
     this.responseFilters_ = new Set()
 
-    /** @private {?function(number, number)} */
+    /* * @private {?function(number, number)} */
     this.onProgressUpdated_ = onProgressUpdated || null
   }
 
-  /**
+  /* *
    * Registers a scheme plugin.  This plugin will handle all requests with the
    * given scheme.  If a plugin with the same scheme already exists, it is
    * replaced, unless the existing plugin is of higher priority.
@@ -80,7 +80,7 @@ export class NetworkingEngine extends FakeEventTarget {
     }
   }
 
-  /**
+  /* *
    * Removes a scheme plugin.
    *
    * @param {string} scheme
@@ -90,7 +90,7 @@ export class NetworkingEngine extends FakeEventTarget {
     delete NetworkingEngine.schemes_[scheme]
   }
 
-  /**
+  /* *
    * Registers a new request filter.  All filters are applied in the order they
    * are registered.
    *
@@ -101,7 +101,7 @@ export class NetworkingEngine extends FakeEventTarget {
     this.requestFilters_.add(filter)
   }
 
-  /**
+  /* *
    * Removes a request filter.
    *
    * @param {shaka.extern.RequestFilter} filter
@@ -111,7 +111,7 @@ export class NetworkingEngine extends FakeEventTarget {
     this.requestFilters_.delete(filter)
   }
 
-  /**
+  /* *
    * Clears all request filters.
    *
    * @export
@@ -120,7 +120,7 @@ export class NetworkingEngine extends FakeEventTarget {
     this.requestFilters_.clear()
   }
 
-  /**
+  /* *
    * Registers a new response filter.  All filters are applied in the order they
    * are registered.
    *
@@ -131,7 +131,7 @@ export class NetworkingEngine extends FakeEventTarget {
     this.responseFilters_.add(filter)
   }
 
-  /**
+  /* *
    * Removes a response filter.
    *
    * @param {shaka.extern.ResponseFilter} filter
@@ -141,7 +141,7 @@ export class NetworkingEngine extends FakeEventTarget {
     this.responseFilters_.delete(filter)
   }
 
-  /**
+  /* *
    * Clears all response filters.
    *
    * @export
@@ -150,7 +150,7 @@ export class NetworkingEngine extends FakeEventTarget {
     this.responseFilters_.clear()
   }
 
-  /**
+  /* *
    * Gets a copy of the default retry parameters.
    *
    * @return {shaka.extern.RetryParameters}
@@ -164,7 +164,7 @@ export class NetworkingEngine extends FakeEventTarget {
     return Backoff.defaultRetryParameters()
   }
 
-  /**
+  /* *
    * Makes a simple network request for the given URIs.
    *
    * @param {!Array.<string>} uris
@@ -185,7 +185,7 @@ export class NetworkingEngine extends FakeEventTarget {
     }
   }
 
-  /**
+  /* *
    * @override
    * @export
    */
@@ -196,7 +196,7 @@ export class NetworkingEngine extends FakeEventTarget {
     return this.operationManager_.destroy()
   }
 
-  /**
+  /* *
    * Makes a network request and returns the resulting data.
    *
    * @param {NetworkingEngine.RequestType} type
@@ -291,7 +291,7 @@ export class NetworkingEngine extends FakeEventTarget {
     return pendingRequest
   }
 
-  /**
+  /* *
    * @param {NetworkingEngine.RequestType} type
    * @param {shaka.extern.Request} request
    * @return {!shaka.extern.IAbortableOperation.<undefined>}
@@ -330,7 +330,7 @@ export class NetworkingEngine extends FakeEventTarget {
     })
   }
 
-  /**
+  /* *
    * @param {NetworkingEngine.RequestType} type
    * @param {shaka.extern.Request} request
    * @param {NetworkingEngine.NumBytesRemainingClass}
@@ -341,14 +341,14 @@ export class NetworkingEngine extends FakeEventTarget {
    */
   makeRequestWithRetry_(type, request, numBytesRemainingObj) {
     const backoff = new Backoff(
-      request.retryParameters, /* autoReset= */ false)
+      request.retryParameters, /*  autoReset= */ false)
     const index = 0
     return this.send_(
-      type, request, backoff, index, /* lastError= */ null,
+      type, request, backoff, index, /*  lastError= */ null,
       numBytesRemainingObj)
   }
 
-  /**
+  /* *
    * Sends the given request to the correct plugin and retry using Backoff.
    *
    * @param {NetworkingEngine.RequestType} type
@@ -453,7 +453,7 @@ export class NetworkingEngine extends FakeEventTarget {
 
         // Move to the next URI.
         index = (index + 1) % request.uris.length
-        const shakaError = /** @type {Error} */(error)
+        const shakaError = /* * @type {Error} */(error)
         return this.send_(
           type, request, backoff, index, shakaError, numBytesRemainingObj)
       }
@@ -465,7 +465,7 @@ export class NetworkingEngine extends FakeEventTarget {
     return sendOperation
   }
 
-  /**
+  /* *
    * @param {NetworkingEngine.RequestType} type
    * @param {NetworkingEngine.ResponseAndGotProgress}
    *        responseAndGotProgress
@@ -513,7 +513,7 @@ export class NetworkingEngine extends FakeEventTarget {
     })
   }
 
-  /**
+  /* *
    * This is here only for testability.  We can't mock location in our tests on
    * all browsers, so instead we mock this.
    *
@@ -525,7 +525,7 @@ export class NetworkingEngine extends FakeEventTarget {
   }
 }
 
-/**
+/* *
  * A wrapper class for the number of bytes remaining to be downloaded for the
  * request.
  * Instead of using PendingRequest directly, this class is needed to be sent to
@@ -535,22 +535,22 @@ export class NetworkingEngine extends FakeEventTarget {
  * @export
  */
 NetworkingEngine.NumBytesRemainingClass = class {
-  /**
+  /* *
    * Constructor
    */
   constructor() {
-    /** @private {number} */
+    /* * @private {number} */
     this.bytesToLoad_ = 0
   }
 
-  /**
+  /* *
    * @param {number} bytesToLoad
    */
   setBytes(bytesToLoad) {
     this.bytesToLoad_ = bytesToLoad
   }
 
-  /**
+  /* *
    * @return {number}
    */
   getBytes() {
@@ -558,7 +558,7 @@ NetworkingEngine.NumBytesRemainingClass = class {
   }
 }
 
-/**
+/* *
  * Request types.  Allows a filter to decide which requests to read/alter.
  *
  * @enum {number}
@@ -571,7 +571,7 @@ NetworkingEngine.RequestType = {
   'APP': 3,
   'TIMING': 4
 }
-/**
+/* *
  * Priority level for network scheme plugins.
  * If multiple plugins are provided for the same scheme, only the
  * highest-priority one is used.
@@ -584,7 +584,7 @@ NetworkingEngine.PluginPriority = {
   'PREFERRED': 2,
   'APPLICATION': 3
 }
-/**
+/* *
  * @typedef {{
  *   plugin: shaka.extern.SchemePlugin,
  *   priority: number
@@ -595,14 +595,14 @@ NetworkingEngine.PluginPriority = {
  *   The plugin's priority.
  */
 NetworkingEngine.SchemeObject
-/**
+/* *
  * Contains the scheme plugins.
  *
  * @private {!Object.<string, NetworkingEngine.SchemeObject>}
  */
 NetworkingEngine.schemes_ = {}
 
-/**
+/* *
  * @typedef {{
  *   response: shaka.extern.Response,
  *   gotProgress: boolean
@@ -617,7 +617,7 @@ NetworkingEngine.schemes_ = {}
  * @private
  */
 NetworkingEngine.ResponseAndGotProgress
-/**
+/* *
  * A pending network request. This can track the current progress of the
  * download, and allows the request to be aborted if the network is slow.
  *
@@ -626,7 +626,7 @@ NetworkingEngine.ResponseAndGotProgress
  * @export
  */
 export class PendingRequest extends AbortableOperation {
-  /**
+  /* *
        * @param {!Promise} promise
        *   A Promise which represents the underlying operation.  It is resolved
        *   when the operation is complete, and rejected if the operation fails
@@ -644,11 +644,11 @@ export class PendingRequest extends AbortableOperation {
   constructor(promise, onAbort, numBytesRemainingObj) {
     super(promise, onAbort)
 
-    /** @private {NetworkingEngine.NumBytesRemainingClass} */
+    /* * @private {NetworkingEngine.NumBytesRemainingClass} */
     this.bytesRemaining_ = numBytesRemainingObj
   }
 
-  /**
+  /* *
        * @return {number}
        */
   getBytesRemaining() {

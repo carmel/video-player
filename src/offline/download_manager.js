@@ -6,14 +6,14 @@ import Error from '../util/error'
 // import IDestroyable from '../util/i_destroyable'
 import Pssh from '../util/pssh'
 
-/**
+/* *
  * This manages downloading segments.
  *
  * @implements {IDestroyable}
  * @final
  */
 export default class DownloadManager {
-  /**
+  /* *
    * Create a new download manager. It will use (but not own) |networkingEngine|
    * and call |onProgress| after each download.
    *
@@ -22,10 +22,10 @@ export default class DownloadManager {
    * @param {function(!Uint8Array, string)} onInitData
    */
   constructor(networkingEngine, onProgress, onInitData) {
-    /** @private {NetworkingEngine} */
+    /* * @private {NetworkingEngine} */
     this.networkingEngine_ = networkingEngine
 
-    /**
+    /* *
      * We group downloads. Within each group, the requests are executed in
      * series. Between groups, the requests are executed in parallel. We store
      * the promise chain that is doing the work.
@@ -34,14 +34,14 @@ export default class DownloadManager {
      */
     this.groups_ = new Map()
 
-    /** @private {!Destroyer} */
+    /* * @private {!Destroyer} */
     this.destroyer_ = new Destroyer(() => {
       const promises = Array.from(this.groups_.values())
       // Add a 'catch' block to stop errors from being returned.
       return Promise.all(promises.map((p) => p.catch(() => {})))
     })
 
-    /**
+    /* *
      * A callback for when a segment has been downloaded. The first parameter
      * is the progress of all segments, a number between 0.0 (0% complete) and
      * 1.0 (100% complete). The second parameter is the total number of bytes
@@ -51,7 +51,7 @@ export default class DownloadManager {
      */
     this.onProgress_ = onProgress
 
-    /**
+    /* *
      * A callback for when a segment has new PSSH data and we pass
      * on the initData to storage
      *
@@ -59,16 +59,16 @@ export default class DownloadManager {
      */
     this.onInitData_ = onInitData
 
-    /** @private {DownloadProgressEstimator} */
+    /* * @private {DownloadProgressEstimator} */
     this.estimator_ = new DownloadProgressEstimator()
   }
 
-  /** @override */
+  /* * @override */
   destroy() {
     return this.destroyer_.destroy()
   }
 
-  /**
+  /* *
    * Add a request to be downloaded as part of a group.
    *
    * @param {number} groupId
@@ -122,7 +122,7 @@ export default class DownloadManager {
     }))
   }
 
-  /**
+  /* *
    * Get a promise that will resolve when all currently queued downloads have
    * finished.
    *
@@ -133,7 +133,7 @@ export default class DownloadManager {
     return this.estimator_.getTotalDownloaded()
   }
 
-  /**
+  /* *
    * Download a segment and return the data in the response.
    *
    * @param {shaka.extern.Request} request

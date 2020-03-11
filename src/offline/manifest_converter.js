@@ -4,13 +4,13 @@ import SegmentIndex from '../media/segment_index'
 import OfflineUri from './offline_uri'
 import ManifestParserUtils from '../util/manifest_parser_utils'
 import Iterables from '../util/iterables'
-/**
+/* *
  * Utility class for converting database manifest objects back to normal
  * player-ready objects. Used by the offline system to convert on-disk
  * objects back to the in-memory objects.
  */
 export default class ManifestConverter {
-  /**
+  /* *
    * Create a new manifest converter. Need to know the mechanism and cell that
    * the manifest is from so that all segments paths can be created.
    *
@@ -18,14 +18,14 @@ export default class ManifestConverter {
    * @param {string} cell
    */
   constructor(mechanism, cell) {
-    /** @private {string} */
+    /* * @private {string} */
     this.mechanism_ = mechanism
 
-    /** @private {string} */
+    /* * @private {string} */
     this.cell_ = cell
   }
 
-  /**
+  /* *
    * Convert a |shaka.extern.ManifestDB| object to a |shaka.extern.Manifest|
    * object.
    *
@@ -62,7 +62,7 @@ export default class ManifestConverter {
     }
   }
 
-  /**
+  /* *
    * Create a period object from a database period.
    *
    * @param {shaka.extern.PeriodDB} period
@@ -71,20 +71,20 @@ export default class ManifestConverter {
    * @return {shaka.extern.Period}
    */
   fromPeriodDB(period, periodDuration, timeline) {
-    /** @type {!Array.<shaka.extern.StreamDB>} */
+    /* * @type {!Array.<shaka.extern.StreamDB>} */
     const audioStreams =
         period.streams.filter((streamDB) => this.isAudio_(streamDB))
-    /** @type {!Array.<shaka.extern.StreamDB>} */
+    /* * @type {!Array.<shaka.extern.StreamDB>} */
     const videoStreams =
         period.streams.filter((streamDB) => this.isVideo_(streamDB))
 
     const periodStart = period.startTime
 
-    /** @type {!Map.<number, shaka.extern.Variant>} */
+    /* * @type {!Map.<number, shaka.extern.Variant>} */
     const variants = this.createVariants(
       audioStreams, videoStreams, timeline, periodStart, periodDuration)
 
-    /** @type {!Array.<shaka.extern.Stream>} */
+    /* * @type {!Array.<shaka.extern.Stream>} */
     const textStreams = period.streams
       .filter((streamDB) => this.isText_(streamDB))
       .map((streamDB) => this.fromStreamDB_(
@@ -97,7 +97,7 @@ export default class ManifestConverter {
     }
   }
 
-  /**
+  /* *
    * Recreates Variants from audio and video StreamDB collections.
    *
    * @param {!Array.<!shaka.extern.StreamDB>} audios
@@ -109,7 +109,7 @@ export default class ManifestConverter {
    */
   createVariants(audios, videos, timeline, periodStart, periodDuration) {
     // Get all the variant ids from all audio and video streams.
-    /** @type {!Set.<number>} */
+    /* * @type {!Set.<number>} */
     const variantIds = new Set()
     for (const streamDB of audios) {
       for (const id of streamDB.variantIds) {
@@ -122,7 +122,7 @@ export default class ManifestConverter {
       }
     }
 
-    /** @type {!Map.<number, shaka.extern.Variant>} */
+    /* * @type {!Map.<number, shaka.extern.Variant>} */
     const variantMap = new Map()
     for (const id of variantIds) {
       variantMap.set(id, this.createEmptyVariant_(id))
@@ -130,7 +130,7 @@ export default class ManifestConverter {
 
     // Assign each audio stream to its variants.
     for (const audio of audios) {
-      /** @type {shaka.extern.Stream} */
+      /* * @type {shaka.extern.Stream} */
       const stream = this.fromStreamDB_(
         audio, timeline, periodStart, periodDuration)
 
@@ -148,7 +148,7 @@ export default class ManifestConverter {
 
     // Assign each video stream to its variants.
     for (const video of videos) {
-      /** @type {shaka.extern.Stream} */
+      /* * @type {shaka.extern.Stream} */
       const stream = this.fromStreamDB_(
         video, timeline, periodStart, periodDuration)
 
@@ -166,7 +166,7 @@ export default class ManifestConverter {
     return variantMap
   }
 
-  /**
+  /* *
    * @param {shaka.extern.StreamDB} streamDB
    * @param {PresentationTimeline} timeline
    * @param {number} periodStart
@@ -179,7 +179,7 @@ export default class ManifestConverter {
       ? this.fromInitSegmentDB_(streamDB.initSegmentKey) : null
     const presentationTimeOffset = streamDB.presentationTimeOffset
 
-    /** @type {!Array.<!SegmentReference>} */
+    /* * @type {!Array.<!SegmentReference>} */
     const segments = streamDB.segments.map(
       (segment, index) => this.fromSegmentDB_(
         index, segment, initSegmentReference, presentationTimeOffset,
@@ -187,10 +187,10 @@ export default class ManifestConverter {
 
     timeline.notifySegments(segments)
 
-    /** @type {!SegmentIndex} */
+    /* * @type {!SegmentIndex} */
     const segmentIndex = new SegmentIndex(segments)
 
-    /** @type {shaka.extern.Stream} */
+    /* * @type {shaka.extern.Stream} */
     const stream = {
       id: streamDB.id,
       originalId: streamDB.originalId,
@@ -221,7 +221,7 @@ export default class ManifestConverter {
     return stream
   }
 
-  /**
+  /* *
    * @param {number} index
    * @param {shaka.extern.SegmentDB} segmentDB
    * @param {InitSegmentReference} initSegmentReference
@@ -234,7 +234,7 @@ export default class ManifestConverter {
   fromSegmentDB_(
     index, segmentDB, initSegmentReference, presentationTimeOffset,
     periodStart, periodDuration) {
-    /** @type {!OfflineUri} */
+    /* * @type {!OfflineUri} */
     const uri = OfflineUri.segment(
       this.mechanism_, this.cell_, segmentDB.dataKey)
 
@@ -249,31 +249,31 @@ export default class ManifestConverter {
       periodStart + segmentDB.startTime,
       periodStart + segmentDB.endTime,
       () => [uri.toString()],
-      /* startByte= */ 0,
-      /* endByte= */ null,
+      /*  startByte= */ 0,
+      /*  endByte= */ null,
       initSegmentReference,
       timestampOffset,
-      /* appendWindowStart= */ periodStart,
-      /* appendWindowEnd= */ periodStart + periodDuration)
+      /*  appendWindowStart= */ periodStart,
+      /*  appendWindowEnd= */ periodStart + periodDuration)
   }
 
-  /**
+  /* *
    * @param {number} key
    * @return {!InitSegmentReference}
    * @private
    */
   fromInitSegmentDB_(key) {
-    /** @type {!OfflineUri} */
+    /* * @type {!OfflineUri} */
     const uri = OfflineUri.segment(
       this.mechanism_, this.cell_, key)
 
     return new InitSegmentReference(
       () => [uri.toString()],
-      /* startBytes= */ 0,
-      /* endBytes= */ null)
+      /*  startBytes= */ 0,
+      /*  endBytes= */ null)
   }
 
-  /**
+  /* *
    * @param {shaka.extern.StreamDB} streamDB
    * @return {boolean}
    * @private
@@ -283,7 +283,7 @@ export default class ManifestConverter {
     return streamDB.contentType === ContentType.AUDIO
   }
 
-  /**
+  /* *
    * @param {shaka.extern.StreamDB} streamDB
    * @return {boolean}
    * @private
@@ -293,7 +293,7 @@ export default class ManifestConverter {
     return streamDB.contentType === ContentType.VIDEO
   }
 
-  /**
+  /* *
    * @param {shaka.extern.StreamDB} streamDB
    * @return {boolean}
    * @private
@@ -303,7 +303,7 @@ export default class ManifestConverter {
     return streamDB.contentType === ContentType.TEXT
   }
 
-  /**
+  /* *
    * Creates an empty Variant.
    *
    * @param {number} id
