@@ -3,6 +3,7 @@ import babel from 'rollup-plugin-babel'
 import node from '@rollup/plugin-node-resolve'
 import cjs from '@rollup/plugin-commonjs'
 import { terser } from 'rollup-plugin-terser'
+import strip from '@rollup/plugin-strip'
 // import ms from 'ms'
 // ！！！注意：配置plugins项时，`babel()`务必写在`commonjs()`上面，否则会出现意想不到的错误
 export default [
@@ -38,7 +39,10 @@ export default [
         ]
       }),
       cjs(), // so Rollup can convert `ms` to an ES module
-      terser()
+      terser(),
+      strip({
+        labels: ['unittest']
+      })
     ]
   },
 
