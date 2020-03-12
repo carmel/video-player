@@ -84,18 +84,20 @@ export default class ActiveStreamMap {
 
     return this.history_.get(period)
   }
-}
-/* *
- * A structure used to track which streams were played during a specific
- * time frame.
- *
- * @final
- */
-ActiveStreamMap.Frame = class {
-  constructor() {
-    /* * @type {?shaka.extern.Variant} */
-    this.variant = null
-    /* * @type {?shaka.extern.Stream} */
-    this.text = null
+  /* *
+    * A structure used to track which streams were played during a specific
+    * time frame.
+    *
+    * @final
+    */
+  static get Frame() {
+    return class {
+      constructor() {
+        /* * @type {?shaka.extern.Variant} */
+        this.variant = null
+        /* * @type {?shaka.extern.Stream} */
+        this.text = null
+      }
+    }
   }
 }

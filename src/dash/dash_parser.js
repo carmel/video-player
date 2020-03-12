@@ -1565,15 +1565,18 @@ export default class DashParser {
     // types well.
     return mimeType.split('/')[0]
   }
+  /* *
+    * Contains the minimum amount of time, in seconds, between manifest update
+    * requests.
+    *
+    * @private
+    * @const {number}
+    */
+  static get MIN_UPDATE_PERIOD_() {
+    return 3
+  }
 }
-/* *
- * Contains the minimum amount of time, in seconds, between manifest update
- * requests.
- *
- * @private
- * @const {number}
- */
-DashParser.MIN_UPDATE_PERIOD_ = 3
+
 /* *
  * @typedef {
  *   function(!Array.<string>, ?number, ?number):!Promise.<BufferSource>
@@ -1747,6 +1750,7 @@ DashParser.GenerateSegmentIndexFunction
  *   An async function to create the SegmentIndex for the stream.
  */
 DashParser.StreamInfo
+
 ManifestParser.registerParserByExtension(
   'mpd', () => new DashParser())
 ManifestParser.registerParserByMime(

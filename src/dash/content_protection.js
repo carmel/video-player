@@ -458,6 +458,61 @@ export default class ContentProtection {
       init: (init.length > 0 ? init : null)
     }
   }
+  /* *
+    * Enum for PlayReady record types.
+    * @enum {number}
+    */
+  static get PLAYREADY_RECORD_TYPES() {
+    return {
+      RIGHTS_MANAGEMENT: 0x001,
+      RESERVED: 0x002,
+      EMBEDDED_LICENSE: 0x003
+    }
+  }
+  /* *
+  * A map of scheme URI to key system name.
+  *
+  * @const {!Map.<string, string>}
+  * @private
+  */
+  static get defaultKeySystems_() {
+    return new Map()
+      .set('urn:uuid:1077efec-c0b2-4d02-ace3-3c1e52e2fb4b',
+        'org.w3.clearkey')
+      .set('urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',
+        'com.widevine.alpha')
+      .set('urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',
+        'com.microsoft.playready')
+      .set('urn:uuid:f239e769-efa3-4850-9c16-a903c6932efb',
+        'com.adobe.primetime')
+  }
+  /* *
+    * A map of key system name to license server url parser.
+    *
+    * @const {!Map.<string, function(ContentProtection.Element)>}
+    * @private
+    */
+  static get licenseUrlParsers_() {
+    return new Map()
+      .set('com.widevine.alpha',
+        ContentProtection.getWidevineLicenseUrl)
+      .set('com.microsoft.playready',
+        ContentProtection.getPlayReadyLicenseUrl)
+  }
+  /* *
+  * @const {string}
+  * @private
+  */
+  static get MP4Protection_() {
+    return 'urn:mpeg:dash:mp4protection:2011'
+  }
+  /* *
+  * @const {string}
+  * @private
+  */
+  static get CencNamespaceUri_() {
+    return 'urn:mpeg:cenc:2013'
+  }
 }
 
 /* *
@@ -475,16 +530,6 @@ export default class ContentProtection {
  *   Record content.
  */
 ContentProtection.PlayReadyRecord
-
-/* *
- * Enum for PlayReady record types.
- * @enum {number}
- */
-ContentProtection.PLAYREADY_RECORD_TYPES = {
-  RIGHTS_MANAGEMENT: 0x001,
-  RESERVED: 0x002,
-  EMBEDDED_LICENSE: 0x003
-}
 
 /* *
  * @typedef {{
@@ -535,42 +580,3 @@ ContentProtection.Context
  *   this is non-null, there is at least one element.
  */
 ContentProtection.Element
-/* *
- * A map of scheme URI to key system name.
- *
- * @const {!Map.<string, string>}
- * @private
- */
-ContentProtection.defaultKeySystems_ = new Map()
-  .set('urn:uuid:1077efec-c0b2-4d02-ace3-3c1e52e2fb4b',
-    'org.w3.clearkey')
-  .set('urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',
-    'com.widevine.alpha')
-  .set('urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',
-    'com.microsoft.playready')
-  .set('urn:uuid:f239e769-efa3-4850-9c16-a903c6932efb',
-    'com.adobe.primetime')
-
-/* *
- * A map of key system name to license server url parser.
- *
- * @const {!Map.<string, function(ContentProtection.Element)>}
- * @private
- */
-ContentProtection.licenseUrlParsers_ = new Map()
-  .set('com.widevine.alpha',
-    ContentProtection.getWidevineLicenseUrl)
-  .set('com.microsoft.playready',
-    ContentProtection.getPlayReadyLicenseUrl)
-
-/* *
- * @const {string}
- * @private
- */
-ContentProtection.MP4Protection_ =
-    'urn:mpeg:dash:mp4protection:2011'
-/* *
- * @const {string}
- * @private
- */
-ContentProtection.CencNamespaceUri_ = 'urn:mpeg:cenc:2013'

@@ -27,11 +27,8 @@ export default class Deprecate {
    * @param {string} versionString
    */
   static init(versionString) {
-    console.assert(
-      enforcer_ == null,
-      'Deprecate.init should only be called once.')
-
-    enforcer_ = new Enforcer(
+    console.assert(Deprecate.enforcer_ == null, 'Deprecate.init should only be called once.')
+    Deprecate.enforcer_ = new Enforcer(
       Version.parse(versionString),
       Deprecate.onPending_,
       Deprecate.onExpired_)
@@ -47,7 +44,7 @@ export default class Deprecate {
    * @param {string} description
    */
   static deprecateFeature(major, minor, name, description) {
-    const enforcer = enforcer_
+    const enforcer = Deprecate.enforcer_
     console.assert(
       enforcer,
       'Missing deprecation enforcer. Was |init| called?')
@@ -102,14 +99,15 @@ export default class Deprecate {
     console.error(errorMessage)
     console.assert(false, errorMessage)
   }
+  /* *
+    * The global deprecation enforcer that will be set by the player (because the
+    * player knows the version) when it calls |init|. This may appear a little
+    * round-about to you, because it is. Since player uses |Deprecate|, it means
+    * that |Deprecate| can't depend on Player directly.
+    *
+    * @private {Enforcer}
+    */
+  static get enforcer_() {
+    return null
+  }
 }
-
-/* *
- * The global deprecation enforcer that will be set by the player (because the
- * player knows the version) when it calls |init|. This may appear a little
- * round-about to you, because it is. Since player uses |Deprecate|, it means
- * that |Deprecate| can't depend on Player directly.
- *
- * @private {Enforcer}
- */
-let enforcer_ = null

@@ -492,6 +492,13 @@ export default class MpdUtils {
       return element
     })
   }
+  /* *
+    * @const {string}
+    * @private
+    */
+  static get XlinkNamespaceUri_() {
+    return 'http://www.w3.org/1999/xlink'
+  }
 }
 /* *
  * @typedef {{
@@ -538,8 +545,4 @@ MpdUtils.TimeRange
  *   The timeline of the representation, if given.  Times in seconds.
  */
 MpdUtils.SegmentInfo
-/* *
- * @const {string}
- * @private
- */
-MpdUtils.XlinkNamespaceUri_ = 'http://www.w3.org/1999/xlink'
+
