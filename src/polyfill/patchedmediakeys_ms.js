@@ -1,4 +1,3 @@
-import DrmEngine from '../media/drm_engine'
 import polyfill from './all'
 import BufferUtils from '../util/buffer_utils'
 import EventManager from '../util/event_manager'
@@ -630,31 +629,6 @@ PatchedMediaKeysMs.MediaKeyStatusMap = class {
   getStatus() {
     return this.status_
   }
-
-  /* * @override */
-  forEach(fn) {
-    if (this.status_) {
-      fn(this.status_, DrmEngine.DUMMY_KEY_ID.value())
-    }
-  }
-
-  /* * @override */
-  get(keyId) {
-    if (this.has(keyId)) {
-      return this.status_
-    }
-    return undefined
-  }
-
-  /* * @override */
-  has(keyId) {
-    const fakeKeyId = DrmEngine.DUMMY_KEY_ID.value()
-    if (this.status_ && BufferUtils.equal(keyId, fakeKeyId)) {
-      return true
-    }
-    return false
-  }
-
   /* *
    * @suppress {missingReturn}
    * @override

@@ -45,15 +45,6 @@ export default class ManifestConverter {
       periods.push(this.fromPeriodDB(periodDB, periodDuration, timeline))
     }
 
-    const drmInfos = manifestDB.drmInfo ? [manifestDB.drmInfo] : []
-    if (manifestDB.drmInfo) {
-      for (const period of periods) {
-        for (const variant of period.variants) {
-          variant.drmInfos = drmInfos
-        }
-      }
-    }
-
     return {
       presentationTimeline: timeline,
       minBufferTime: 2,
@@ -318,7 +309,6 @@ export default class ManifestConverter {
       audio: null,
       video: null,
       bandwidth: 0,
-      drmInfos: [],
       allowedByApplication: true,
       allowedByKeySystem: true
     }

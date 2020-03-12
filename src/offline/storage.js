@@ -1,10 +1,8 @@
 import Player from '../main'
-import DrmEngine from '../media/drm_engine'
 import ManifestParser from '../media/manifest_parser'
 import { NetworkingEngine } from '../net/networking_engine'
 import DownloadManager from './download_manager'
 import OfflineUri from './offline_uri'
-import SessionDeleter from './session_deleter'
 import StorageMuxer from './storage_muxer'
 import StoredContentUtils from './stored_content_utils'
 import StreamBandwidthEstimator from './stream_bandwidth_estimator'
@@ -14,12 +12,9 @@ import Error from '../util/error'
 import Functional from '../util/functional'
 // import IDestroyable from '../util/i_destroyable'
 import Iterables from '../util/iterables'
-import ManifestFilter from '../util/manifest_filter'
 import Networking from '../util/networking'
-import Periods from '../util/periods'
 import Platform from '../util/platform'
 import PlayerConfiguration from '../util/player_configuration'
-import StreamUtils from '../util/stream_utils'
 import ConfigUtils from '../util/config_utils'
 
 /* *
@@ -307,31 +302,15 @@ export default class Storage {
     // get initialized when we enter the catch/finally block, we need to assume
     // that they may be null/undefined when we get there.
     /* * @type {?DrmEngine} */
-    let drmEngine = null
     /* * @type {StorageMuxer} */
     const muxer = new StorageMuxer()
     /* * @type {?StorageCellHandle} */
     let activeHandle = null
 
-    // This will be used to store any errors from drm engine. Whenever drm
-    // engine is passed to another function to do work, we should check if this
-    // was set.
-    let drmError = null
-
     try {
-      drmEngine = await this.createDrmEngine(
-        manifest,
-        (e) => { drmError = drmError || e })
-
       // We could have been asked to destroy ourselves while we were 'away'
       // creating the drm engine.
       this.ensureNotDestroyed_()
-      if (drmError) {
-        throw drmError
-      }
-
-      await this.filterManifest_(manifest, drmEngine)
-
       await muxer.init()
       this.ensureNotDestroyed_()
 
@@ -341,15 +320,9 @@ export default class Storage {
       activeHandle = await muxer.getActive()
       this.ensureNotDestroyed_()
 
-      console.assert(drmEngine, 'drmEngine should be non-null here.')
-
       const manifestDB = await this.downloadManifest_(
-        activeHandle.cell, drmEngine, manifest, uri, appMetadata)
+        activeHandle.cell, manifest, uri, appMetadata)
       this.ensureNotDestroyed_()
-      if (drmError) {
-        throw drmError
-      }
-
       const ids = await activeHandle.cell.addManifests([manifestDB])
       this.ensureNotDestroyed_()
 
@@ -366,95 +339,12 @@ export default class Storage {
         await activeHandle.cell.removeSegments(
           this.segmentsFromStore_, () => {})
       }
-
-      // If we already had an error, ignore this error to avoid hiding
-      // the original error.
-      throw drmError || e
     } finally {
       this.storeInProgress_ = false
       this.segmentsFromStore_ = []
-
       await muxer.destroy()
-      if (drmEngine) {
-        await drmEngine.destroy()
-      }
     }
   }
-
-  /* *
-   * Filter |manifest| such that it will only contain the variants and text
-   * streams that we want to store and can actually play.
-   *
-   * @param {shaka.extern.Manifest} manifest
-   * @param {!DrmEngine} drmEngine
-   * @return {!Promise}
-   * @private
-   */
-  async filterManifest_(manifest, drmEngine) {
-    // Filter the manifest based on the restrictions given in the player
-    // configuration.
-    const maxHwRes = { width: Infinity, height: Infinity }
-    ManifestFilter.filterByRestrictions(
-      manifest, this.config_.restrictions, maxHwRes)
-
-    // Filter the manifest based on what we know media source will be able to
-    // play later (no point storing something we can't play).
-    ManifestFilter.filterByMediaSourceSupport(manifest)
-
-    // Filter the manifest based on what we know our drm system will support
-    // playing later.
-    ManifestFilter.filterByDrmSupport(manifest, drmEngine)
-
-    // Filter the manifest so that it will only use codecs that are available in
-    // all periods.
-    ManifestFilter.filterByCommonCodecs(manifest)
-
-    // Filter each variant based on what the app says they want to store. The
-    // app will only be given variants that are compatible with all previous
-    // post-filtered periods.
-    await ManifestFilter.rollingFilter(manifest, async(period) => {
-      const allTracks = []
-
-      for (const variant of period.variants) {
-        console.assert(
-          StreamUtils.isPlayable(variant),
-          'We should have already filtered by `is playable`')
-
-        allTracks.push(StreamUtils.variantToTrack(variant))
-      }
-
-      for (const text of period.textStreams) {
-        allTracks.push(StreamUtils.textStreamToTrack(text))
-      }
-
-      const chosenTracks =
-          await this.config_.offline.trackSelectionCallback(allTracks)
-
-      /* * @type {!Set.<number>} */
-      const variantIds = new Set()
-      /* * @type {!Set.<number>} */
-      const textIds = new Set()
-
-      for (const track of chosenTracks) {
-        if (track.type === 'variant') {
-          variantIds.add(track.id)
-        }
-        if (track.type === 'text') {
-          textIds.add(track.id)
-        }
-      }
-
-      period.variants =
-          period.variants.filter((variant) => variantIds.has(variant.id))
-      period.textStreams =
-          period.textStreams.filter((stream) => textIds.has(stream.id))
-    })
-
-    // Check the post-filtered manifest for characteristics that may indicate
-    // issues with how the app selected tracks.
-    Storage.validateManifest_(manifest)
-  }
-
   /* *
    * Create a download manager and download the manifest.
    *
@@ -466,34 +356,13 @@ export default class Storage {
    * @return {!Promise.<shaka.extern.ManifestDB>}
    * @private
    */
-  async downloadManifest_(storage, drmEngine, manifest, uri, metadata) {
+  async downloadManifest_(storage, manifest, uri, metadata) {
     console.assert(
       this.networkingEngine_,
       'Cannot call |downloadManifest_| after calling |destroy|.')
 
     const pendingContent = StoredContentUtils.fromManifest(
       uri, manifest, /*  size= */ 0, metadata)
-
-    const isEncrypted = manifest.periods.some((period) => {
-      return period.variants.some((variant) => {
-        return variant.drmInfos && variant.drmInfos.length
-      })
-    })
-    const includesInitData = manifest.periods.some((period) => {
-      return period.variants.some((variant) => {
-        return variant.drmInfos.some((drmInfos) => {
-          return drmInfos.initData && drmInfos.initData.length
-        })
-      })
-    })
-    const needsInitData = isEncrypted && !includesInitData
-
-    let currentSystemId = null
-    if (needsInitData) {
-      const drmInfo = drmEngine.getDrmInfo()
-      currentSystemId =
-          Storage.defaultSystemIds_.get(drmInfo.keySystem)
-    }
 
     /* * @type {!DownloadManager} */
     const downloader = new DownloadManager(
@@ -503,31 +372,14 @@ export default class Storage {
         // update.
         pendingContent.size = size
         this.config_.offline.progressCallback(pendingContent, progress)
-      },
-      (initData, systemId) => {
-        if (needsInitData && this.config_.offline.usePersistentLicense &&
-              currentSystemId === systemId) {
-          drmEngine.newInitData('cenc', initData)
-        }
       })
 
     try {
       const manifestDB = this.createOfflineManifest_(
-        downloader, storage, drmEngine, manifest, uri, metadata)
+        downloader, storage, manifest, uri, metadata)
 
       manifestDB.size = await downloader.waitToFinish()
-      manifestDB.expiration = drmEngine.getExpiration()
-      const sessions = drmEngine.getSessionIds()
-      manifestDB.sessionIds = this.config_.offline.usePersistentLicense
-        ? sessions : []
-
-      if (isEncrypted && this.config_.offline.usePersistentLicense &&
-          !sessions.length) {
-        throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.STORAGE,
-          Error.Code.NO_INIT_DATA_FOR_OFFLINE)
-      }
+      manifestDB.sessionIds = []
 
       return manifestDB
     } finally {
@@ -580,7 +432,6 @@ export default class Storage {
       const manifest = manifests[0]
 
       await Promise.all([
-        this.removeFromDRM_(uri, manifest, muxer),
         this.removeFromStorage_(cell, uri, manifest)
       ])
     } finally {
@@ -601,32 +452,15 @@ export default class Storage {
     for (const period of manifestDb.periods) {
       for (const stream of period.streams) {
         if (isVideo && stream.contentType === 'video') {
-          ret.push({
-            contentType: MimeUtils.getFullType(stream.mimeType, stream.codecs),
-            robustness: manifestDb.drmInfo.videoRobustness
+          ret.push({contentType: MimeUtils.getFullType(stream.mimeType, stream.codecs)
           })
         } else if (!isVideo && stream.contentType === 'audio') {
           ret.push({
-            contentType: MimeUtils.getFullType(stream.mimeType, stream.codecs),
-            robustness: manifestDb.drmInfo.audioRobustness
-          })
+            contentType: MimeUtils.getFullType(stream.mimeType, stream.codecs)})
         }
       }
     }
     return ret
-  }
-
-  /* *
-   * @param {!OfflineUri} uri
-   * @param {shaka.extern.ManifestDB} manifestDb
-   * @param {!StorageMuxer} muxer
-   * @return {!Promise}
-   * @private
-   */
-  async removeFromDRM_(uri, manifestDb, muxer) {
-    console.assert(this.networkingEngine_, 'Cannot be destroyed')
-    await Storage.deleteLicenseFor_(
-      this.networkingEngine_, this.config_.drm, muxer, manifestDb)
   }
 
   /* *
@@ -656,63 +490,6 @@ export default class Storage {
       storage.removeSegments(segmentIds, onRemove),
       storage.removeManifests([uri.key()], onRemove)
     ])
-  }
-
-  /* *
-   * Removes any EME sessions that were not successfully removed before.  This
-   * returns whether all the sessions were successfully removed.
-   *
-   * @return {!Promise.<boolean>}
-   * @export
-   */
-  removeEmeSessions() {
-    return this.startOperation_(this.removeEmeSessions_())
-  }
-
-  /* *
-   * @return {!Promise.<boolean>}
-   * @private
-   */
-  async removeEmeSessions_() {
-    this.requireSupport_()
-
-    console.assert(this.networkingEngine_, 'Cannot be destroyed')
-    const net = this.networkingEngine_
-    const config = this.config_.drm
-
-    /* * @type {!StorageMuxer} */
-    const muxer = new StorageMuxer()
-    /* * @type {!SessionDeleter} */
-    const deleter = new SessionDeleter()
-
-    let hasRemaining = false
-
-    try {
-      await muxer.init()
-
-      /* * @type {!Array.<shaka.extern.EmeSessionStorageCell>} */
-      const cells = []
-      muxer.forEachEmeSessionCell((c) => cells.push(c))
-
-      // Run these sequentially to avoid creating too many DrmEngine instances
-      // and having multiple CDMs alive at once.  Some embedded platforms may
-      // not support that.
-      for (const sessionIdCell of cells) {
-        /*  eslint-disable no-await-in-loop */
-        const sessions = await sessionIdCell.getAll()
-        const deletedSessionIds = await deleter.delete(config, net, sessions)
-        await sessionIdCell.remove(deletedSessionIds)
-
-        if (deletedSessionIds.length !== sessions.length) {
-          hasRemaining = true
-        }
-        /*  eslint-enable no-await-in-loop */
-      }
-    } finally {
-      await muxer.destroy()
-    }
-
-    return !hasRemaining
   }
 
   /* *
@@ -842,40 +619,6 @@ export default class Storage {
       await parser.stop()
     }
   }
-
-  /* *
-   * This method is public so that it can be override in testing.
-   *
-   * @param {shaka.extern.Manifest} manifest
-   * @param {function(Error)} onError
-   * @return {!Promise.<!DrmEngine>}
-   */
-  async createDrmEngine(manifest, onError) {
-    console.assert(
-      this.networkingEngine_,
-      'Cannot call |createDrmEngine| after |destroy|')
-
-    /* * @type {!DrmEngine} */
-    const drmEngine = new DrmEngine({
-      netEngine: this.networkingEngine_,
-      onError: onError,
-      onKeyStatus: () => {},
-      onExpirationUpdated: () => {},
-      onEvent: () => {}
-    })
-
-    const variants = Periods.getAllVariantsFrom(manifest.periods)
-
-    const config = this.config_
-    drmEngine.configure(config.drm)
-    await drmEngine.initForStorage(
-      variants, config.offline.usePersistentLicense)
-    await drmEngine.setServerCertificate()
-    await drmEngine.createOrLoad()
-
-    return drmEngine
-  }
-
   /* *
    * Creates an offline 'manifest' for the real manifest.  This does not store
    * the segments yet, only adds them to the download manager through
@@ -891,30 +634,19 @@ export default class Storage {
    * @private
    */
   createOfflineManifest_(
-    downloader, storage, drmEngine, manifest, originalManifestUri, metadata) {
+    downloader, storage, manifest, originalManifestUri, metadata) {
     const estimator = new StreamBandwidthEstimator()
 
     const periods = manifest.periods.map((period) => {
       return this.createPeriod_(
-        downloader, storage, estimator, drmEngine, manifest, period)
+        downloader, storage, estimator, manifest, period)
     })
-
-    const usePersistentLicense = this.config_.offline.usePersistentLicense
-    const drmInfo = drmEngine.getDrmInfo()
-
-    if (drmInfo && usePersistentLicense) {
-      // Don't store init data, since we have stored sessions.
-      drmInfo.initData = []
-    }
 
     return {
       originalManifestUri: originalManifestUri,
       duration: manifest.presentationTimeline.getDuration(),
       size: 0,
-      expiration: drmEngine.getExpiration(),
       periods: periods,
-      sessionIds: usePersistentLicense ? drmEngine.getSessionIds() : [],
-      drmInfo: drmInfo,
       appMetadata: metadata
     }
   }
@@ -934,7 +666,7 @@ export default class Storage {
    * @return {shaka.extern.PeriodDB}
    * @private
    */
-  createPeriod_(downloader, storage, estimator, drmEngine, manifest, period) {
+  createPeriod_(downloader, storage, estimator, manifest, period) {
     // Pass all variants and text streams to the estimator so that we can
     // get the best estimate for each stream later.
     for (const variant of period.variants) {
@@ -1189,48 +921,6 @@ export default class Storage {
       await muxer.destroy()
     }
   }
-
-  /* *
-   * @param {!NetworkingEngine} net
-   * @param {!shaka.extern.DrmConfiguration} drmConfig
-   * @param {!StorageMuxer} muxer
-   * @param {shaka.extern.ManifestDB} manifestDb
-   * @return {!Promise}
-   * @private
-   */
-  static async deleteLicenseFor_(net, drmConfig, muxer, manifestDb) {
-    if (!manifestDb.drmInfo) {
-      return
-    }
-
-    const sessionIdCell = muxer.getEmeSessionCell()
-
-    /* * @type {!Array.<shaka.extern.EmeSessionDB>} */
-    const sessions = manifestDb.sessionIds.map((sessionId) => {
-      return {
-        sessionId: sessionId,
-        keySystem: manifestDb.drmInfo.keySystem,
-        licenseUri: manifestDb.drmInfo.licenseServerUri,
-        serverCertificate: manifestDb.drmInfo.serverCertificate,
-        audioCapabilities: Storage.getCapabilities_(
-          manifestDb,
-          /*  isVideo= */ false),
-        videoCapabilities: Storage.getCapabilities_(
-          manifestDb,
-          /*  isVideo= */ true)
-      }
-    })
-    // Try to delete the sessions; any sessions that weren't deleted get stored
-    // in the database so we can try to remove them again later.  This allows us
-    // to still delete the stored content but not 'forget' about these sessions.
-    // Later, we can remove the sessions to free up space.
-    const deleter = new SessionDeleter()
-    const deletedSessionIds = await deleter.delete(drmConfig, net, sessions)
-    await sessionIdCell.remove(deletedSessionIds)
-    await sessionIdCell.add(sessions.filter(
-      (session) => !deletedSessionIds.includes(session.sessionId)))
-  }
-
   /* *
    * Get the set of all streams in |manifest|.
    *

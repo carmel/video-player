@@ -218,7 +218,6 @@ export default class Platform {
    * @return {!HTMLMediaElement}
    */
   static anyMediaElement() {
-    const Platform = Platform
     if (Platform.cachedMediaElement_) {
       return Platform.cachedMediaElement_
     }
@@ -242,8 +241,6 @@ export default class Platform {
   }
 }
 
-/* * @private {Timer} */
-Platform.cacheExpirationTimer_ = null
-
-/* * @private {HTMLMediaElement} */
 Platform.cachedMediaElement_ = null
+
+Platform.cacheExpirationTimer_ = null

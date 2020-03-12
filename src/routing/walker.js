@@ -1,5 +1,6 @@
 import Destroyer from '../util/destroyer'
 import PublicPromise from '../util/public_promise'
+import Error from '../util/error'
 // import IDestroyable from '../util/i_destroyable'
 
 /* *

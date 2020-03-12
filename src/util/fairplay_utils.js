@@ -58,7 +58,6 @@ export default class FairPlayUtils {
     if (!cert || !cert.byteLength) {
       throw new Error(
         Error.Severity.CRITICAL,
-        Error.Category.DRM,
         Error.Code.SERVER_CERTIFICATE_REQUIRED)
     }
 

@@ -136,13 +136,7 @@ export default class PlayerConfiguration {
       // log message, because those are stripped in the compiled build.
       progressCallback: (content, progress) => {
         return [content, progress]
-      },
-
-      // By default we use persistent licenses as forces errors to surface if
-      // a platform does not support offline licenses rather than causing
-      // unexpected behaviours when someone tries to plays downloaded content
-      // without a persistent license.
-      usePersistentLicense: true
+      }
     }
 
     const abr = {

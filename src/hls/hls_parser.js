@@ -6,7 +6,6 @@ import { InitSegmentReference, SegmentReference } from '../media/segment_referen
 import ManifestParser from '../media/manifest_parser'
 import PresentationTimeline from '../media/presentation_timeline'
 import SegmentIndex from '../media/segment_index'
-import DataUriPlugin from '../net/data_uri_plugin'
 import { NetworkingEngine } from '../net/networking_engine'
 import ArrayUtils from '../util/array_utils'
 import DataViewReader from '../util/data_view_reader'
@@ -20,7 +19,6 @@ import Mp4Parser from '../util/mp4_parser'
 import Networking from '../util/networking'
 import OperationManager from '../util/operation_manager'
 import Timer from '../util/timer'
-import BufferUtils from '../util/buffer_utils'
 
 /* *
  * HLS parser.
@@ -861,20 +859,11 @@ export default class HlsParser {
       for (const videoInfo of videoInfos) {
         const audioStream = audioInfo ? audioInfo.stream : null
         const videoStream = videoInfo ? videoInfo.stream : null
-        const audioDrmInfos = audioInfo ? audioInfo.drmInfos : null
-        const videoDrmInfos = videoInfo ? videoInfo.drmInfos : null
         const videoStreamUri =
         videoInfo ? videoInfo.verbatimMediaPlaylistUri : ''
         const audioStreamUri =
         audioInfo ? audioInfo.verbatimMediaPlaylistUri : ''
         const variantUriKey = videoStreamUri + ' - ' + audioStreamUri
-
-        let drmInfos
-        if (audioStream) {
-          drmInfos = audioDrmInfos
-        } else if (videoStream) {
-          drmInfos = videoDrmInfos
-        }
 
         if (this.variantUriSet_.has(variantUriKey)) {
           // This happens when two variants only differ in their text streams.
@@ -898,7 +887,6 @@ export default class HlsParser {
           audio: audioStream,
           video: videoStream,
           bandwidth: bandwidth,
-          drmInfos: drmInfos,
           allowedByApplication: true,
           allowedByKeySystem: true
         }
@@ -1068,58 +1056,10 @@ export default class HlsParser {
         Error.Code.HLS_INVALID_PLAYLIST_HIERARCHY)
     }
 
-    /* * @type {!Array.<!Tag>} */
-    const drmTags = []
-    if (playlist.segments) {
-      for (const segment of playlist.segments) {
-        const segmentKeyTags = Utils.filterTagsByName(segment.tags,
-          'EXT-X-KEY')
-        drmTags.push(...segmentKeyTags)
-      }
-    }
-
     let encrypted = false
     /** @type {!Array.<shaka.extern.DrmInfo>} */
-    const drmInfos = []
     let keyId = null
 
-    // TODO: May still need changes to support key rotation.
-    for (const drmTag of drmTags) {
-      const method = drmTag.getRequiredAttrValue('METHOD')
-      if (method !== 'NONE') {
-        encrypted = true
-
-        // We do not support AES-128 encryption with HLS yet. So, do not create
-        // StreamInfo for the playlist encrypted with AES-128.
-        // TODO: Remove the error message once we add support for AES-128.
-        if (method === 'AES-128') {
-          console.warning('Unsupported HLS Encryption', method)
-          this.aesEncrypted_ = true
-          return null
-        }
-
-        const keyFormat = drmTag.getRequiredAttrValue('KEYFORMAT')
-        const drmParser =
-            HlsParser.KEYFORMATS_TO_DRM_PARSERS_[keyFormat]
-
-        const drmInfo = drmParser ? drmParser(drmTag) : null
-        if (drmInfo) {
-          if (drmInfo.keyIds.length) {
-            keyId = drmInfo.keyIds[0]
-          }
-          drmInfos.push(drmInfo)
-        } else {
-          console.warning('Unsupported HLS KEYFORMAT', keyFormat)
-        }
-      }
-    }
-
-    if (encrypted && !drmInfos.length) {
-      throw new Error(
-        Error.Severity.CRITICAL,
-        Error.Category.MANIFEST,
-        Error.Code.HLS_KEYFORMATS_NOT_SUPPORTED)
-    }
     console.assert(playlist.segments !== null,
       'Media playlist should have segments!')
 
@@ -1190,7 +1130,6 @@ export default class HlsParser {
 
     return {
       stream,
-      drmInfos,
       verbatimMediaPlaylistUri,
       absoluteMediaPlaylistUri,
       minTimestamp,
@@ -2144,40 +2083,6 @@ export default class HlsParser {
 
     return op.promise
   }
-
-  /* *
-   * @param {!Tag} drmTag
-   * @return {?shaka.extern.DrmInfo}
-   * @private
-   */
-  static widevineDrmParser_(drmTag) {
-    const method = drmTag.getRequiredAttrValue('METHOD')
-    const VALID_METHODS = ['SAMPLE-AES', 'SAMPLE-AES-CTR']
-    if (!VALID_METHODS.includes(method)) {
-      console.error('Widevine in HLS is only supported with [',
-        VALID_METHODS.join(', '), '], not', method)
-      return null
-    }
-
-    const uri = drmTag.getRequiredAttrValue('URI')
-    const parsedData = DataUriPlugin.parseRaw(uri)
-
-    // The data encoded in the URI is a PSSH box to be used as init data.
-    const pssh = BufferUtils.toUint8(parsedData.data)
-    const drmInfo = ManifestParserUtils.createDrmInfo(
-      'com.widevine.alpha', [
-        { initDataType: 'cenc', initData: pssh }
-      ])
-
-    const keyId = drmTag.getAttributeValue('KEYID')
-    if (keyId) {
-      // This value should begin with '0x':
-      console.assert(keyId.startsWith('0x'), 'Incorrect KEYID format!')
-      // But the output should not contain the '0x':
-      drmInfo.keyIds = [keyId.substr(2).toLowerCase()]
-    }
-    return drmInfo
-  }
 }
 /* *
  * @typedef {{
@@ -2332,23 +2237,11 @@ HlsParser.EXTENSION_MAP_BY_CONTENT_TYPE_ = {
   'video': HlsParser.VIDEO_EXTENSIONS_TO_MIME_TYPES_,
   'text': HlsParser.TEXT_EXTENSIONS_TO_MIME_TYPES_
 }
-/* *
- * @typedef {function(!Tag):?shaka.extern.DrmInfo}
- * @private
- */
-HlsParser.DrmParser_
+
 /* *
  * @const {!Object.<string, HlsParser.DrmParser_>}
  * @private
  */
-HlsParser.KEYFORMATS_TO_DRM_PARSERS_ = {
-  /*  TODO: https://github.com/google/shaka-player/issues/382
-  'com.apple.streamingkeydelivery':
-      HlsParser.fairplayDrmParser_,
-  */
-  'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed':
-      HlsParser.widevineDrmParser_
-}
 /* *
  * @enum {string}
  * @private

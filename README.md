@@ -16,5 +16,20 @@ $ rollup player.js --file bundle.js --format cjs
 + For both browsers and Node.js:
 ```shell
 # UMD format requires a bundle name
-$ rollup player.js --file bundle.js --format umd --name "myBundle"
+$ rollup player.js --file bundle.js --format umd --name VideoPlayer
+```
+
+### Test the class's static property syntax
+```shell
+$ cd test && rollup static_property.js --file bundle.js --format cjs
+```
+```javascript
+// create file named test.js, content as below:
+const sp = require('./bundle')
+console.log(sp.Title)
+```
+```shell
+#then run: 
+$ node test.js
+#The result as you see.
 ```

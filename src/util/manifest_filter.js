@@ -46,21 +46,6 @@ export default class ManifestFilter {
   }
 
   /* *
-   * Filter the variants in |manifest| to only include those that are supported
-   * by |drm|.
-   *
-   * @param {shaka.extern.Manifest} manifest
-   * @param {!DrmEngine} drmEngine
-   */
-  static filterByDrmSupport(manifest, drmEngine) {
-    for (const period of manifest.periods) {
-      period.variants = period.variants.filter((variant) => {
-        return drmEngine.supportsVariant(variant)
-      })
-    }
-  }
-
-  /* *
    * Filter the variants in |manifest| to only include those that use codecs
    * that will be supported in each variant. This ensures playback from the
    * first period to the last period by 'jumping between' compatible variants.

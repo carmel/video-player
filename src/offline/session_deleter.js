@@ -1,84 +1,8 @@
 import ArrayUtils from '../util/array_utils'
-import DrmEngine from '../media/drm_engine'
 /* *
  * Contains a utility method to delete persistent EME sessions.
  */
 export default class SessionDeleter {
-  /* *
-   * Deletes the given sessions.  This never fails and instead logs the error.
-   *
-   * @param {shaka.extern.DrmConfiguration} config
-   * @param {!NetworkingEngine} netEngine
-   * @param {!Array.<shaka.extern.EmeSessionDB>} sessions
-   * @return {!Promise.<!Array.<string>>} The session IDs that were deleted.
-   */
-  async delete(config, netEngine, sessions) {
-    const SessionDeleter = SessionDeleter
-
-    let deleted = []
-    for (const bucket of SessionDeleter.createBuckets_(sessions)) {
-      // Run these sequentially to avoid creating multiple CDM instances at one
-      // time.  Some embedded platforms may not support multiples.
-      const p = this.doDelete_(config, netEngine, bucket)
-      const cur = await p // eslint-disable-line no-await-in-loop
-      deleted = deleted.concat(cur)
-    }
-    return deleted
-  }
-  /* *
-   * Performs the deletion of the given session IDs.
-   *
-   * @param {shaka.extern.DrmConfiguration} config
-   * @param {!NetworkingEngine} netEngine
-   * @param {SessionDeleter.Bucket_} bucket
-   * @return {!Promise.<!Array.<string>>} The sessions that were deleted
-   * @private
-   */
-  async doDelete_(config, netEngine, bucket) {
-    /* * @type {!DrmEngine} */
-    const drmEngine = new DrmEngine({
-      netEngine: netEngine,
-      onError: () => {},
-      onKeyStatus: () => {},
-      onExpirationUpdated: () => {},
-      onEvent: () => {}
-    })
-
-    try {
-      drmEngine.configure(config)
-      await drmEngine.initForRemoval(
-        bucket.info.keySystem, bucket.info.licenseUri,
-        bucket.info.serverCertificate,
-        bucket.info.audioCapabilities, bucket.info.videoCapabilities)
-    } catch (e) {
-      console.warning('Error initializing EME', e)
-      await drmEngine.destroy()
-      return []
-    }
-
-    try {
-      await drmEngine.setServerCertificate()
-    } catch (e) {
-      console.warning('Error setting server certificate', e)
-      await drmEngine.destroy()
-      return []
-    }
-
-    /* * @type {!Array.<string>} */
-    const sessionIds = []
-    await Promise.all(bucket.sessionIds.map(async(sessionId) => {
-      // This method is in a .map(), so this starts multiple removes at once,
-      // so this removes the sessions in parallel.
-      try {
-        await drmEngine.removeSession(sessionId)
-        sessionIds.push(sessionId)
-      } catch (e) {
-        console.warning('Error deleting offline session', e)
-      }
-    }))
-    await drmEngine.destroy()
-    return sessionIds
-  }
   /* *
    * Collects the given sessions into buckets that can be done at the same time.
    * Since querying with different parameters can give us back different CDMs,

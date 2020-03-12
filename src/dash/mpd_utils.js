@@ -492,14 +492,9 @@ export default class MpdUtils {
       return element
     })
   }
-  /* *
-    * @const {string}
-    * @private
-    */
-  static get XlinkNamespaceUri_() {
-    return 'http://www.w3.org/1999/xlink'
-  }
 }
+
+MpdUtils.XlinkNamespaceUri_ = 'http://www.w3.org/1999/xlink'
 /* *
  * @typedef {{
  *   start: number,

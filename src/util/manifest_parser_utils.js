@@ -26,26 +26,6 @@ export default class ManifestParserUtils {
       .reduce(Functional.collapseArrays, [])
       .map((uri) => uri.toString())
   }
-  /* *
-   * Creates a DrmInfo object from the given info.
-   *
-   * @param {string} keySystem
-   * @param {Array.<shaka.extern.InitDataOverride>} initData
-   * @return {shaka.extern.DrmInfo}
-   */
-  static createDrmInfo(keySystem, initData) {
-    return {
-      keySystem: keySystem,
-      licenseServerUri: '',
-      distinctiveIdentifierRequired: false,
-      persistentStateRequired: false,
-      audioRobustness: '',
-      videoRobustness: '',
-      serverCertificate: null,
-      initData: initData || [],
-      keyIds: []
-    }
-  }
 }
 /* *
  * @enum {string}

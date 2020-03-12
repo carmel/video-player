@@ -46,36 +46,6 @@ export default class Uri {
       this.queryData_ = new Uri.QueryData(null, null)
     }
   }
-  static get reDisallowedInQuery_() {
-    // eslint-disable-next-line
-    return /[\#\?@]/g
-  }
-  static get reDisallowedInRelativePath_() {
-    // eslint-disable-next-line
-    return /[\#\?:]/g
-  }
-  static get reDisallowedInSchemeOrUserInfo_() {
-    // eslint-disable-next-line
-    return /[#\/\?@]/g
-  }
-  static get reDisallowedInAbsolutePath_() {
-    // eslint-disable-next-line
-    return /[\#\?]/g
-  }
-  static get reDisallowedInFragment_() {
-    return /#/g
-  }
-  static get ComponentIndex() {
-    return {
-      SCHEME: 1,
-      USER_INFO: 2,
-      DOMAIN: 3,
-      PORT: 4,
-      PATH: 5,
-      QUERY_DATA: 6,
-      FRAGMENT: 7
-    }
-  }
   toString() {
     var out = []
     var scheme = this.getScheme()
@@ -310,7 +280,7 @@ export default class Uri {
    * @return {!goog.Uri} Reference to this URI object.
    */
   setQueryData(queryData, decode) {
-    if (queryData instanceof this.QueryData) {
+    if (queryData instanceof Uri.QueryData) {
       this.queryData_ = queryData
     } else {
       if (!decode) {
@@ -318,7 +288,7 @@ export default class Uri {
         // decode flag is not true.
         queryData = Uri.encodeSpecialChars_(queryData, Uri.reDisallowedInQuery_)
       }
-      this.queryData_ = Uri.QueryData(queryData, null)
+      this.queryData_ = new Uri.QueryData(queryData, null)
     }
     return this
   }
@@ -480,20 +450,31 @@ export default class Uri {
   }
 }
 
-/* *
-   * Class used to represent URI query parameters.  It is essentially a hash of
-   * name-value pairs, though a name can be present more than once.
-   *
-   * Has the same interface as the collections in goog.structs.
-   *
-   * @param {?string=} query Optional encoded query string to parse into
-   *     the object.
-   * @param {goog.Uri=} uri Optional uri object that should have its
-   *     cache invalidated when this object updates. Deprecated -- this
-   *     is no longer required.
-   * @constructor
-   * @final
-   */
+// eslint-disable-next-line
+Uri.reDisallowedInQuery_ = /[\#\?@]/g
+
+Uri.reDisallowedInRelativePath_ =
+  // eslint-disable-next-line
+  /[\#\?:]/g
+
+// eslint-disable-next-line
+Uri.reDisallowedInSchemeOrUserInfo_ = /[#\/\?@]/g
+
+// eslint-disable-next-line
+Uri.reDisallowedInAbsolutePath_ = /[\#\?]/g
+
+Uri.reDisallowedInFragment_ = /#/g
+
+Uri.ComponentIndex = {
+  SCHEME: 1,
+  USER_INFO: 2,
+  DOMAIN: 3,
+  PORT: 4,
+  PATH: 5,
+  QUERY_DATA: 6,
+  FRAGMENT: 7
+}
+
 Uri.QueryData = class {
   constructor(query, uri) {
     /* *

@@ -99,15 +99,6 @@ export default class Deprecate {
     console.error(errorMessage)
     console.assert(false, errorMessage)
   }
-  /* *
-    * The global deprecation enforcer that will be set by the player (because the
-    * player knows the version) when it calls |init|. This may appear a little
-    * round-about to you, because it is. Since player uses |Deprecate|, it means
-    * that |Deprecate| can't depend on Player directly.
-    *
-    * @private {Enforcer}
-    */
-  static get enforcer_() {
-    return null
-  }
 }
+
+Deprecate.enforcer_ = null

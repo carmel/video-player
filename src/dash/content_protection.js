@@ -1,6 +1,6 @@
 import BufferUtils from '../util/buffer_utils'
 import Error from '../util/error'
-import ManifestParserUtils from '../util/manifest_parser_utils'
+// import ManifestParserUtils from '../util/manifest_parser_utils'
 import Pssh from '../util/pssh'
 import StringUtils from '../util/string_utils'
 import Uint8ArrayUtils from '../util/uint8array_utils'
@@ -11,147 +11,6 @@ import XmlUtils from '../util/xml_utils'
  *   elements.
  */
 export default class ContentProtection {
-  /* *
-   * Parses info from the ContentProtection elements at the AdaptationSet level.
-   *
-   * @param {!Array.<!Element>} elems
-   * @param {shaka.extern.DashContentProtectionCallback} callback
-   * @param {boolean} ignoreDrmInfo
-   * @return {ContentProtection.Context}
-   */
-  static parseFromAdaptationSet(elems, callback, ignoreDrmInfo) {
-    const ContentProtection = ContentProtection
-    const parsed = ContentProtection.parseElements_(elems)
-    /* * @type {Array.<shaka.extern.InitDataOverride>} */
-    let defaultInit = null
-    /* * @type {!Array.<shaka.extern.DrmInfo>} */
-    let drmInfos = []
-    let parsedNonCenc = []
-
-    // Get the default key ID; if there are multiple, they must all match.
-    const keyIds = new Set(parsed.map((element) => element.keyId))
-    // Remove any possible null value (elements may have no key ids).
-    keyIds.delete(null)
-
-    if (keyIds.size > 1) {
-      throw new Error(
-        Error.Severity.CRITICAL,
-        Error.Category.MANIFEST,
-        Error.Code.DASH_CONFLICTING_KEY_IDS)
-    }
-
-    if (!ignoreDrmInfo) {
-      // Find the default key ID and init data.  Create a new array of all the
-      // non-CENC elements.
-      parsedNonCenc = parsed.filter((elem) => {
-        if (elem.schemeUri === ContentProtection.MP4Protection_) {
-          console.assert(!elem.init || elem.init.length,
-            'Init data must be null or non-empty.')
-          defaultInit = elem.init || defaultInit
-          return false
-        } else {
-          return true
-        }
-      })
-
-      if (parsedNonCenc.length) {
-        drmInfos = ContentProtection.convertElements_(
-          defaultInit, callback, parsedNonCenc)
-
-        // If there are no drmInfos after parsing, then add a dummy entry.
-        // This may be removed in parseKeyIds.
-        if (drmInfos.length === 0) {
-          drmInfos = [ManifestParserUtils.createDrmInfo('', defaultInit)]
-        }
-      }
-    }
-
-    // If there are only CENC element(s) or ignoreDrmInfo flag is set, assume
-    // all key-systems are supported.
-    if (parsed.length && (ignoreDrmInfo || !parsedNonCenc.length)) {
-      drmInfos = []
-
-      const keySystems = ContentProtection.defaultKeySystems_
-      for (const keySystem of keySystems.values()) {
-        // If the manifest doesn't specify any key systems, we shouldn't
-        // put clearkey in this list.  Otherwise, it may be triggered when
-        // a real key system should be used instead.
-        if (keySystem !== 'org.w3.clearkey') {
-          const info =
-              ManifestParserUtils.createDrmInfo(keySystem, defaultInit)
-          drmInfos.push(info)
-        }
-      }
-    }
-
-    // If we have a default key id, apply it to every initData.
-    const defaultKeyId = Array.from(keyIds)[0] || null
-
-    if (defaultKeyId) {
-      for (const info of drmInfos) {
-        for (const initData of info.initData) {
-          initData.keyId = defaultKeyId
-        }
-      }
-    }
-
-    return {
-      defaultKeyId: defaultKeyId,
-      defaultInit: defaultInit,
-      drmInfos: drmInfos,
-      firstRepresentation: true
-    }
-  }
-
-  /* *
-   * Parses the given ContentProtection elements found at the Representation
-   * level.  This may update the |context|.
-   *
-   * @param {!Array.<!Element>} elems
-   * @param {shaka.extern.DashContentProtectionCallback} callback
-   * @param {ContentProtection.Context} context
-   * @param {boolean} ignoreDrmInfo
-   * @return {?string} The parsed key ID
-   */
-  static parseFromRepresentation(elems, callback, context, ignoreDrmInfo) {
-    const ContentProtection = ContentProtection
-    const repContext = ContentProtection.parseFromAdaptationSet(
-      elems, callback, ignoreDrmInfo)
-
-    if (context.firstRepresentation) {
-      const asUnknown = context.drmInfos.length === 1 &&
-          !context.drmInfos[0].keySystem
-      const asUnencrypted = context.drmInfos.length === 0
-      const repUnencrypted = repContext.drmInfos.length === 0
-
-      // There are two cases where we need to replace the |drmInfos| in the
-      // context with those in the Representation:
-      //   1. The AdaptationSet does not list any ContentProtection.
-      //   2. The AdaptationSet only lists unknown key-systems.
-      if (asUnencrypted || (asUnknown && !repUnencrypted)) {
-        context.drmInfos = repContext.drmInfos
-      }
-      context.firstRepresentation = false
-    } else if (repContext.drmInfos.length > 0) {
-      // If this is not the first Representation, then we need to remove entries
-      // from the context that do not appear in this Representation.
-      context.drmInfos = context.drmInfos.filter((asInfo) => {
-        return repContext.drmInfos.some((repInfo) => {
-          return repInfo.keySystem === asInfo.keySystem
-        })
-      })
-      // If we have filtered out all key-systems, throw an error.
-      if (context.drmInfos.length === 0) {
-        throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.DASH_NO_COMMON_KEY_SYSTEM)
-      }
-    }
-
-    return repContext.defaultKeyId || context.defaultKeyId
-  }
-
   /* *
    * Gets a Widevine license URL from a content protection element
    * containing a custom `ms:laurl` element
@@ -343,7 +202,6 @@ export default class ContentProtection {
     const ContentProtection = ContentProtection
     const ManifestParserUtils = ManifestParserUtils
     const defaultKeySystems = ContentProtection.defaultKeySystems_
-    const licenseUrlParsers = ContentProtection.licenseUrlParsers_
 
     /* * @type {!Array.<shaka.extern.DrmInfo>} */
     const out = []
@@ -354,16 +212,6 @@ export default class ContentProtection {
         console.assert(
           !element.init || element.init.length,
           'Init data must be null or non-empty.')
-
-        const proInitData = ContentProtection.getInitDataFromPro_(element)
-        const initData = element.init || defaultInit || proInitData
-        const info = ManifestParserUtils.createDrmInfo(keySystem, initData)
-        const licenseParser = licenseUrlParsers.get(keySystem)
-        if (licenseParser) {
-          info.licenseServerUri = licenseParser(element)
-        }
-
-        out.push(info)
       } else {
         console.assert(callback, 'ContentProtection callback is required')
         const infos = callback(element.node) || []
@@ -372,7 +220,6 @@ export default class ContentProtection {
         }
       }
     }
-
     return out
   }
 
@@ -458,63 +305,33 @@ export default class ContentProtection {
       init: (init.length > 0 ? init : null)
     }
   }
-  /* *
-    * Enum for PlayReady record types.
-    * @enum {number}
-    */
-  static get PLAYREADY_RECORD_TYPES() {
-    return {
-      RIGHTS_MANAGEMENT: 0x001,
-      RESERVED: 0x002,
-      EMBEDDED_LICENSE: 0x003
-    }
-  }
-  /* *
-  * A map of scheme URI to key system name.
-  *
-  * @const {!Map.<string, string>}
-  * @private
-  */
-  static get defaultKeySystems_() {
-    return new Map()
-      .set('urn:uuid:1077efec-c0b2-4d02-ace3-3c1e52e2fb4b',
-        'org.w3.clearkey')
-      .set('urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',
-        'com.widevine.alpha')
-      .set('urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',
-        'com.microsoft.playready')
-      .set('urn:uuid:f239e769-efa3-4850-9c16-a903c6932efb',
-        'com.adobe.primetime')
-  }
-  /* *
-    * A map of key system name to license server url parser.
-    *
-    * @const {!Map.<string, function(ContentProtection.Element)>}
-    * @private
-    */
-  static get licenseUrlParsers_() {
-    return new Map()
-      .set('com.widevine.alpha',
-        ContentProtection.getWidevineLicenseUrl)
-      .set('com.microsoft.playready',
-        ContentProtection.getPlayReadyLicenseUrl)
-  }
-  /* *
-  * @const {string}
-  * @private
-  */
-  static get MP4Protection_() {
-    return 'urn:mpeg:dash:mp4protection:2011'
-  }
-  /* *
-  * @const {string}
-  * @private
-  */
-  static get CencNamespaceUri_() {
-    return 'urn:mpeg:cenc:2013'
-  }
 }
 
+ContentProtection.PLAYREADY_RECORD_TYPES = {
+  RIGHTS_MANAGEMENT: 0x001,
+  RESERVED: 0x002,
+  EMBEDDED_LICENSE: 0x003
+}
+
+ContentProtection.defaultKeySystems_ = new Map()
+  .set('urn:uuid:1077efec-c0b2-4d02-ace3-3c1e52e2fb4b',
+    'org.w3.clearkey')
+  .set('urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',
+    'com.widevine.alpha')
+  .set('urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',
+    'com.microsoft.playready')
+  .set('urn:uuid:f239e769-efa3-4850-9c16-a903c6932efb',
+    'com.adobe.primetime')
+
+ContentProtection.licenseUrlParsers_ = new Map()
+  .set('com.widevine.alpha',
+    ContentProtection.getWidevineLicenseUrl)
+  .set('com.microsoft.playready',
+    ContentProtection.getPlayReadyLicenseUrl)
+
+ContentProtection.MP4Protection_ = 'urn:mpeg:dash:mp4protection:2011'
+
+ContentProtection.CencNamespaceUri_ = 'urn:mpeg:cenc:2013'
 /* *
  * @typedef {{
  *   type: number,

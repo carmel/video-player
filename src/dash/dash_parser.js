@@ -1,6 +1,5 @@
 
 import Ewma from '../abr/ewma'
-import ContentProtection from './content_protection'
 import MpdUtils from './mpd_utils'
 import SegmentBase from './segment_base'
 import SegmentList from './segment_list'
@@ -711,7 +710,6 @@ export default class DashParser {
           audio: audio ? stream : null,
           video: video ? stream : null,
           bandwidth: bandwidth,
-          drmInfos: set.drmInfos,
           allowedByApplication: true,
           allowedByKeySystem: true
         }
@@ -856,12 +854,6 @@ export default class DashParser {
       return null
     }
 
-    const contentProtectionElems =
-        XmlUtils.findChildren(elem, 'ContentProtection')
-    const contentProtection = ContentProtection.parseFromAdaptationSet(
-      contentProtectionElems, this.config_.dash.customScheme,
-      this.config_.dash.ignoreDrmInfo)
-
     const language =
         LanguageUtils.normalize(elem.getAttribute('lang') || 'und')
 
@@ -881,7 +873,7 @@ export default class DashParser {
     // Parse Representations into Streams.
     const representations = XmlUtils.findChildren(elem, 'Representation')
     const streams = representations.map((representation) => {
-      return this.parseRepresentation_(context, contentProtection, kind,
+      return this.parseRepresentation_(context, kind,
         language, label, main, roleValues, closedCaptions, representation)
     }).filter((s) => !!s)
 
@@ -914,17 +906,6 @@ export default class DashParser {
       }
     }
 
-    for (const stream of streams) {
-      // Some DRM license providers require that we have a default
-      // key ID from the manifest in the wrapped license request.
-      // Thus, it should be put in drmInfo to be accessible to request filters.
-      for (const drmInfo of contentProtection.drmInfos) {
-        if (stream.keyId) {
-          drmInfo.keyIds.push(stream.keyId)
-        }
-      }
-    }
-
     const repIds = representations
       .map((node) => { return node.getAttribute('id') })
       .filter(Functional.isNotNull)
@@ -935,7 +916,6 @@ export default class DashParser {
       language: language,
       main: main,
       streams: streams,
-      drmInfos: contentProtection.drmInfos,
       trickModeFor: trickModeFor,
       representationIds: repIds
     }
@@ -957,7 +937,7 @@ export default class DashParser {
    *   non-critical parsing error.
    * @private
    */
-  parseRepresentation_(context, contentProtection, kind, language, label,
+  parseRepresentation_(context, kind, language, label,
     isPrimary, roles, closedCaptions, node) {
     const XmlUtils = XmlUtils
     const ContentType = ManifestParserUtils.ContentType
@@ -1023,12 +1003,6 @@ export default class DashParser {
       throw error
     }
 
-    const contentProtectionElems =
-        XmlUtils.findChildren(node, 'ContentProtection')
-    const keyId = ContentProtection.parseFromRepresentation(
-      contentProtectionElems, this.config_.dash.customScheme,
-      contentProtection, this.config_.dash.ignoreDrmInfo)
-
     // Detect the presence of E-AC3 JOC audio content, using DD+JOC signaling.
     // See: ETSI TS 103 420 V1.2.1 (2018-10)
     const supplementalPropertyElems =
@@ -1061,8 +1035,7 @@ export default class DashParser {
       width: context.representation.width,
       height: context.representation.height,
       kind: kind,
-      encrypted: contentProtection.drmInfos.length > 0,
-      keyId: keyId,
+      encrypted: false,
       language: language,
       label: label,
       type: context.adaptationSet.contentType,
@@ -1565,18 +1538,9 @@ export default class DashParser {
     // types well.
     return mimeType.split('/')[0]
   }
-  /* *
-    * Contains the minimum amount of time, in seconds, between manifest update
-    * requests.
-    *
-    * @private
-    * @const {number}
-    */
-  static get MIN_UPDATE_PERIOD_() {
-    return 3
-  }
 }
 
+DashParser.MIN_UPDATE_PERIOD_ = 3
 /* *
  * @typedef {
  *   function(!Array.<string>, ?number, ?number):!Promise.<BufferSource>

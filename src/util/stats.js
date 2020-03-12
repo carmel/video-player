@@ -28,9 +28,6 @@ export default class Stats {
     this.manifestTimeSeconds_ = NaN
 
     /* * @private {number} */
-    this.drmTimeSeconds_ = NaN
-
-    /* * @private {number} */
     this.licenseTimeSeconds_ = NaN
 
     /* * @private {number} */
@@ -96,15 +93,6 @@ export default class Stats {
   }
 
   /* *
-   * Record the time it took to download the first drm key.
-   *
-   * @param {number} seconds
-   */
-  setDrmTime(seconds) {
-    this.drmTimeSeconds_ = seconds
-  }
-
-  /* *
    * Record the cumulative time spent on license requests during this session.
    *
    * @param {number} seconds
@@ -158,7 +146,6 @@ export default class Stats {
       estimatedBandwidth: this.bandwidthEstimate_,
       loadLatency: this.loadLatencySeconds_,
       manifestTimeSeconds: this.manifestTimeSeconds_,
-      drmTimeSeconds: this.drmTimeSeconds_,
       playTime: this.stateHistory_.getTimeSpentIn('playing'),
       pauseTime: this.stateHistory_.getTimeSpentIn('paused'),
       bufferingTime: this.stateHistory_.getTimeSpentIn('buffering'),
@@ -185,7 +172,6 @@ export default class Stats {
       estimatedBandwidth: NaN,
       loadLatency: NaN,
       manifestTimeSeconds: NaN,
-      drmTimeSeconds: NaN,
       playTime: NaN,
       pauseTime: NaN,
       bufferingTime: NaN,

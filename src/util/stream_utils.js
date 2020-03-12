@@ -1,4 +1,3 @@
-// import DrmEngine from '../media/drm_engine'
 import MediaSourceEngine from '../media/media_source_engine'
 import TextEngine from '../text/text_engine'
 import Functional from './functional'
@@ -94,12 +93,11 @@ export default class StreamUtils {
   /**
    * Alters the given Period to filter out any unplayable streams.
    *
-   * @param {DrmEngine} drmEngine
    * @param {?shaka.extern.Stream} activeAudio
    * @param {?shaka.extern.Stream} activeVideo
    * @param {shaka.extern.Period} period
    */
-  static filterNewPeriod(drmEngine, activeAudio, activeVideo, period) {
+  static filterNewPeriod(activeAudio, activeVideo, period) {
     const StreamUtils = StreamUtils
 
     if (activeAudio) {
@@ -114,14 +112,6 @@ export default class StreamUtils {
 
     // Filter variants.
     period.variants = period.variants.filter((variant) => {
-      if (drmEngine && drmEngine.initialized()) {
-        if (!drmEngine.supportsVariant(variant)) {
-          console.debug('Dropping variant - not compatible with key system',
-            variant)
-          return false
-        }
-      }
-
       const audio = variant.audio
       const video = variant.video
 

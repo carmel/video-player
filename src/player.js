@@ -248,6 +248,10 @@ export default class Player extends FakeEventTarget {
     actions.set(this.unloadNode_, (has, wants) => {
       return AbortableOperation.notAbortable(this.onUnload_(has, wants))
     })
+    // actions.set(this.srcEqualsDrmNode_, (has, wants) => {
+    //   const p = this.onInitializeSrcEqualsDrm_(has, wants)
+    //   return AbortableOperation.notAbortable(p)
+    // })
     actions.set(this.mediaSourceNode_, (has, wants) => {
       const p = this.onInitializeMediaSourceEngine_(has, wants)
       return AbortableOperation.notAbortable(p)
@@ -1974,9 +1978,6 @@ export default class Player extends FakeEventTarget {
   getNextStep_(currentlyAt, currentlyWith, wantsToBeAt, wantsToHave) {
     let next = null
 
-    // Detach is very simple, either stay in detach (because |detach| was called
-    // while in detached) or go somewhere that requires us to attach to an
-    // element.
     if (currentlyAt === this.detachNode_) {
       next = wantsToBeAt === this.detachNode_
         ? this.detachNode_
@@ -1994,12 +1995,22 @@ export default class Player extends FakeEventTarget {
 
     if (currentlyAt === this.parserNode_) {
       next = this.getNextMatchingAllDependencies_(
-        /*  destination= */ this.loadNode_,
-        /*  next= */ this.manifestNode_,
-        /*  reset= */ this.unloadNode_,
-        /*  goingTo= */ wantsToBeAt,
-        /*  has= */ currentlyWith,
-        /*  wants= */ wantsToHave)
+        /* destination= */ this.loadNode_,
+        /* next= */ this.manifestNode_,
+        /* reset= */ this.unloadNode_,
+        /* goingTo= */ wantsToBeAt,
+        /* has= */ currentlyWith,
+        /* wants= */ wantsToHave)
+    }
+
+    if (currentlyAt === this.manifestNode_) {
+      next = this.getNextMatchingAllDependencies_(
+        /* destination= */ this.loadNode_,
+        /* next= */ this.srcEqualsNode_,
+        /* reset= */ this.unloadNode_,
+        /* goingTo= */ wantsToBeAt,
+        /* has= */ currentlyWith,
+        /* wants= */ wantsToHave)
     }
 
     // After we load content, always go through unload because we can't safely
@@ -2125,6 +2136,10 @@ export default class Player extends FakeEventTarget {
     // The next step from attached to loaded is through media source.
     if (goingTo === this.mediaSourceNode_ || goingTo === this.loadNode_) {
       return this.mediaSourceNode_
+    }
+
+    if (goingTo === this.srcEqualsNode_) {
+      return this.srcEqualsNode_
     }
 
     // We are missing a rule, the null will get caught by a common check in
@@ -2647,5 +2662,103 @@ export default class Player extends FakeEventTarget {
     // HLS), we prefer MediaSource.  So the final return value for choosing src=
     // is false.
     return false
+  }
+  isBuffering() {
+    return this.bufferObserver_
+      ? this.bufferObserver_.getState() === BufferingObserver.State.STARVING
+      : false
+  }
+  static isBrowserSupported() {
+    // Basic features needed for the library to be usable.
+    const basicSupport = !!window.Promise && !!window.Uint8Array &&
+                         // eslint-disable-next-line no-restricted-syntax
+                         !!Array.prototype.forEach
+    if (!basicSupport) {
+      return false
+    }
+
+    // We do not support iOS 9, 10, or 11, nor those same versions of desktop
+    // Safari.
+    const safariVersion = Platform.safariVersion()
+    if (safariVersion && safariVersion < 12) {
+      return false
+    }
+
+    // If we have MediaSource (MSE) support, we should be able to use Shaka.
+    if (Platform.supportsMediaSource()) {
+      return true
+    }
+
+    // If we don't have MSE, we _may_ be able to use Shaka.  Look for native HLS
+    // support, and call this platform usable if we have it.
+    return Platform.supportsMediaType('application/x-mpegurl')
+  }
+  /**
+   * After destruction, a Player object cannot be used again.
+   *
+   * @override
+   * @export
+   */
+  async destroy() {
+    // Make sure we only execute the destroy logic once.
+    if (this.loadMode_ === LoadMode.DESTROYED) {
+      return
+    }
+
+    // Mark as "dead". This should stop external-facing calls from changing our
+    // internal state any more. This will stop calls to |attach|, |detach|, etc.
+    // from interrupting our final move to the detached state.
+    this.loadMode_ = LoadMode.DESTROYED
+
+    // Because we have set |loadMode_| to |DESTROYED| we can't call |detach|. We
+    // must talk to |this.walker_| directly.
+    const events = this.walker_.startNewRoute((currentPayload) => {
+      return {
+        node: this.detachNode_,
+        payload: Player.createEmptyPayload_(),
+        interruptible: false
+      }
+    })
+
+    // Wait until the detach has finished so that we don't interrupt it by
+    // calling |destroy| on |this.walker_|. To avoid failing here, we always
+    // resolve the promise.
+    await new Promise((resolve) => {
+      events.onStart = () => {
+        console.info('Preparing to destroy walker...')
+      }
+      events.onEnd = () => {
+        resolve()
+      }
+      events.onCancel = () => {
+        console.assert(false, 'Our final detach call should never be cancelled.')
+        resolve()
+      }
+      events.onError = () => {
+        console.assert(false, 'Our final detach call should never see an error')
+        resolve()
+      }
+      events.onSkip = () => {
+        console.assert(false, 'Our final detach call should never be skipped')
+        resolve()
+      }
+    })
+    await this.walker_.destroy()
+
+    // Tear-down the event manager to ensure messages stop moving around.
+    if (this.eventManager_) {
+      this.eventManager_.release()
+      this.eventManager_ = null
+    }
+
+    this.abrManagerFactory_ = null
+    this.abrManager_ = null
+    this.config_ = null
+    this.stats_ = null
+
+    if (this.networkingEngine_) {
+      await this.networkingEngine_.destroy()
+      this.networkingEngine_ = null
+    }
   }
 }

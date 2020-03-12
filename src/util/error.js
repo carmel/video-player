@@ -107,9 +107,6 @@ Error.Category = {
   /* * Errors related to streaming. */
   'STREAMING': 5,
 
-  /* * Errors related to DRM. */
-  'DRM': 6,
-
   /* * Miscellaneous errors from the player. */
   'PLAYER': 7,
 
@@ -658,12 +655,6 @@ Error.Code = {
   'LICENSE_RESPONSE_REJECTED': 6008,
 
   // RETIRED: 'NO_LICENSE_SERVER_SPECIFIED': 6009,
-
-  /* *
-   * The manifest does not specify any DRM info, but the content is encrypted.
-   * Either the manifest or the manifest parser are broken.
-   */
-  'ENCRYPTED_CONTENT_WITHOUT_DRM_INFO': 6010,
 
   // RETIRED: 'WRONG_KEYS': 6011,
 

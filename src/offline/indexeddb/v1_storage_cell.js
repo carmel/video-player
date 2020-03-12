@@ -68,7 +68,6 @@ export default class V1StorageCell extends BaseStorageCell {
       expiration: old.expiration === null ? Infinity : old.expiration,
       periods: old.periods.map(V1StorageCell.convertPeriod_),
       sessionIds: old.sessionIds,
-      drmInfo: old.drmInfo,
       appMetadata: old.appMetadata
     }
   }
