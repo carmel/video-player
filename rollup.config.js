@@ -41,7 +41,11 @@ export default [
       cjs(), // so Rollup can convert `ms` to an ES module
       terser(),
       strip({
-        labels: ['unittest']
+        // functions: [ 'console.log', 'console.info', 'debug', 'alert' ],
+        // remove one or more labeled blocks by name
+        // defaults to `[]`
+        labels: ['unittest'],
+        sourceMap: true
       })
     ]
   },

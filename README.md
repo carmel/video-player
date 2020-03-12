@@ -19,6 +19,11 @@ $ rollup player.js --file bundle.js --format cjs
 $ rollup player.js --file bundle.js --format umd --name VideoPlayer
 ```
 
+Or just run:
+```shell
+$ yarn build
+```
+
 ### Test the class's static property syntax
 ```shell
 $ cd test && rollup static_property.js --file bundle.js --format cjs
